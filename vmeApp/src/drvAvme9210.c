@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <epicsExport.h>
 
 #include "dbDefs.h"
 #include "drvSup.h"
@@ -55,6 +56,7 @@ struct {
   avme9210_init,
   avme9210_reboot
 };
+epicsExportAddress(drvet, drvAvme9210);
 
 /* memory structure of the 9210, total length is 1 KB */
 typedef struct avme9210_s {

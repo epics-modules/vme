@@ -28,6 +28,7 @@
 #include	<types.h>
 #include	<stdioLib.h>
 #include	<string.h>
+#include        <epicsExport.h>
 
 #include	"dbAccess.h"
 #include        "recGbl.h"
@@ -61,7 +62,7 @@ struct {
   aoAvme9210_write,
   aoAvme9210_special_linconv
 };
-
+epicsExportAddress(dset, devAoAvme9210);
 
 long aoAvme9210_init(int after)
 /*-----------------------------------------------------------------------------
