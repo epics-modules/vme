@@ -53,6 +53,7 @@ OWNED RIGHTS.
 LICENSING INQUIRIES MAY BE DIRECTED TO THE INDUSTRIAL TECHNOLOGY
 DEVELOPMENT CENTER AT ARGONNE NATIONAL LABORATORY (708-252-2000).
 */
+
 /*
 * Modification Log:
  * -----------------
@@ -90,13 +91,11 @@ DEVELOPMENT CENTER AT ARGONNE NATIONAL LABORATORY (708-252-2000).
 #define PWR_CYCLED_BIT  ( 0x8 )
 
 #define FREG_READ       ( 1 )
-#define FCSR_READ       ( FREG_READ +1 )
-#define FREG_WRITE      ( FCSR_READ + 1 )
-#define FREG_SETBITS    ( FREG_WRITE + 1 )
-#define FREG_RESETBITS  ( FREG_SETBITS + 1 )
-#define FREG_WRITEBITS  ( FREG_RESETBITS + 1 )
-#define FREG_READLONG   ( FREG_WRITEBITS + 1 )
-#define FREG_WRITELONG  ( FREG_READLONG + 1 )
+#define FCSR_READ       ( 2 )
+#define FREG_WRITE      ( 3 )
+#define FREG_WRITEBITS  ( 4 )
+#define FREG_READLONG   ( 5 )
+#define FREG_WRITELONG  ( 6 )
 
 int drvBunchClkGenDebug = 0;
 epicsExportAddress(int, drvBunchClkGenDebug);
@@ -104,7 +103,7 @@ epicsExportAddress(int, drvBunchClkGenDebug);
 static int* drvDebug = &drvBunchClkGenDebug;
 
 static long drvInitCard();
-static long drvIoReport();
+static long drvIoReport(int);
 static long check_card(USHORT, USHORT);
 static long drvReadCard(short, short, short, ULONG*);
 static long drvWriteCardBit(USHORT, USHORT, USHORT, USHORT, USHORT);
@@ -120,7 +119,7 @@ typedef struct
    DRVSUPFUN   init;
 } drvBunchClkGen_drvet;
 
-drvBunchClkGen_drvet drvBunchClkGen = {2, drvIoReport, drvInitCard };
+drvBunchClkGen_drvet drvBunchClkGen = { 2, drvIoReport, drvInitCard };
 epicsExportAddress(drvet, drvBunchClkGen);
 
 static char* drvName = "drvBunchClkGen";
@@ -165,11 +164,13 @@ struct drvPrivate
    USHORT ramR[1296];
 };
 
+static int NumCards           = 0; /* User configurable # of cards */
+static int ConfigureLock      = 0;
+
 static struct drvPrivate Card[MAX_NUM_CARDS];
 static struct drvPrivate* dio = Card;
-static int NumCards = 0; /* User configurable # of cards */
-static int ConfigureLock = 0;
-
+
+
 /*************************************************************************/
 int BunchClkGenConfigure( int Card, ULONG CardAddress )
 {
@@ -198,6 +199,7 @@ USHORT junk;
    {
       dio[Card].dptr = NULL;
       errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: A16 Address map failed for Card %d", xname, Card );
+
       return( ERROR );
    }
 
@@ -205,6 +207,7 @@ USHORT junk;
    {
       dio[Card].dptr = NULL;
       errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: vxMemProbe failed for Card %d", xname, Card );
+
       return( ERROR );
    }
 
@@ -214,8 +217,10 @@ USHORT junk;
    }
 
    return( OK );
-}
-
+
+} /* BunchClkGenConfigure() */
+
+
 /******************************************************************************
  *
  * Initialize all cards controlled by the driver.
@@ -253,23 +258,25 @@ USHORT val;
             /* Copy hardware RAM to driver READ RAM to driver WRITE RAM */
             drvReadRam( i );
             drvCopyRam( i );
-         }  
+         }
 
       }
 
    }
 
    return( status );
-}
-
+
+} /* drvInitCard() */
+
+
 /*************************************************************************/
 static long drvIoReport( int level )
 {
 int i;
 
-   for( i = 0 ; i < MAX_NUM_CARDS; i++ )
+   for( i = 0; i < MAX_NUM_CARDS; i++ )
    {
-      if ( dio[i].dptr)
+      if( dio[i].dptr)
       {
          printf( "%s:\tcard %d\tcsr = 0x%x, P0 delay = 0x%x, fine Delay = 0x%x\n",
                   drvName, i,
@@ -280,8 +287,9 @@ int i;
    }
 
    return( OK );
-}
-
+} /* drvIoReport() */
+
+
 /***************************************************************************/
 static long check_card( USHORT card, USHORT signal )
 {
@@ -317,9 +325,10 @@ static long check_card( USHORT card, USHORT signal )
    }
 
    return( OK );
-}
 
-
+} /* check_card() */
+
+
 /***************************************************************************
  *
  *   Perform register writes
@@ -354,8 +363,10 @@ ULONG status;
    }
 
    return( OK );
-}
-
+
+} /* drvWriteCard() */
+
+
 /***************************************************************************
  *
  *   Perform register reads
@@ -396,8 +407,9 @@ ULONG status;
    }
 
    return( OK );
-}
-
+
+} /* drvReadCard() */
+
 
 /***************************************************************************
  *
@@ -414,7 +426,7 @@ static long drvWriteCardBit(  USHORT card,
 USHORT tmp;
 ULONG status;
 
-   if ( (status = check_card( card, signal )) != OK )
+   if( (status = check_card( card, signal )) != OK )
    {
       return( status );
    }
@@ -443,8 +455,10 @@ ULONG status;
    }
 
    return( OK );
-}
-
+
+} /* drvWriteCardBit() */
+
+
 /***************************************************************************
  *
  *   write/readback  selected bits in reg
@@ -476,16 +490,18 @@ ULONG status;
    *prbval = ((*((USHORT*)dio[card].dptr + signal)) & mask) >> shift;
 
    return( OK );
-}
-
+
+} /* drvWriteReadBit() */
+
+
 /******************************************************************************
  *
  * Place any user-required functions here.
  *
  ******************************************************************************/
 
-#define BCGDisable 0x04
-#define RamSize 1296/16
+#define BCGDisable   ( 0x04 )
+#define RamSize      ( 1296 / 16 )
 
 /***********************************************************************
  *
@@ -505,14 +521,17 @@ USHORT csr;
    dio[card].dptr->reg.w.data    = val;
    dio[card].dptr->reg.w.csr     = csr;
    epicsMutexUnlock( dio[card].lock );
-   
+
    if( *drvDebug > 10 )
    {
       errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s:drvWriteRamLoc: address = %d, val = 0x%x\n", drvName, location, val );
    }
 
-return( 0 );
-}
+   return( 0 );
+
+} /* drvWriteRamLoc() */
+
+
 /***********************************************************************
  *
  * Write Ram
@@ -543,8 +562,10 @@ ULONG status;
    epicsMutexUnlock( dio[card].lock );
 
    return( OK );
-}
-
+
+} /* drvWriteRam() */
+
+
 /***********************************************************************
  *
  * Read Ram
@@ -575,7 +596,10 @@ ULONG status;
    epicsMutexUnlock( dio[card].lock );
 
    return( OK );
-}
+
+} /* drvReadRam() */
+
+
 /***********************************************************************
  *
  *  Copy Read Ram contents to Write Ram Contents
@@ -597,8 +621,10 @@ ULONG status;
    }
 
    return( OK );
-}
-
+
+} /* drvCopyRam() */
+
+
 /***********************************************************************
  *
  * Clear Ram
@@ -631,8 +657,10 @@ ULONG status;
    epicsMutexUnlock( dio[card].lock );
 
    return( OK );
-}
-
+
+} /* drvClearRam() */
+
+
 /**************************************************************************/
 static long drvListBuckets( int card, short* buf, int max, int* actual )
 {
@@ -640,7 +668,7 @@ int num, j, ramloc;
 short bucket;
 USHORT val;
 int notDone;
-   
+
    notDone  = 1;
    ramloc   = num = bucket = 0;
 
@@ -667,16 +695,19 @@ int notDone;
    }
 
    *actual = num;
+
    return( 0 );
-}
-
+
+} /* drvListBuckets() */
+
+
 /**************************************************************************/
 static long drvShowPattern( int card, short* buf, int max, int *actual )
 {
 int num, j, ramloc;
 USHORT val;
 int notDone;
-   
+
    notDone  = 1;
    ramloc   = num = 0;
 
@@ -708,85 +739,130 @@ int notDone;
    }
 
    *actual = num;
+
    return( 0 );
-}
-
+
+} /* drvShowPattern() */
+
+
+#define PERLINE   ( 16 )
+
 /*************************************************************************/
-long  drvBunchClkGenDump( int card )
+long drvBunchClkGenDump( int card )
 {
-#define PERLINE 16
-   int i, j, bucket, num, ramloc;
-   int notDone;
-   USHORT val;
-   USHORT buckets[PERLINE];
+int   i,
+      j,
+      bucket,
+      num,
+      ramloc,
+      notDone;
+USHORT val;
+USHORT buckets[PERLINE];
 
 
-   if( drvReadRam(card) != OK) {
-      printf("Error on accessing card\n");
-      return(-1);
+   if( drvReadRam( card ) != OK )
+   {
+      printf( "Error on accessing card\n" );
+      return( -1 );
    }
-   printf("P0 Delay = 0x%x, Fine Delay = 0x%x\n",
-       dio[card].dptr->reg.r.P0Delay, dio[card].dptr->reg.r.fineDelay);
-   
-   notDone = 1;
-   bucket = 0;
-   ramloc = 0;
-   j = 16;
-   val = 0;
-   while ( notDone) {
+
+   printf( "P0 Delay = 0x%x, Fine Delay = 0x%x\n", dio[card].dptr->reg.r.P0Delay, dio[card].dptr->reg.r.fineDelay );
+
+   notDone  = 1;
+   bucket   = 0;
+   ramloc   = 0;
+   j        = 16;
+   val      = 0;
+
+   while( notDone )
+   {
       num = 0;
-      while ( num < PERLINE && notDone) {
-         if ( j >= 16) {
+
+      while( num < PERLINE && notDone )
+      {
+         if( j >= 16 )
+         {
             val = dio[card].ramR[ramloc++];
             j = 0;
          }
-         for(; j < 16 && num < PERLINE; j++, bucket++) {
-            if(val & 0x01) {
+
+         for( ; j < 16 && num < PERLINE; j++, bucket++ )
+         {
+            if( val & 0x01 )
+            {
                buckets[num++] = bucket;
             }
+
             val >>= 1;
          }
-         if(ramloc >= RamSize && j >= 16)
+
+         if( ramloc >= RamSize && j >= 16 )
+         {
             notDone = 0;
+         }
+
       }
-      for( i =0; i < num; i++)
-         printf("%4.4d ", buckets[i]);
-      printf("\n");
+
+      for( i = 0; i < num; i++ )
+      {
+         printf( "%4.4d ", buckets[i] );
+      }
+
+      printf( "\n" );
    }
-   return(0);
-}
+
+   return( 0 );
+
+} /* drvBunchClkGenDump() */
+
+
+#define PERLINE1  ( 10 )
+
 /*************************************************************************/
-long  drvBunchClkGenDumpRam( int card )
+long drvBunchClkGenDumpRam( int card )
 {
-#define PERLINE1 10
-   int i, ramloc;
-   int notDone;
-   USHORT val;
+int   i,
+      ramloc,
+      notDone;
+USHORT val;
 
 
-   if( drvReadRam(card) != OK) {
-      printf("Error on accessing card\n");
-      return(-1);
+   if( drvReadRam( card ) != OK )
+   {
+      printf( "Error on accessing card\n" );
+      return( -1 );
    }
-   printf("P0 Delay = 0x%x, Fine Delay = 0x%x\n",
-       dio[card].dptr->reg.r.P0Delay, dio[card].dptr->reg.r.fineDelay);
-   
-   notDone = 1;
-   ramloc = 0;
-   val = 0;
-   while ( notDone) {
-      printf("%4.4d  ", ramloc);
-      for( i= 0; (i < PERLINE1) && notDone ; i++, ramloc++) {
+
+   printf( "P0 Delay = 0x%x, Fine Delay = 0x%x\n", dio[card].dptr->reg.r.P0Delay, dio[card].dptr->reg.r.fineDelay );
+
+   notDone  = 1;
+   ramloc   = 0;
+   val      = 0;
+
+   while( notDone )
+   {
+      printf( "%4.4d  ", ramloc );
+
+      for( i = 0; (i < PERLINE1) && notDone; i++, ramloc++ )
+      {
          val = dio[card].ramR[ramloc++];
-         printf("0x%4.4x ", val);
-         if(ramloc >= RamSize )
+         printf( "0x%4.4x ", val );
+
+         if( ramloc >= RamSize )
+         {
             notDone = 0;
+         }
+
       }
-      printf("\n");
+
+      printf( "\n" );
    }
-   return(0);
-}
-
+
+   return( 0 );
+
+} /* drvBunchClkGenDumpRam() */
+
+
 /***************************************************************************
  *
  *  Write a bucket in Ram
@@ -836,105 +912,116 @@ ULONG status;
    drvWriteRamLoc( card, ramloc, dio[card].ramW[ramloc] );
 
    return( 0 );
-}
-
+
+} /* drvWriteBucket() */
+
+
 /*************************************************************************/
-static int drvGetPwrOnStatus(short card)
+static int drvGetPwrOnStatus( short card )
 {
 
-        if ( check_card(card, 0) != OK)
-                return(-1);
+   if( check_card( card, 0 ) != OK )
+   {
+      return( -1 );
+   }
    else
-      return(dio[card].init_hw);
-   
-}
-
+   {
+      return( dio[card].init_hw );
+   }
+
+} /* drvGetPwrOnStatus() */
+
+
 /******************************************************************************
  *
  *  "Device"  Support stuff follows
  *
  *****************************************************************************/
-/* create the dsets */
 
+/* create the dsets */
 #include <alarm.h>
 #include <devSup.h>
 #include <recSup.h>
-#include        <biRecord.h>
-#include        <boRecord.h>
-#include    <aoRecord.h>
-#include    <aiRecord.h>
+#include <biRecord.h>
+#include <boRecord.h>
+#include <aoRecord.h>
+#include <aiRecord.h>
 #include <waveformRecord.h>
 
-#define         PARAM_BIT_FIELD 1
-#define         PARAM_MASK 2
-#define     PARAM_ASCII 3
+#define PARAM_BIT_FIELD    ( 1 )
+#define PARAM_MASK         ( 2 )
+#define PARAM_ASCII        ( 3 )
 
-#define     PARAM_BIT 1
-#define     PARAM_SHORT 2
-#define     PARAM_LONG 3
-#define         PARAM_MBB 4
+#define PARAM_BIT          ( 1 )
+#define PARAM_SHORT        ( 2 )
+#define PARAM_LONG         ( 3 )
+#define PARAM_MBB          ( 4 )
 
-#define     PARAM_RW 1
-#define     PARAM_RO 2
-#define     PARAM_WO 3
+#define PARAM_RW           ( 1 )
+#define PARAM_RO           ( 2 )
+#define PARAM_WO           ( 3 )
 
-#define     NUMCHANNELS 0
-#define     CHANNELREGS 1
+#define NUMCHANNELS        ( 0 )
+#define CHANNELREGS        ( 1 )
 
-static char *devName="devBunchClkGen";
+int devBunchClkGenDebug = 0;
+static int* devDebug = &devBunchClkGenDebug;
 
-int   devBunchClkGenDebug  = 0;
-static  int *devDebug = &devBunchClkGenDebug;
+static long initBiRecord(struct biRecord*);
+static long readBi(struct biRecord*);
 
-static int      init_hw = 0;    /* flag to init  modules */
+static long initBoRecord(struct boRecord*);
+static long writeBo(struct boRecord*);
 
-static long initBiRecord();
-static long readBi();
-static long initBoRecord();
-static long writeBo();
-static long initAoRecord();
-static long writeAo();
-static long specialLinconvAo();
-static long initAiRecord();
-static long readAi();
-static long specialLinconvAi();
-static long initWfRecord();
-static long readWf();
+static long initAoRecord(struct aoRecord*);
+static long writeAo(struct aoRecord*);
+static long specialLinconvAo(struct aoRecord*, int);
 
-typedef struct {
-   long     number;
+static long initAiRecord(struct aiRecord*);
+static long readAi(struct aiRecord*);
+static long specialLinconvAi(struct aiRecord*, int);
+
+static long initWfRecord(struct waveformRecord*);
+static long readWf(struct waveformRecord*);
+
+typedef struct
+{
+   long        number;
    DEVSUPFUN   report;
-      DEVSUPFUN   init;
+   DEVSUPFUN   init;
    DEVSUPFUN   init_record;
-   DEVSUPFUN      get_ioint_info;
+   DEVSUPFUN   get_ioint_info;
    DEVSUPFUN   read_write;
 } DSET;
-DSET devBiBunchClkGen={ 5, NULL, NULL, initBiRecord, NULL, readBi };
-epicsExportAddress(dset, devBiBunchClkGen);
 
-DSET devBoBunchClkGen ={ 5, NULL, NULL, initBoRecord, NULL, writeBo };
+DSET devBiBunchClkGen = { 5, NULL, NULL, initBiRecord, NULL, readBi  };
+DSET devBoBunchClkGen = { 5, NULL, NULL, initBoRecord, NULL, writeBo };
+
+epicsExportAddress(dset, devBiBunchClkGen);
 epicsExportAddress(dset, devBoBunchClkGen);
 
-typedef struct {
-        long            number;
-        DEVSUPFUN       report;
-        DEVSUPFUN       init;
-        DEVSUPFUN       init_record;
-        DEVSUPFUN       get_ioint_info;
-        DEVSUPFUN       read_write;
-        DEVSUPFUN       special_linconv;
+typedef struct
+{
+   long        number;
+   DEVSUPFUN   report;
+   DEVSUPFUN   init;
+   DEVSUPFUN   init_record;
+   DEVSUPFUN   get_ioint_info;
+   DEVSUPFUN   read_write;
+   DEVSUPFUN   special_linconv;
 } DSETA;
-DSETA devAoBunchClkGen = {6, NULL, NULL, initAoRecord, NULL, writeAo, specialLinconvAo};
+
+DSETA devAoBunchClkGen = { 6, NULL, NULL, initAoRecord, NULL, writeAo, specialLinconvAo };
+DSETA devAiBunchClkGen = { 6, NULL, NULL, initAiRecord, NULL, readAi,  specialLinconvAi };
+DSETA devWfBunchClkGen = { 6, NULL, NULL, initWfRecord, NULL, readWf,  NULL             };
+
 epicsExportAddress(dset, devAoBunchClkGen);
-
-DSETA devAiBunchClkGen = {6, NULL, NULL, initAiRecord, NULL, readAi, specialLinconvAi};
 epicsExportAddress(dset, devAiBunchClkGen);
-
-DSETA devWfBunchClkGen = {6, NULL, NULL, initWfRecord, NULL, readWf, NULL};
 epicsExportAddress(dset, devWfBunchClkGen);
 
-static struct  paramEntrys{
-   char  *param;
+static struct paramEntrys
+{
+   char* param;
    short type;
    short access;
    short signal;
@@ -942,38 +1029,41 @@ static struct  paramEntrys{
    short shift;
    short special;
    ULONG mask;
-}  paramEntry[] = {
-   {"Running",   PARAM_BIT, PARAM_RO, 0, 0, 0, 0, 0x0},
-   {"P0_Detect", PARAM_BIT, PARAM_RO, 0, 1, 0, 0, 0x0},
-   {"Disable",   PARAM_BIT, PARAM_RW, 0, 2, 0, 0, 0xfff4},
-   {"PwrCycle",  PARAM_BIT, PARAM_RW, 0, 3, 0, 0, 0xfff8},
-   {"InitRam",   PARAM_BIT, PARAM_WO, 1, 0, 0, 0, 0x1},
-   {"WriteRam",  PARAM_BIT, PARAM_WO, 2, 0, 0, 0, 0x1}
+}
+paramEntry[] =
+{
+   { "Running",   PARAM_BIT, PARAM_RO, 0, 0, 0, 0, 0x0    },
+   { "P0_Detect", PARAM_BIT, PARAM_RO, 0, 1, 0, 0, 0x0    },
+   { "Disable",   PARAM_BIT, PARAM_RW, 0, 2, 0, 0, 0xfff4 },
+   { "PwrCycle",  PARAM_BIT, PARAM_RW, 0, 3, 0, 0, 0xfff8 },
+   { "InitRam",   PARAM_BIT, PARAM_WO, 1, 0, 0, 0, 0x1    },
+   { "WriteRam",  PARAM_BIT, PARAM_WO, 2, 0, 0, 0, 0x1    }
 };
-static struct paramTbls{
-   int   num;
-   struct   paramEntrys *pentry;
-} paramTbl = {
-   sizeof(paramEntry)/sizeof(struct paramEntrys),
+
+static struct paramTbls
+{
+   int                  num;
+   struct paramEntrys*  pentry;
+}
+paramTbl =
+{
+   sizeof(paramEntry) / sizeof(struct paramEntrys),
    paramEntry
 };
 
-struct PvtBi {
-   short  signal;
-   short  special;
+struct PvtBi
+{
+   short signal;
+   short special;
 };
 
-struct PvtBo {
+struct PvtBo
+{
    USHORT mask;
    short  signal;
 };
-
-static long init1( int after )
-{
-   init_hw = 0;
-   return( 0 );
-}
-
+
+
 /********************************************************************/
 static long lookUpParam( char *parm, ULONG *pval )
 {
@@ -994,7 +1084,7 @@ char* xname="lookUpParam";
          break;
       }
 
-   }        
+   }
 
    if( i >= paramTbl.num )
    {
@@ -1002,8 +1092,10 @@ char* xname="lookUpParam";
    }
 
    return( OK );
-}
-
+
+} /* lookUpParam() */
+
+
 /********************************************************************/
 static long initParam( char* parm, ULONG* pval, USHORT mode )
 {
@@ -1035,7 +1127,7 @@ char* xname="initParam";
          *pval = val << ( *parm - 'a' + 10 );
          return( OK );
       }
-      else if ( *parm >= 'A' && *parm <= 'F')
+      else if( *parm >= 'A' && *parm <= 'F')
       {
          *pval = val << ( *parm - 'A' + 10 );
          return( OK );
@@ -1062,119 +1154,141 @@ char* xname="initParam";
    case PARAM_ASCII:
       return( lookUpParam( parm, pval ) );
 
-   default :
+   default:
       return( ERROR );
    }
 
-}
-
+} /* initParam() */
+
+
 /*********************************************************************/
 static long initBiRecord( struct biRecord* pbi )
 {
-  struct vmeio *pvmeio;
-  struct PvtBi *ptr;
-  long status;
-  USHORT *pReg;
-  USHORT val;
-  ULONG lval;
-  ULONG lval1;
+struct vmeio* pvmeio;
+struct PvtBi* ptr;
+long status;
+USHORT *pReg;
+USHORT val;
+ULONG lval;
+ULONG lval1;
 
-  /* bi.inp must be an VME_IO */
 
-  switch (pbi->inp.type) {
-  case (VME_IO) :
-    pvmeio = (struct vmeio *)&(pbi->inp.value);
-    break;
-  default :
-    recGblRecordError(S_dev_badInpType, (void*)pbi,
-        "devBiBunchClkGen (initBiRecord) : not a VME device!!!");
-   return(S_dev_badInpType);
-  }
+   /* bi.inp must be an VME_IO */
+   switch( pbi->inp.type )
+   {
+   case VME_IO:
+      pvmeio = (struct vmeio*)&(pbi->inp.value);
+      break;
 
-  /* call driver so that it configures card */
-  if ((status = check_card(pvmeio->card, pvmeio->signal)) != OK) {
-     recGblRecordError(S_dev_badCard,(void*)pbi,
-         "devBiBunchClkGen (initBiRecord) : init failed!!!");
-     return(S_dev_badCard);
-  }
-/* check param */
-   if ( initParam(pvmeio->parm, &lval, PARAM_ASCII) != OK ) {
-      if (*devDebug) {
-      errPrintf(NO_ERR_RPT, __FILE__, __LINE__,
-         "devBiBunchClkGen: card = 0x%x param = %s (BAD PARAM)\n",
-            pvmeio->card, pvmeio->parm);
-        }
-      recGblRecordError(S_dev_badSignal,(void*)pbi,
-            "devBiBunchClkGen (initBiRecord) : init failed!!!");
-      return(S_dev_badSignal);
+   default:
+      recGblRecordError( S_dev_badInpType, (void*)pbi,"devBiBunchClkGen (initBiRecord) : not a VME device!!!" );
+      return( S_dev_badInpType );
    }
-   lval1=1;
-   pbi->mask = (lval1 << paramTbl.pentry[lval].bit);
-  if(( pbi->dpvt = malloc(sizeof( struct PvtBi))) == NULL ) {
-      if (*devDebug) {
-        errPrintf(NO_ERR_RPT, __FILE__, __LINE__,
-                "devBiBunchClkGen: card = %d  sig = %d (Malloc failed)\n",
-                   pvmeio->card, pvmeio->signal);
-        }
-        recGblRecordError(S_dev_noMemory,(void*)pbi,
-                "devBiBunchClkGen (initBiRecord) : init failed!!!");
-        return(S_dev_noMemory);
+
+   /* call driver so that it configures card */
+   if( (status = check_card( pvmeio->card, pvmeio->signal )) != OK )
+   {
+      recGblRecordError( S_dev_badCard, (void*)pbi, "devBiBunchClkGen (initBiRecord) : init failed!!!" );
+      return( S_dev_badCard );
    }
-   ptr = ( struct PvtBi *)pbi->dpvt;
-   if( pvmeio->signal < NUMCHANNELS  ) {
-      ptr->signal = (paramTbl.pentry[lval].signal +
-         pvmeio->signal*CHANNELREGS);
-   } else {
+
+   /* check param */
+   if( initParam( pvmeio->parm, &lval, PARAM_ASCII ) != OK )
+   {
+      if( *devDebug )
+      {
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen: card = 0x%x param = %s (BAD PARAM)\n", pvmeio->card, pvmeio->parm );
+      }
+
+      recGblRecordError( S_dev_badSignal, (void*)pbi, "devBiBunchClkGen (initBiRecord) : init failed!!!" );
+      return( S_dev_badSignal );
+   }
+
+   lval1       = 1;
+   pbi->mask   = (lval1 << paramTbl.pentry[lval].bit);
+
+   if( (pbi->dpvt = malloc( sizeof(struct PvtBi) ) ) == NULL )
+   {
+      if( *devDebug )
+      {
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen: card = %d  sig = %d (Malloc failed)\n", pvmeio->card, pvmeio->signal );
+      }
+
+      recGblRecordError( S_dev_noMemory, (void*)pbi, "devBiBunchClkGen (initBiRecord) : init failed!!!" );
+      return( S_dev_noMemory );
+   }
+
+   ptr = (struct PvtBi*)pbi->dpvt;
+
+   if( pvmeio->signal < NUMCHANNELS  )
+   {
+      ptr->signal = (paramTbl.pentry[lval].signal + pvmeio->signal * CHANNELREGS);
+   }
+   else
+   {
       ptr->signal = paramTbl.pentry[lval].signal;
    }
-  ptr->special = paramTbl.pentry[lval].special;
 
-/*  Check Register Exists */
-   pReg = (USHORT *) dio[pvmeio->card].dptr + ptr->signal;
-   if (vxMemProbe( (char*)pReg, READ, sizeof(val), (char*)&val) != OK ) {
-      if (*devDebug) {
-      errPrintf(NO_ERR_RPT, __FILE__, __LINE__,
-        "devBiBunchClkGen: vxMemProbe failed!!! card = 0x%x, sig = 0x%x\n",
-         pvmeio->card, pvmeio->signal);
-        }
-      recGblRecordError(S_dev_badSignal,(void*)pbi,
-            "devBiBunchClkGen (initBiRecord) : init failed!!!");
+   ptr->special = paramTbl.pentry[lval].special;
+
+   /* Check Register Exists */
+   pReg = (USHORT*)dio[pvmeio->card].dptr + ptr->signal;
+   if( vxMemProbe( (char*)pReg, READ, sizeof(val), (char*)&val ) != OK )
+   {
+      if( *devDebug )
+      {
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen: vxMemProbe failed!!! card = 0x%x, sig = 0x%x\n", pvmeio->card, pvmeio->signal );
+      }
+
+      recGblRecordError( S_dev_badSignal, (void*)pbi, "devBiBunchClkGen (initBiRecord) : init failed!!!" );
       pbi->dpvt = NULL;
-      return(S_dev_badSignal);
+
+      return( S_dev_badSignal );
    }
-  return(0);
-}
-
+
+   return( 0 );
+
+} /* initBiRecord() */
+
+
 /*****************************************************************/
 static long readBi( struct biRecord* pbi )
 {
-  ULONG value;
-  struct vmeio* pvmeio = (struct vmeio*)&(pbi->inp.value);
-  struct PvtBi* ptr;
+ULONG value;
+struct vmeio* pvmeio = (struct vmeio*)&(pbi->inp.value);
+struct PvtBi* ptr;
 
-  if(!pbi->dpvt)
-   return(S_dev_NoInit);
-   ptr = ( struct PvtBi*)pbi->dpvt;
+   if( !pbi->dpvt )
+   {
+      return( S_dev_NoInit );
+   }
 
-    if(drvReadCard( pvmeio->card, FREG_READ, ptr->signal, &value)
-      != OK) {
-            if (*devDebug) {
-            errPrintf(NO_ERR_RPT, __FILE__, __LINE__,
-         "devBiBunchClkGen (readBi) : read Error, card = %d, sig = %d",
-          pvmeio->card, pvmeio->signal);
-            }
-         recGblSetSevr(pbi,READ_ALARM,INVALID_ALARM);
-         return (2); /* don't convert */
+   ptr = (struct PvtBi*)pbi->dpvt;
+
+   if( drvReadCard( pvmeio->card, FREG_READ, ptr->signal, &value ) != OK )
+   {
+
+      if( *devDebug )
+      {
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen (readBi) : read Error, card = %d, sig = %d", pvmeio->card, pvmeio->signal );
       }
 
-  pbi->rval = ((ULONG)value) & pbi->mask;
-      if (*devDebug >= 10) {
-       printf("devBunchClkGen: card = %d, signal = %d, raw read value = 0x%lx\n",
-         pvmeio->card, ptr->signal,  pbi->rval);
-      }
-  return(0);
-}
-
+      recGblSetSevr( pbi, READ_ALARM, INVALID_ALARM );
+      return( 2 ); /* don't convert */
+   }
+
+   pbi->rval = value & pbi->mask;
+
+   if( *devDebug >= 10 )
+   {
+      printf( "devBunchClkGen: card = %d, signal = %d, raw read value = 0x%lx\n", pvmeio->card, ptr->signal,  pbi->rval );
+   }
+
+   return( 0 );
+
+} /* readBi() */
+
+
 /************************************************************************/
 static long initBoRecord( struct boRecord* pbo )
 {
@@ -1283,8 +1397,9 @@ long status;
       return( 2 );  /* don't convert */
    }
 
-}
-
+} /* initBoRecord() */
+
+
 /**************************************************************************/
 static long writeBo( struct boRecord *pbo )
 {
@@ -1303,12 +1418,12 @@ struct PvtBo *ptr;
    value = (USHORT) pbo->rval;
    mask  = ptr->mask;
 
-   if ( ptr->signal == 1 )
+   if( ptr->signal == 1 )
    {
       drvClearRam( pvmeio->card );
       return( 0 );
    }
-   else if ( ptr->signal == 2 )
+   else if( ptr->signal == 2 )
    {
       drvWriteRam( pvmeio->card );
       return( 0 );
@@ -1335,7 +1450,10 @@ struct PvtBo *ptr;
    }
 
    return( 0 );
-}
+
+} /* writeBo() */
+
+
 /***************************************************************************/
 static long initAoRecord( struct aoRecord* pao )
 {
@@ -1417,14 +1535,16 @@ long status;
 
    if( drvGetPwrOnStatus( pvmeio->card ) == 1 )
    {
-      return( 0 );   /* initialize to readback value */  
+      return( 0 );   /* initialize to readback value */
    }
    else
    {
       return( 2 );   /* don't convert */
    }
-}
-
+
+} /* initAoRecord() */
+
+
 /*****************************************************************/
 static long writeAo( struct aoRecord *pao )
 {
@@ -1517,29 +1637,41 @@ struct vmeio *pvmeio = (struct vmeio*)&(pao->out.value);
    }
 
    return( 0 );
-}
+
+} /* writeAo() */
+
+
 /*********************************************************************/
 static long specialLinconvAo( struct aoRecord* pao, int after )
 {
-  struct vmeio *pvmeio = (struct vmeio *) & (pao->out.value);
+struct vmeio* pvmeio = (struct vmeio*)&(pao->out.value);
 
-   if(!after)
-      return(0);
-    /* set linear conversion slope*/
-   switch (pvmeio->signal) {
-      case 0:
-      case 1:
-      case 3:
-            pao->eslo = 1;
-         break;
-      case 4:
-         pao->eslo = (pao->eguf - pao->egul)/255;
-         break;
-      default :
-         pao->eslo = 1;
-   }        
-    return(0);
-}
+   if( !after )
+   {
+      return( 0 );
+   }
+
+   /* set linear conversion slope */
+   switch( pvmeio->signal )
+   {
+   case 0:
+   case 1:
+   case 3:
+      pao->eslo = 1;
+      break;
+
+   case 4:
+      pao->eslo = (pao->eguf - pao->egul) / 255;
+      break;
+
+   default:
+      pao->eslo = 1;
+   }
+
+   return( 0 );
+
+} /* specialLinconvAo() */
+
 
 /**************************************************************************/
 static long initWfRecord( struct waveformRecord* pRec )
@@ -1593,8 +1725,11 @@ USHORT *pReg;
    }
 
    pRec->dpvt = pRec;
+
    return( 0 );
-}
+
+} /* initWfRecord() */
+
 
 /*************************************************************************/
 static long readWf( struct waveformRecord* pRec )
@@ -1622,9 +1757,12 @@ int num;
    }
 
    pRec->nord = num;
+
    return( 0 );
-}
-
+
+} /* readWf() */
+
+
 /**************************************************************************/
 static long initAiRecord( struct aiRecord* pai )
 {
@@ -1674,9 +1812,12 @@ long status;
    }
 
    pai->dpvt = pai;
+
    return( 0 );
-}
-
+
+} /* initAiRecord() */
+
+
 /*****************************************************************/
 static long readAi( struct aiRecord* pai )
 {
@@ -1718,24 +1859,36 @@ struct vmeio *pvmeio = (struct vmeio*)&(pai->inp.value);
    }
 
    return( 0 );
-}
+
+} /* readAi() */
+
+
 /*********************************************************************/
 static long specialLinconvAi( struct aiRecord* pai, int after )
 {
-  struct vmeio *pvmeio = (struct vmeio *) & (pai->inp.value);
-   if(!after)
-      return(0);
-    /* set linear conversion slope*/
-    switch (pvmeio->signal) {
-      case 4 :    /* fine delay */
-            pai->eslo = (pai->eguf -pai->egul)/255.0;
-         break;
-      case 3 :
-            pai->eslo = 1;
-         break;
-      default :
-         break;
+struct vmeio *pvmeio = (struct vmeio*)&(pai->inp.value);
+
+   if( !after )
+   {
+      return( 0 );
    }
-    return(0);
-}
+
+   /* set linear conversion slope */
+   switch( pvmeio->signal )
+   {
+   case 4:  /* P0 / coarse delay */
+      pai->eslo = (pai->eguf - pai->egul) / 255.0;
+      break;
+
+   case 3:  /* Fine delay */
+      pai->eslo = 1;
+      break;
+
+   default:
+      break;
+   }
+
+   return( 0 );
+
+} /* specialLinconvAi() */
 
