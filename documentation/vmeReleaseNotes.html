@@ -1,35 +1,49 @@
-<html>
-
-<head>
-<meta http-equiv="Content-Type"
-content="text/html; charset=iso-8859-1">
-<title>vmeReleaseNotes</title>
-</head>
-
-<body bgcolor="#FFFFFF">
-
-<h1 align="center">vme Release Notes</h1>
-
-<h2 align="center">Release 2-3</h2>
-
-<p align="left">This is the first release of the synApps vme module.
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>vmeReleaseNotes</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Linux)">
+	<META NAME="CREATED" CONTENT="20041223;10520000">
+	<META NAME="CHANGED" CONTENT="20050107;7310400">
+</HEAD>
+<BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
+<H2 ALIGN=CENTER>vme Release Notes</H2>
+<H2 ALIGN=LEFT>Release 2-4-0</H2>
+<P ALIGN=LEFT>Tested using base 3.14.6 and 3.14.7, seq 2.0.8, calc
+2.3, sscan 2.3, std 2.3, and asyn 1.2.</P>
+<P ALIGN=LEFT>New support:</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0in">MRD-100:<BR>1) devAvmeMRD –
+	Provides new device support and is the first step in moving away
+	from using devA32Vme.<BR>2) msl_mrd100.db – Modified to reflect
+	new device support module.<BR>3) msl_mrd101.db – Modified to
+	reflect new device support module.</P>
+	<LI><P ALIGN=LEFT STYLE="margin-bottom: 0in">Added Joerger VSxx
+	scaler.</P>
+	<LI><P ALIGN=LEFT STYLE="margin-bottom: 0in">Added support for
+	Acromag 9210 and 9440</P>
+	<LI><P STYLE="margin-bottom: 0in">Added new vmeTest test
+	application. It's a menu-driven application that provides simple VME
+	read/write operations. 
+	</P>
+</UL>
+<H2 ALIGN=LEFT>Release 2-3</H2>
+<P ALIGN=LEFT>This is the first release of the synApps vme module.
 Version numbering for this module begins with 2.3 because this module
 was split from version 2.2 of the std module, and I wanted to retain
-the CVS histories of module contents.</p>
-
-This version is intended to build with EPICS base 3.14.5.
-
-Differences from software as previously released in std 2.2:
-<ul>
-<li><p>Converted to EPICS 3.14.
-<li><p>VME_DAC_SETTINGS.req,  VME_DAC_POSITIONS.req - New files
-
-</ul>
-<address>
-    Suggestions and Comments to: <br>
-    <a href="mailto:mooney@aps.anl.gov">Tim Mooney </a>:
-    (mooney@aps.anl.gov) <br>
-    Last modified: March 5, 2004 
-</address>
-</body>
-</html>
+the CVS histories of module contents.</P>
+<P>This version is intended to build with EPICS base 3.14.5.
+Differences from software as previously released in std 2.2: 
+</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0in">Converted to EPICS 3.14. 
+	</P>
+	<LI><P>VME_DAC_SETTINGS.req, VME_DAC_POSITIONS.req - New files 
+	</P>
+</UL>
+<ADDRESS STYLE="text-align: left">Suggestions and Comments to: <BR><A HREF="mailto:dkline@aps.anl.gov">David
+Kline </A>: (dkline@aps.anl.gov) <BR>Last modified: December 23, 2004
+</ADDRESS>
+</BODY>
+</HTML>

@@ -82,7 +82,7 @@ DSET devAoVMI4116 = {
 	write_ao,
 	special_linconv
 };
-epicsExportAddress(DSET, devAoVMI4116);
+epicsExportAddress(dset, devAoVMI4116);
 
 #define VMI_ENABLE_OUT		0x4100 /*Fail LED off, enable P3 output.*/
 #define VMI_DISABLE_OUT		0x0100 /*Fail LED on, enable P3 output.*/
