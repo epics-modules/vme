@@ -9,14 +9,10 @@
 #include <iv.h>
 #include <sysLib.h>
 #include <vxLib.h>
-/*
 #include <logLib.h>
-*/
 #include <intLib.h>
 
 #define FEXIT   1
-
-extern int  logMsg (char *fmt, ...);
 
 static void  ttylinemode();
 static void  ttycharmode();
@@ -104,43 +100,43 @@ static void a32inthandler();
 
 static unsigned short   *modbase;   /* module base address */
 static unsigned short   vxila;      /* vxi logical address */
-static unsigned short   reg;     /* register offset */
+static unsigned short   reg;        /* register offset */
 static unsigned short   writeval;   /* default write value */
-static unsigned short   radd;    /* ram address offset */
+static unsigned short   radd;       /* ram address offset */
 static unsigned short   rdreg;      /* ram data reg offset */
 static unsigned short   rsize;      /* ram size in words */
 static unsigned short   rwsize;     /* ram word size in bytes */
 static unsigned short   rdadd;      /* ram dump address */
-static unsigned short   rdwords; /* number of words to dump */
+static unsigned short   rdwords;    /* number of words to dump */
 static unsigned short   ivect;      /* interrupt vector register offset */
 static unsigned short   iresetreg;  /* offset of register to write to reset interrupt */
 static unsigned short   irbits;     /* bits to or into reset interrupt pattern */
 static unsigned short   ipatmask;   /* interrupt pattern and mask */
 static unsigned short   bpnum;      /* bit pattern generator # */
 static unsigned short   bpbank;     /* bit pattern bank */
-static unsigned short   seed;    /* random num generator seed */
+static unsigned short   seed;       /* random num generator seed */
 
-static unsigned long *a32base;   /* module a32 base address */
-static unsigned long    *a32ibase;  /* module a32 interrupt base add */
-static unsigned long a32reg;     /* a32 register offset */
+static unsigned long *a32base;      /* module a32 base address */
+static unsigned long *a32ibase;     /* module a32 interrupt base add */
+static unsigned long a32reg;        /* a32 register offset */
 static unsigned long a32writeval;   /*  default a32 write value */
-static unsigned long    a32radd;    /* ram address offset */
-static unsigned long   a32rsize;    /* ram size in words */
+static unsigned long a32radd;       /* ram address offset */
+static unsigned long a32rsize;      /* ram size in words */
 static unsigned long a32rdadd;      /* ram dump address */
-static unsigned long   a32rdwords;  /* number of words to dump */
-static unsigned long    a32seed; /* random num generator seed */
-static unsigned long a32fast; /* 1 = fast read/write */
+static unsigned long a32rdwords;    /* number of words to dump */
+static unsigned long a32seed;       /* random num generator seed */
+static unsigned long a32fast;       /* 1 = fast read/write */
 static unsigned long a32ivect;      /* interrupt vector register offset */
 static unsigned long a32iresetreg;  /* offset of register to write to reset interrupt */
 static unsigned long a32irbits;     /* bits to or into reset interrupt pattern */
 static unsigned long a32ipatmask;   /* interrupt pattern and mask */
 
-struct  menu_prompt {           /* defines a prompt for a menu */
-   char  id;      /* char to input for this choice */
-        int     val;            /* value to return for this prompt */
-        int     (*proc)();      /* proc to execute for this prompt */
-        int     key;            /* key code for this prompt */
-        char    *pmt;           /* prompt text */
+struct  menu_prompt {    /* defines a prompt for a menu */
+   char  id;             /* char to input for this choice */
+   int   val;            /* value to return for this prompt */
+   int   (*proc)();      /* proc to execute for this prompt */
+   int   key;            /* key code for this prompt */
+   char  *pmt;           /* prompt text */
 };
 
 struct   fmenu {
@@ -151,22 +147,22 @@ struct   fmenu {
 };
 
 static struct menu_prompt menu_prompts[] = {
-   'b', 0, setbase, 0, "Set module base address",
-   'v', 1, setla, 0, "Set VXI module Logical Address",
-   'o', 2, setoffset, 0, "Set register offset",
-   'l', 3, listsettings, 0, "List settings",
-   'r', 4, freadreg, 0, "Read Register",
-   'w', 5, fwritereg, 0, "Write Regiser",
-   'e', 6, fwrreg, 0, "Write-read Register",
-   '1', 7, loopread, 0, "Loop on read",
-   '2', 8,  loopwrite, 0, "Loop on write",
-   '3', 9, looprw, 0, "Loop on write-read",
-   'm', 10, rammenu, 0, "Ram Tests",
-   '9', 11, bitpatmenu, 0, "BPM Bit pattern tests",
-   'i', 12, setintvector, 0, "Set Interrupt Vector",
-   't', 13, twopatternwrite, 0, "2 pattern register write",
-   'a', 14, a32menu, 0, "A32/D32 tests",
-   'x', 3, exitx, 0, "Exit"
+   { 'b', 0,  setbase,         0, "Set module base address" },
+   { 'v', 1,  setla,           0, "Set VXI module Logical Address" },
+   { 'o', 2,  setoffset,       0, "Set register offset" },
+   { 'l', 3,  listsettings,    0, "List settings" },
+   { 'r', 4,  freadreg,        0, "Read Register" },
+   { 'w', 5,  fwritereg,       0, "Write Regiser" },
+   { 'e', 6,  fwrreg,          0, "Write-read Register" },
+   { '1', 7,  loopread,        0, "Loop on read" },
+   { '2', 8,  loopwrite,       0, "Loop on write" },
+   { '3', 9,  looprw,          0, "Loop on write-read" },
+   { 'm', 10, rammenu,         0, "Ram Tests" },
+   { '9', 11, bitpatmenu,      0, "BPM Bit pattern tests" },
+   { 'i', 12, setintvector,    0, "Set Interrupt Vector" },
+   { 't', 13, twopatternwrite, 0, "2 pattern register write" },
+   { 'a', 14, a32menu,         0, "A32/D32 tests" },
+   { 'x', 3,  exitx,           0, "Exit" }
 };
 
 static   struct   fmenu mm = {
@@ -177,23 +173,23 @@ static   struct   fmenu mm = {
 };
 
 static struct menu_prompt ram_prompts[] = {
-   'a', 0, setramaoff, 0, "Set ram address register offset",
-   'r', 0, setramdoff, 0, "Set ram data register offset",
-   's', 0, setramsz, 0, "Set ram size in words",
-   'w', 0, setramwsz, 0, "Set ram word size",
-   'b', 0, setramdadd, 0, "Set ram dump address",
-   'n', 0, setramdwords, 0, "Set number of words to dump",
-   'f', 0, fillram, 0, "Fill ram",
-   'd', 0, dumpram, 0, "Dump ram",
-   'l', 0, listrsettings, 0, "List settings",
-   '1', 0, wraddtest, 0, "Write-read ram address test",
-   '2', 0, wrrottest, 0, "Rotate pattern ram test",
-   '3', 0, wronestest, 0, "Shifting ones test",
-   '4', 0, randchk, 0, "Read and check",
-   '5', 0, wrrandtest, 0, "Random pattern test",
-   '6', 0, rrandtest, 0, "Read random pattern test",
-   '7', 0, raddtest, 0, "Read ram address test",
-   'x', 0, exitx, 0, "Exit"
+   { 'a', 0, setramaoff, 0, "Set ram address register offset" },
+   { 'r', 0, setramdoff, 0, "Set ram data register offset" },
+   { 's', 0, setramsz, 0, "Set ram size in words" },
+   { 'w', 0, setramwsz, 0, "Set ram word size" },
+   { 'b', 0, setramdadd, 0, "Set ram dump address" },
+   { 'n', 0, setramdwords, 0, "Set number of words to dump" },
+   { 'f', 0, fillram, 0, "Fill ram" },
+   { 'd', 0, dumpram, 0, "Dump ram" },
+   { 'l', 0, listrsettings, 0, "List settings" },
+   { '1', 0, wraddtest, 0, "Write-read ram address test" },
+   { '2', 0, wrrottest, 0, "Rotate pattern ram test" },
+   { '3', 0, wronestest, 0, "Shifting ones test" },
+   { '4', 0, randchk, 0, "Read and check" },
+   { '5', 0, wrrandtest, 0, "Random pattern test" },
+   { '6', 0, rrandtest, 0, "Read random pattern test" },
+   { '7', 0, raddtest, 0, "Read ram address test" },
+   { 'x', 0, exitx, 0, "Exit" }
 };
 
 
@@ -205,17 +201,17 @@ static struct fmenu rm = {
 };
 
 static struct menu_prompt bp_prompts[] = {
-   'o', 0, bpramsel, 0, "Select Bit Pattern Generator",
-   'b', 0, bpbanksel, 0, "Select Bank",
-   'n', 0, setramdwords, 0, "Set number of words to dump",
-   'f', 0, bpfillram, 0, "Fill ram",
-   'd', 0, bpdumpram, 0, "Dump ram",
-   'l', 0, listbpsettings, 0, "List settings",
-   '1', 0, bpwraddtest, 0, "Write-read ram address test",
-   '2', 0, bpwrrottest, 0, "Rotate pattern ram test",
-   '3', 0, bpwronestest, 0, "Shifting ones test",
-   '4', 0, bprandchk, 0, "Read and check",
-   'x', 0, exitx, 0, "Exit"
+   { 'o', 0, bpramsel, 0, "Select Bit Pattern Generator" },
+   { 'b', 0, bpbanksel, 0, "Select Bank" },
+   { 'n', 0, setramdwords, 0, "Set number of words to dump" },
+   { 'f', 0, bpfillram, 0, "Fill ram" },
+   { 'd', 0, bpdumpram, 0, "Dump ram" },
+   { 'l', 0, listbpsettings, 0, "List settings" },
+   { '1', 0, bpwraddtest, 0, "Write-read ram address test" },
+   { '2', 0, bpwrrottest, 0, "Rotate pattern ram test" },
+   { '3', 0, bpwronestest, 0, "Shifting ones test" },
+   { '4', 0, bprandchk, 0, "Read and check" },
+   { 'x', 0, exitx, 0, "Exit" }
 };
 
 static struct fmenu bpm = {
@@ -226,18 +222,18 @@ static struct fmenu bpm = {
 };
 
 static struct menu_prompt a32_prompts[] = {
-   'b', 0, seta32base, 0, "Set module A32 base address",
-   'o', 1, seta32offset, 0, "Set a32 register offset (hex byte address)",
-   'l', 2, lista32settings, 0, "List settings",
-   'r', 3, freada32reg, 0, "Read Register",
-   'w', 4, fwritea32reg, 0, "Write Regiser",
-   'e', 5, fwra32reg, 0, "Write-read Register",
-   '1', 5, loopa32read, 0, "Loop on read",
-   '2', 6,  loopa32write, 0, "Loop on write",
-   '3', 7, loopa32rw, 0, "Loop on write-read",
-   'm', 8, a32rammenu, 0, "A32 Ram Tests",
-   'i', 12, seta32intvector, 0, "Set Interrupt Vector",
-   'x', 0, exitx, 0, "Exit"
+   { 'b', 0, seta32base, 0, "Set module A32 base address" },
+   { 'o', 1, seta32offset, 0, "Set a32 register offset (hex byte address)" },
+   { 'l', 2, lista32settings, 0, "List settings" },
+   { 'r', 3, freada32reg, 0, "Read Register" },
+   { 'w', 4, fwritea32reg, 0, "Write Regiser" },
+   { 'e', 5, fwra32reg, 0, "Write-read Register" },
+   { '1', 5, loopa32read, 0, "Loop on read" },
+   { '2', 6,  loopa32write, 0, "Loop on write" },
+   { '3', 7, loopa32rw, 0, "Loop on write-read" },
+   { 'm', 8, a32rammenu, 0, "A32 Ram Tests" },
+   { 'i', 12, seta32intvector, 0, "Set Interrupt Vector" },
+   { 'x', 0, exitx, 0, "Exit" }
 };
 
 static struct fmenu a32 = {
@@ -248,22 +244,22 @@ static struct fmenu a32 = {
 };
 
 static struct menu_prompt a32ram_prompts[] = {
-   'a', 0, seta32ramaoff, 0, "Set ram start offset",
-   's', 0, seta32ramsz, 0, "Set ram size in words",
-   'b', 0, seta32ramdadd, 0, "Set ram dump address",
-   'n', 0, seta32ramdwords, 0, "Set number of words to dump",
-   't', 0, seta32fast, 0, "Set turbo read/write mode",
-   'f', 0, filla32ram, 0, "Fill ram",
-   'd', 0, dumpa32ram, 0, "Dump ram",
-   'l', 0, lista32rsettings, 0, "List settings",
-   '1', 0, a32wraddtest, 0, "Write-read ram address test",
-   '2', 0, a32wrrottest, 0, "Rotate pattern ram test",
-   '3', 0, a32wronestest, 0, "Shifting ones test",
-   '4', 0, a32randchk, 0, "Read and check",
-   '5', 0, a32wrrandtest, 0, "Random pattern test",
-   '6', 0, a32rrandtest, 0, "Read random pattern test",
-   '7', 0, a32raddtest, 0, "Read ram address test",
-   'x', 0, exitx, 0, "Exit"
+   { 'a', 0, seta32ramaoff, 0, "Set ram start offset" },
+   { 's', 0, seta32ramsz, 0, "Set ram size in words" },
+   { 'b', 0, seta32ramdadd, 0, "Set ram dump address" },
+   { 'n', 0, seta32ramdwords, 0, "Set number of words to dump" },
+   { 't', 0, seta32fast, 0, "Set turbo read/write mode" },
+   { 'f', 0, filla32ram, 0, "Fill ram" },
+   { 'd', 0, dumpa32ram, 0, "Dump ram" },
+   { 'l', 0, lista32rsettings, 0, "List settings" },
+   { '1', 0, a32wraddtest, 0, "Write-read ram address test" },
+   { '2', 0, a32wrrottest, 0, "Rotate pattern ram test" },
+   { '3', 0, a32wronestest, 0, "Shifting ones test" },
+   { '4', 0, a32randchk, 0, "Read and check" },
+   { '5', 0, a32wrrandtest, 0, "Random pattern test" },
+   { '6', 0, a32rrandtest, 0, "Read random pattern test" },
+   { '7', 0, a32raddtest, 0, "Read ram address test" },
+   { 'x', 0, exitx, 0, "Exit" }
 };
 
 
@@ -274,7 +270,7 @@ static struct fmenu a32rm = {
    a32ram_prompts
 };
 
-void modtest()
+void vmeTest()
 {
    int   choice;
    int   selected;
@@ -282,11 +278,11 @@ void modtest()
    reg = 0;
    selected = 0;
    setbase();
-   while (selected == 0) {
-      ttycharmode();    
+   while( selected == 0 )
+   {
+      ttycharmode();
       ttyinflush();
-      selected =
-      (*(mm.pmt[choice=fmenu(&mm)].proc))();
+      selected = (*(mm.pmt[choice=fmenu(&mm)].proc))();
    }
    ttylinemode();
 }
@@ -300,13 +296,13 @@ static int rammenu()
       rwsize = 1;
    selected = 0;
    while (selected == 0) {
-      ttycharmode();    
+      ttycharmode();
       ttyinflush();
-      selected =
-      (*(rm.pmt[choice=fmenu(&rm)].proc))();
+      selected = (*(rm.pmt[choice=fmenu(&rm)].proc))();
    }
    return(0);
 }
+
 static int a32menu()
 {
    int   choice;
@@ -314,10 +310,9 @@ static int a32menu()
 
    selected = 0;
    while (selected == 0) {
-      ttycharmode();    
+      ttycharmode();
       ttyinflush();
-      selected =
-      (*(a32.pmt[choice=fmenu(&a32)].proc))();
+      selected = (*(a32.pmt[choice=fmenu(&a32)].proc))();
    }
    return(0);
 }
@@ -329,13 +324,13 @@ static int a32rammenu()
 
    selected = 0;
    while (selected == 0) {
-      ttycharmode();    
+      ttycharmode();
       ttyinflush();
-      selected =
-      (*(a32rm.pmt[choice=fmenu(&a32rm)].proc))();
+      selected = (*(a32rm.pmt[choice=fmenu(&a32rm)].proc))();
    }
    return(0);
 }
+
 static int exitx()
 {
    return(FEXIT);
@@ -346,9 +341,10 @@ static void ttyinflush()
    int   status;
    int   dummy;
 
-        status = ioctl(0, FIORFLUSH, (int)&dummy);
+   status = ioctl(0, FIORFLUSH, (int)&dummy);
 
 }
+
 static void ttycharmode()
 {
    int   status;
@@ -356,9 +352,9 @@ static void ttycharmode()
    int   nmode;
    int   dummy;
 
-        ttymode = ioctl(0, FIOGETOPTIONS, (int)&dummy);
-        nmode = ttymode & ~OPT_LINE;
-        status = ioctl(0, FIOSETOPTIONS, nmode);
+   ttymode  = ioctl(0, FIOGETOPTIONS, (int)&dummy);
+   nmode    = ttymode & ~OPT_LINE;
+   status   = ioctl(0, FIOSETOPTIONS, nmode);
 
 }
 static void ttylinemode()
@@ -368,9 +364,9 @@ static void ttylinemode()
    int   nmode;
    int   dummy;
 
-        ttymode = ioctl(0, FIOGETOPTIONS, (int)&dummy);
-        nmode = ttymode | OPT_LINE;
-        status = ioctl(0, FIOSETOPTIONS, nmode);
+   ttymode  = ioctl(0, FIOGETOPTIONS, (int)&dummy);
+   nmode    = ttymode | OPT_LINE;
+   status   = ioctl(0, FIOSETOPTIONS, nmode);
 
 }
 
@@ -458,7 +454,7 @@ struct   fmenu *pmenu)
    }
    printf("\n%c is not a valid choice\n", (char)choice);
    }
-   
+
 }
 
 static short  readreg(
@@ -718,7 +714,7 @@ static int dumpram()
          val = readreg(pd);
          if ( rwsize == 1)
             val &= 0xff;
-         printf("  %x", val); 
+         printf("  %x", val);
       }
       }
       printf("\n\nContinue? (y|n): ");
@@ -746,7 +742,7 @@ static int fillram()
       if ( writereg(pd, writeval) != OK )
          break;
    }
-      
+
    return(0);
 }
 
@@ -1071,7 +1067,7 @@ static int junk()
    int   dummy;
 
    while (1) {
-      
+
       nttychars=0;
       ttymode = ioctl(0, FIOGETOPTIONS, (int)&dummy);
       nmode = ttymode & ~OPT_LINE;
@@ -1091,7 +1087,7 @@ int     param)
    unsigned short pat;
    unsigned short *p;
 
-        logMsg("tic\n");
+        logMsg("tic\n",0,0,0,0,0,0);
    p = modbase + iresetreg/2;
    pat = *p & ipatmask;
    *p = pat | irbits;
@@ -1103,7 +1099,7 @@ int     param)
    unsigned long pat;
    unsigned long *p;
 
-        logMsg("tic\n");
+        logMsg("tic\n",0,0,0,0,0,0);
    p = a32ibase + a32iresetreg/4;
    pat = *p & a32ipatmask;
    *p = pat | a32irbits;
@@ -1219,7 +1215,7 @@ static int bitpatmenu()
    bpbank = 0;
    selected = 0;
    while (selected == 0) {
-      ttycharmode();    
+      ttycharmode();
       ttyinflush();
       selected =
       (*(bpm.pmt[choice=fmenu(&bpm)].proc))();
@@ -1311,7 +1307,7 @@ static int bpfillram()
       if ( writereg(pd, writeval) != OK )
          break;
    }
-      
+
    return(0);
 }
 
@@ -1339,7 +1335,7 @@ static int bpdumpram()
          val = readreg(pd);
          if ( rwsize == 1)
             val &= 0xff;
-         printf("  %x", val); 
+         printf("  %x", val);
       }
       }
       printf("\n\nContinue? (y|n): ");
@@ -1640,7 +1636,7 @@ static int wrrandtest()
       if ( writereg(pa, 0) != OK )
          return(0);
       srandom(seed);
-   
+
       for ( i=0; i < rsize; i++ ) {
          val = (unsigned short)random();
          if ( rwsize == 1)
@@ -2116,7 +2112,7 @@ static int seta32offset()
    ttylinemode();
    printf("Enter a32 register offset in hex:  ");
    scanf("%lx", &a32reg);
-   printf("Register offset set to %x\n", a32reg);
+   printf("Register offset set to %x\n", (unsigned int)a32reg);
    getchar();
    ttycharmode();
    return(0);
@@ -2124,9 +2120,9 @@ static int seta32offset()
 
 static int lista32settings()
 {
-   printf("Base address set to %p\n", a32base);
-   printf("Register offset set to %x\n", a32reg);
-   printf("Default write value set to %x\n", a32writeval);
+   printf("Base address set to %p\n", (unsigned int*)a32base);
+   printf("Register offset set to %x\n", (unsigned int)a32reg);
+   printf("Default write value set to %x\n", (unsigned int)a32writeval);
    return(0);
 }
 
@@ -2137,7 +2133,7 @@ static int freada32reg()
 
    p = a32base + a32reg/4;
    val = reada32reg(p);
-   printf("Register %p = 0x%x\n", p, val);
+   printf("Register %p = 0x%x\n", p, (unsigned int)val);
    return(0);
 }
 
@@ -2229,7 +2225,7 @@ static int seta32ramaoff()
 {
    printf("Enter offset of start of ram in hex (# of bytes above base:  ");
    scanf("%lx", &a32radd);
-   printf("Offset of start of ram set to %x\n", a32radd);
+   printf("Offset of start of ram set to %x\n", (unsigned int)a32radd);
    getchar();
    return(0);
 }
@@ -2238,7 +2234,7 @@ static int seta32ramsz()
 {
    printf("Enter ram size in words (dec):  ");
    scanf("%ld", &a32rsize);
-   printf("Ram size set to %d words\n", a32rsize);
+   printf("Ram size set to %d words\n", (unsigned int)a32rsize);
    getchar();
    return(0);
 }
@@ -2247,7 +2243,7 @@ static int seta32ramdadd()
 {
    printf("Enter ram dump address in hex:  ");
    scanf("%lx", &a32rdadd);
-   printf("Ram dump address set to %x\n", a32rdadd);
+   printf("Ram dump address set to %x\n", (unsigned int)a32rdadd);
    getchar();
    return(0);
 }
@@ -2255,7 +2251,7 @@ static int seta32ramdwords()
 {
    printf("Enter enter number of words to dump in hex:  ");
    scanf("%lx", &a32rdwords);
-   printf("Number of words to dump set to %x\n", a32rdwords);
+   printf("Number of words to dump set to %x\n", (unsigned int)a32rdwords);
    getchar();
    return(0);
 }
@@ -2274,12 +2270,12 @@ static int seta32fast()
 
 static int lista32rsettings()
 {
-   printf("A32 Base address set to %p\n", a32base);
-   printf("Offset of start of ram set to %x\n", a32radd);
-   printf("Ram size set to %d words\n", a32rsize);
-   printf("Ram default fill  value set to %x\n", a32writeval);
-   printf("Ram dump address set to %x\n", a32rdadd);
-   printf("Number of words to dump set to %x\n", a32rdwords);
+   printf("A32 Base address set to %p\n", (unsigned int*)a32base);
+   printf("Offset of start of ram set to %x\n", (unsigned int)a32radd);
+   printf("Ram size set to %d words\n", (unsigned int)a32rsize);
+   printf("Ram default fill  value set to %x\n", (unsigned int)a32writeval);
+   printf("Ram dump address set to %x\n", (unsigned int)a32rdadd);
+   printf("Number of words to dump set to %x\n", (unsigned int)a32rdwords);
    if (a32fast)
       printf("Turbo mode enabled\n");
    else
@@ -2304,10 +2300,10 @@ static int dumpa32ram()
    while ( loop  == 'y' && k < (a32rsize) ) {
       i=0;
       while( i < a32rdwords) {
-      printf("\n%x  ", a32rdadd + k);
+      printf("\n%x  ", (unsigned int)(a32rdadd + k) );
       for ( j=0; j < line && i < a32rdwords; j++, i++, k++, pa++) {
          val = reada32reg(pa);
-         printf("  %x", val); 
+         printf("  %x", (unsigned int)val);
       }
       }
       printf("\n\nContinue? (y|n): ");
@@ -2332,7 +2328,7 @@ static int filla32ram()
       if ( writea32reg(pa, a32writeval) != OK )
          break;
    }
-      
+
    return(0);
 }
 
@@ -2362,7 +2358,7 @@ static int a32wraddtest()
          chk = i;
          if( val != chk) {
             printf("Error at %x -- wrote %x  read %x\n",
-               i, chk, val);
+               (unsigned int)i, (unsigned int)chk, (unsigned int)val);
          }
 
       }
@@ -2397,7 +2393,7 @@ static int a32raddtest()
          chk = i;
          if( val != chk) {
             printf("Error at %x -- wrote %x  read %x\n",
-               i, chk, val);
+               (unsigned int)i, (unsigned int)chk, (unsigned int)val);
          }
 
       }
@@ -2448,7 +2444,7 @@ static int a32wrrottest()
          val = reada32reg(pa);
          if( val != chk) {
             printf("Error at %x -- wrote %x  read %x\n",
-               i, chk, val);
+               (unsigned int)i, (unsigned int)chk, (unsigned int)val);
          }
          val1 = chk << 1;
          if ( chk & 0x80000000 )
@@ -2501,7 +2497,7 @@ static int a32wronestest()
          val = reada32reg(pa);
          if( val != chk) {
             printf("Error at %x -- wrote %x  read %x\n",
-               i, chk, val);
+               (unsigned int)i, (unsigned int)chk, (unsigned int)val);
          }
          if ( chk & 0x80000000 )
             chk <<=1;
@@ -2544,7 +2540,7 @@ static int a32randchk()
          val = reada32reg(pa);
          if( val != chk) {
             printf("Error at %x -- wrote %x  read %x\n",
-               i, chk, val);
+               (unsigned int)i, (unsigned int)chk, (unsigned int)val);
          }
 
       }
@@ -2576,7 +2572,7 @@ static int a32wrrandtest()
    while (1) {
       pa = seta32add( a32base, a32radd);
       srandom(a32seed);
-   
+
       for ( i=0; i < a32rsize; i++, pa++ ) {
          val = (unsigned long)random();
          if ( writea32reg(pa, val) != OK )
@@ -2591,7 +2587,7 @@ static int a32wrrandtest()
          val = reada32reg(pa);
          if( val != chk) {
             printf("Error at %x -- wrote %x  read %x\n",
-               i, chk, val);
+               (unsigned int)i, (unsigned int)chk, (unsigned int)val);
          }
 
       }
@@ -2630,7 +2626,7 @@ static int a32rrandtest()
          val = reada32reg(pa);
          if( val != chk) {
             printf("Error at %x -- wrote %x  read %x\n",
-               i, chk, val);
+               (unsigned int)i, (unsigned int)chk, (unsigned int)val);
          }
 
       }
