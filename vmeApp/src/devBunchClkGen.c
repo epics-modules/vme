@@ -22,8 +22,8 @@
 
  Description
    This module provides device support for the BCG-100 VMEbus module. The
-   module is found in the A16/D16 VME address space and supports the ai, ao,
-   bi, bo, and waveform record types.
+   module is found in the A16 VME address space and supports the ai, ao, bi,
+   bo, and waveform record types.
 
    Diagnostic messages can be output by setting the variables to the following
    values:
@@ -41,7 +41,7 @@
 
       Where:
          card     - Card number.
-         base     - VME A16/D16 address space.
+         base     - VME A16 address space.
 
       For example:
          BunchClkGenConfigure(0, 0x7000)
@@ -57,34 +57,40 @@
  14-11-95   FRL   - Initial.
  22-01-05   DMK   - Took over support for driver / device support.
                   - Reformatted and documented for clarity.
+ 26-01-05   DMK   - Made OS independent by employing EPICS devLib methods.
  -----------------------------------------------------------------------------
 
 -*/
 
-#include <vxWorks.h>
+/* System related include files */
+#include <math.h>
 #include <types.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <sysLib.h>
-#include <vxLib.h>
 
-#include <vme.h>
-#include <iv.h>
-#include <semLib.h>
-#include <errno.h>
-#include <taskLib.h>
-#include <drvSup.h>
-#include <devSup.h>
+
+/* EPICS system related include files */
+#include <alarm.h>
 #include <devLib.h>
-#include <dbDefs.h>
-#include <dbAccess.h>
-#include <dbScan.h>
-#include <link.h>
-#include <epicsMutex.h>
+#include <devSup.h>
+#include <drvSup.h>
 #include <recGbl.h>
+#include <epicsPrint.h>
 #include <epicsExport.h>
 
+
+/* EPICS record processing related include files */
+#include <dbScan.h>
+#include <dbAccess.h>
+#include <aiRecord.h>
+#include <aoRecord.h>
+#include <biRecord.h>
+#include <boRecord.h>
+#include <waveformRecord.h>
+
+
+/* Define general symbolic constants */
 #define MAX_NUM_CARDS   ( 4 )
 #define NO_ERR_RPT      ( -1 )
 #define FBUSERR         ( -2 )
@@ -117,7 +123,7 @@ epicsExportAddress(drvet, drvBunchClkGen);
 
 static char* drvName = "drvBunchClkGen";
 
-/* device register map */
+/* device register maps */
 struct drv_regr
 {
    USHORT csr;
@@ -145,9 +151,7 @@ struct drvCard
    } reg;
 };
 
-/*
- * Define all per-card private variables here.
- */
+/* Define all per-card private variables */
 struct drvPrivate
 {
    volatile struct drvCard* dptr;
@@ -172,10 +176,10 @@ static struct drvPrivate* dio = Card;
 
 
 /****************************************************************************/
-int BunchClkGenConfigure( int Card, ULONG CardAddress )
+int BunchClkGenConfigure( int card, ULONG base )
 {
-char *xname = "BunchClkGenConfigure";
-USHORT junk;
+USHORT   junk;
+char*    xname = "BunchClkGenConfigure";
 
    if( ConfigureLock != 0 )
    {
@@ -183,37 +187,37 @@ USHORT junk;
       return( ERROR );
    }
 
-   if( Card >= MAX_NUM_CARDS || Card < 0 )
+   if( card >= MAX_NUM_CARDS || card < 0 )
    {
-      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: Card number %d invalid -- must be 0 to %d", xname, Card, MAX_NUM_CARDS-1 );
+      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: Card number %d invalid -- must be 0 to %d", xname, card, MAX_NUM_CARDS-1 );
       return( ERROR );
    }
 
-   if( CardAddress > 0xffff )
+   if( base > 0xffff )
    {
-      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: Card (%d)  address 0x%lx invalid -- must be 0 to 0xffff", xname, Card, CardAddress );
+      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: Card (%d)  address 0x%lx invalid -- must be 0 to 0xffff", xname, card, base );
       return( ERROR );
    }
 
-   if( sysBusToLocalAdrs( VME_AM_SUP_SHORT_IO, (char*)CardAddress, (char**)&dio[Card].dptr ) != OK )
+   if( devRegisterAddress( "devBunchClockGen", atVMEA16, base, sizeof(struct drvCard), (volatile void**)&dio[card].dptr ) )
    {
-      dio[Card].dptr = NULL;
-      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: A16 Address map failed for Card %d", xname, Card );
-
-      return( ERROR );
-   }
-
-   if( vxMemProbe( (char*)dio[Card].dptr, READ, 2, (char*)&junk ) != OK )
-   {
-      dio[Card].dptr = NULL;
-      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: vxMemProbe failed for Card %d", xname, Card );
+      dio[card].dptr = NULL;
+      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: A16 Address map failed for Card %d", xname, card );
 
       return( ERROR );
    }
 
-   if( Card >= NumCards )
+   if( devReadProbe( sizeof(junk), (char*)dio[card].dptr, (char*)&junk ) )
    {
-      NumCards = Card + 1;
+      dio[card].dptr = NULL;
+      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: vxMemProbe failed for Card %d", xname, card );
+
+      return( ERROR );
+   }
+
+   if( card >= NumCards )
+   {
+      NumCards = card + 1;
    }
 
    return( OK );
@@ -230,9 +234,9 @@ USHORT junk;
 /****************************************************************************/
 static long drvInitCard( )
 {
-long status = 0;
-int i;
-USHORT val;
+long     status = 0;
+int      i;
+USHORT   val;
 
    ConfigureLock = 1;   /* prevent Configure calls after init */
 
@@ -289,6 +293,7 @@ int i;
    }
 
    return( OK );
+
 } /* drvIoReport() */
 
 
@@ -376,8 +381,9 @@ ULONG status;
  ***************************************************************************/
 static long drvReadCard( short card, short funct, short signal, ULONG* pp1 )
 {
-USHORT val, val1;
-ULONG status;
+USHORT   val,
+         val1;
+ULONG    status;
 
    if( (status = check_card( card, signal )) != OK )
    {
@@ -425,8 +431,8 @@ static long drvWriteCardBit(  USHORT card,
                               USHORT mask        /* value */
                            )
 {
-USHORT tmp;
-ULONG status;
+USHORT   tmp;
+ULONG    status;
 
    if( (status = check_card( card, signal )) != OK )
    {
@@ -475,8 +481,8 @@ static long drvWriteReadBit(
                               USHORT* prbval  /* place to put readback */
                            )
 {
-USHORT val;
-ULONG status;
+USHORT   val;
+ULONG    status;
 
    if( (status = check_card( card, signal )) != OK )
    {
@@ -541,9 +547,9 @@ USHORT csr;
  ***********************************************************************/
 static long drvWriteRam( short card )
 {
-int i;
-USHORT csr;
-ULONG status;
+int      i;
+USHORT   csr;
+ULONG    status;
 
    if( (status = check_card( card, 0 )) != OK )
    {
@@ -575,9 +581,9 @@ ULONG status;
  ***********************************************************************/
 static long drvReadRam( short card )
 {
-int i;
-USHORT csr;
-ULONG status;
+int      i;
+USHORT   csr;
+ULONG    status;
 
    if( (status = check_card( card, 0 )) != OK )
    {
@@ -609,7 +615,7 @@ ULONG status;
  ***********************************************************************/
 static long drvCopyRam( short card )
 {
-int i;
+int   i;
 ULONG status;
 
    if( (status = check_card( card, 0 )) != OK )
@@ -634,9 +640,9 @@ ULONG status;
  ***********************************************************************/
 static long drvClearRam( short card )
 {
-int i;
-USHORT csr;
-ULONG status;
+int      i;
+USHORT   csr;
+ULONG    status;
 
    if( (status = check_card( card, 0 )) != OK )
    {
@@ -666,10 +672,12 @@ ULONG status;
 /**************************************************************************/
 static long drvListBuckets( int card, short* buf, int max, int* actual )
 {
-int num, j, ramloc;
-short bucket;
-USHORT val;
-int notDone;
+int      num,
+         j,
+         ramloc,
+         notDone;
+short    bucket;
+USHORT   val;
 
    notDone  = 1;
    ramloc   = num = bucket = 0;
@@ -706,9 +714,11 @@ int notDone;
 /**************************************************************************/
 static long drvShowPattern( int card, short* buf, int max, int *actual )
 {
-int num, j, ramloc;
-USHORT val;
-int notDone;
+int      num,
+         j,
+         ramloc,
+         notDone;
+USHORT   val;
 
    notDone  = 1;
    ramloc   = num = 0;
@@ -752,14 +762,14 @@ int notDone;
 /*************************************************************************/
 long drvBunchClkGenDump( int card )
 {
-int   i,
-      j,
-      bucket,
-      num,
-      ramloc,
-      notDone;
-USHORT val;
-USHORT buckets[PERLINE];
+int      i,
+         j,
+         bucket,
+         num,
+         ramloc,
+         notDone;
+USHORT   val;
+USHORT   buckets[PERLINE];
 
 
    if( drvReadRam( card ) != OK )
@@ -823,10 +833,10 @@ USHORT buckets[PERLINE];
 /*************************************************************************/
 long drvBunchClkGenDumpRam( int card )
 {
-int   i,
-      ramloc,
-      notDone;
-USHORT val;
+int      i,
+         ramloc,
+         notDone;
+USHORT   val;
 
 
    if( drvReadRam( card ) != OK )
@@ -872,10 +882,12 @@ USHORT val;
  **************************************************************************/
 static long drvWriteBucket( short card, short bucket, short value )
 {
-int ramloc;
-int bit;
-USHORT mask, val, tmp;
-ULONG status;
+int      ramloc,
+         bit;
+USHORT   mask,
+         val,
+         tmp;
+ULONG    status;
 
    if( (status = check_card( card, 0 )) != OK )
    {
@@ -941,15 +953,6 @@ static int drvGetPwrOnStatus( short card )
  *****************************************************************************/
 
 /* create the dsets */
-#include <alarm.h>
-#include <devSup.h>
-#include <recSup.h>
-#include <biRecord.h>
-#include <boRecord.h>
-#include <aoRecord.h>
-#include <aiRecord.h>
-#include <waveformRecord.h>
-
 #define PARAM_BIT_FIELD    ( 1 )
 #define PARAM_MASK         ( 2 )
 #define PARAM_ASCII        ( 3 )
@@ -1070,7 +1073,7 @@ struct PvtBo
 /********************************************************************/
 static long lookUpParam( char *parm, ULONG *pval )
 {
-int i;
+int   i;
 char* xname="lookUpParam";
 
    if( parm == NULL)
@@ -1102,9 +1105,9 @@ char* xname="lookUpParam";
 /********************************************************************/
 static long initParam( char* parm, ULONG* pval, USHORT mode )
 {
-USHORT val;
-ULONG val1;
-char* xname="initParam";
+USHORT   val;
+ULONG    val1;
+char*    xname="initParam";
 
    if( parm == NULL )
    {
@@ -1167,13 +1170,13 @@ char* xname="initParam";
 /*********************************************************************/
 static long initBiRecord( struct biRecord* pbi )
 {
-struct vmeio* pvmeio;
-struct PvtBi* ptr;
-long status;
-USHORT *pReg;
-USHORT val;
-ULONG lval;
-ULONG lval1;
+struct vmeio*  pvmeio;
+struct PvtBi*  ptr;
+long           status;
+USHORT*        pReg;
+USHORT         val;
+ULONG          lval,
+               lval1;
 
 
    /* bi.inp must be an VME_IO */
@@ -1236,7 +1239,7 @@ ULONG lval1;
 
    /* Check Register Exists */
    pReg = (USHORT*)dio[pvmeio->card].dptr + ptr->signal;
-   if( vxMemProbe( (char*)pReg, READ, sizeof(val), (char*)&val ) != OK )
+   if( devReadProbe( sizeof(val), (char*)pReg, (char*)&val ) )
    {
       if( *devDebug )
       {
@@ -1257,9 +1260,10 @@ ULONG lval1;
 /*****************************************************************/
 static long readBi( struct biRecord* pbi )
 {
-ULONG value;
-struct vmeio* pvmeio = (struct vmeio*)&(pbi->inp.value);
-struct PvtBi* ptr;
+ULONG          value;
+struct vmeio*  pvmeio = (struct vmeio*)&(pbi->inp.value);
+struct PvtBi*  ptr;
+
 
    if( pbi->dpvt == NULL )
    {
@@ -1295,13 +1299,14 @@ struct PvtBi* ptr;
 /************************************************************************/
 static long initBoRecord( struct boRecord* pbo )
 {
-USHORT value;
-ULONG lval;
-ULONG lval1;
-USHORT* pReg;
-struct vmeio* pvmeio;
-struct PvtBo* ptr;
-long status;
+USHORT         value;
+ULONG          lval,
+               lval1;
+USHORT*        pReg;
+long           status;
+struct vmeio*  pvmeio;
+struct PvtBo*  ptr;
+
 
    /* bo.out must be an VME_IO */
    switch( pbo->out.type )
@@ -1368,7 +1373,7 @@ long status;
    /* Check Register Exists */
    pReg = (USHORT*)dio[pvmeio->card].dptr + ptr->signal;
 
-   if( vxMemProbe( (char*)pReg, READ, sizeof(value), (char*)&value ) != OK )
+   if( devReadProbe( sizeof(value), (char*)pReg, (char*)&value ) )
    {
       if( *devDebug )
       {
@@ -1406,11 +1411,12 @@ long status;
 /**************************************************************************/
 static long writeBo( struct boRecord *pbo )
 {
-USHORT value;
-USHORT mask;
-USHORT *pReg;
-struct vmeio *pvmeio = (struct vmeio*)&(pbo->out.value);
-struct PvtBo *ptr;
+USHORT         value,
+               mask;
+USHORT*        pReg;
+struct vmeio*  pvmeio = (struct vmeio*)&(pbo->out.value);
+struct PvtBo*  ptr;
+
 
    if( pbo->dpvt == NULL )
    {
@@ -1460,10 +1466,11 @@ struct PvtBo *ptr;
 /***************************************************************************/
 static long initAoRecord( struct aoRecord* pao )
 {
-USHORT value;
-USHORT *pReg;
-struct vmeio *pvmeio;
-long status;
+USHORT         value;
+USHORT*        pReg;
+struct vmeio*  pvmeio;
+long           status;
+
 
    /* ao.out must be an VME_IO */
    switch( pao->out.type )
@@ -1497,7 +1504,7 @@ long status;
 
    /*  Check Card Exists */
    pReg = (USHORT*)dio[pvmeio->card].dptr;
-   if( vxMemProbe( (char*)pReg, READ, sizeof(value), (char*)&value ) != OK )
+   if( devReadProbe( sizeof(value), (char*)pReg, (char*)&value ) )
    {
       if( *devDebug )
       {
@@ -1551,11 +1558,12 @@ long status;
 /*****************************************************************/
 static long writeAo( struct aoRecord *pao )
 {
-USHORT value;
-ULONG lval;
-short val;
-USHORT *pReg;
-struct vmeio *pvmeio = (struct vmeio*)&(pao->out.value);
+USHORT         value;
+ULONG          lval;
+short          val;
+USHORT*        pReg;
+struct vmeio*  pvmeio = (struct vmeio*)&(pao->out.value);
+
 
    if( pao->dpvt == NULL )
    {
@@ -1679,9 +1687,10 @@ struct vmeio* pvmeio = (struct vmeio*)&(pao->out.value);
 /**************************************************************************/
 static long initWfRecord( struct waveformRecord* pRec )
 {
-struct vmeio *pvmeio;
-USHORT value;
-USHORT *pReg;
+struct vmeio*  pvmeio;
+USHORT         value;
+USHORT*        pReg;
+
 
    /* ao.out must be an VME_IO */
    switch( pRec->inp.type )
@@ -1709,7 +1718,7 @@ USHORT *pReg;
 
    /* Check Card Exists */
    pReg = (USHORT*)dio[pvmeio->card].dptr;
-   if( vxMemProbe( (char*)pReg, READ, sizeof(value), (char*)&value ) != OK )
+   if( devReadProbe( sizeof(value), (char*)pReg, (char*)&value ) )
    {
       if( *devDebug )
       {
@@ -1737,8 +1746,8 @@ USHORT *pReg;
 /*************************************************************************/
 static long readWf( struct waveformRecord* pRec )
 {
-struct vmeio *pvmeio = (struct vmeio*)&(pRec->inp.value);
-int num;
+int            num;
+struct vmeio*  pvmeio = (struct vmeio*)&(pRec->inp.value);
 
    if( pRec->dpvt == NULL )
    {
@@ -1769,8 +1778,9 @@ int num;
 /**************************************************************************/
 static long initAiRecord( struct aiRecord* pai )
 {
-struct vmeio* pvmeio;
-long status;
+long           status;
+struct vmeio*  pvmeio;
+
 
    /* ao.out must be an VME_IO */
    switch( pai->inp.type )
@@ -1824,10 +1834,11 @@ long status;
 /*****************************************************************/
 static long readAi( struct aiRecord* pai )
 {
-ULONG lval;
-struct vmeio *pvmeio = (struct vmeio*)&(pai->inp.value);
+ULONG          lval;
+struct vmeio*  pvmeio = (struct vmeio*)&(pai->inp.value);
 
-   if( !pai->dpvt )
+
+   if( pai->dpvt == NULL )
    {
       return( S_dev_NoInit );
    }
@@ -1869,7 +1880,8 @@ struct vmeio *pvmeio = (struct vmeio*)&(pai->inp.value);
 /*********************************************************************/
 static long specialLinconvAi( struct aiRecord* pai, int after )
 {
-struct vmeio *pvmeio = (struct vmeio*)&(pai->inp.value);
+struct vmeio*  pvmeio = (struct vmeio*)&(pai->inp.value);
+
 
    if( !after )
    {
