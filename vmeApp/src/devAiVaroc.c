@@ -85,7 +85,7 @@ devAiVaroc_dset devAiVaroc = {
 	special_linconv
 };
 
-epicsExportAddress(devAiVaroc_dset, devAiVaroc);
+epicsExportAddress(dset, devAiVaroc);
 
 struct dprivate {
   int enc_bits;

@@ -222,14 +222,14 @@ A32VME_DSET devLoA32Vme =   {5, NULL, NULL, init_lo, NULL, write_lo, NULL};
 A32VME_DSET devMbbiA32Vme = {5, NULL, NULL, init_mbbi, NULL, read_mbbi,  NULL};
 A32VME_DSET devMbboA32Vme = {5, NULL, NULL, init_mbbo, NULL, write_mbbo, NULL};
 
-epicsExportAddress(A32VME_DSET, devAiA32Vme);
-epicsExportAddress(A32VME_DSET, devAoA32Vme);
-epicsExportAddress(A32VME_DSET, devBiA32Vme);
-epicsExportAddress(A32VME_DSET, devBoA32Vme);
-epicsExportAddress(A32VME_DSET, devLiA32Vme);
-epicsExportAddress(A32VME_DSET, devLoA32Vme);
-epicsExportAddress(A32VME_DSET, devMbbiA32Vme);
-epicsExportAddress(A32VME_DSET, devMbboA32Vme);
+epicsExportAddress(dset, devAiA32Vme);
+epicsExportAddress(dset, devAoA32Vme);
+epicsExportAddress(dset, devBiA32Vme);
+epicsExportAddress(dset, devBoA32Vme);
+epicsExportAddress(dset, devLiA32Vme);
+epicsExportAddress(dset, devLoA32Vme);
+epicsExportAddress(dset, devMbbiA32Vme);
+epicsExportAddress(dset, devMbboA32Vme);
 
 /**************************************************************************
  **************************************************************************/
