@@ -341,7 +341,7 @@ STATIC long scaler_init(int after)
 	uint32 probeValue = 0;
  
 	Debug(2,"scaler_init(): entry, after = %d\n", after);
-	if (after) return(0);
+	if (after || (vsc_num_cards == 0)) return(0);
 
 	/* allocate scaler_state structures, array of pointers */
 	if (scaler_state == NULL) {
@@ -630,6 +630,11 @@ void scaler_show(int card)
 {
 	volatile char *addr = scaler_state[card]->localAddr;
 	int i, offset;
+
+	if (vsc_num_cards == 0) {
+		printf("scaler_show: No Joerger VSC cards\n");
+		return;
+	}
 
 	printf("scaler_show: card %d %s\n", card, scaler_state[card]->card_exists ? "exists" : "not found");
 	if (!scaler_state[card]->card_exists) return;

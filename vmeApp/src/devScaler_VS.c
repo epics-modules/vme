@@ -174,7 +174,7 @@ struct VS_module_type VS_module_types[14] = {
 	{"VS16D NIM", 16}
 };
 
-STATIC long vs_num_cards = 2;
+STATIC long vs_num_cards = 0;
 STATIC char *vs_addrs = (char *)0xd000;
 STATIC unsigned char vs_InterruptVector = 0;
 STATIC int vs_InterruptLevel = 5;
@@ -230,7 +230,7 @@ STATIC long scalerVS_report(int level)
 {
 	int card;
 
-	if (vs_num_cards <=0) {
+	if (vs_num_cards <= 0) {
 		printf("    No Joerger VSnn scaler cards found.\n");
 	} else {
 		for (card = 0; card < vs_num_cards; card++) {
@@ -397,7 +397,7 @@ STATIC long scalerVS_init(int after)
 	uint32 probeValue = 0;
 
 	Debug(2,"scalerVS_init(): entry, after = %d\n", after);
-	if (after) return(0);
+	if (after || (vs_num_cards == 0)) return(0);
 
 	/* allocate scalerVS_state structures, array of pointers */
 	if (scalerVS_state == NULL) {
@@ -812,10 +812,16 @@ void scalerVS_Setup(int num_cards,	/* maximum number of cards in crate */
 /* debugging function */
 void scalerVS_show(int card, int level)
 {
-	volatile char *addr = scalerVS_state[card]->localAddr;
+	volatile char *addr;
 	int i, num_channels, offset, saveDebug;
 	char module_type[16];
 
+	if (vs_num_cards == 0) {
+		printf("scaler_show: No Joerger VS cards\n");
+		return;
+	}
+
+	addr = scalerVS_state[card]->localAddr;
 	saveDebug = devScaler_VSDebug;
 	devScaler_VSDebug = 0;
 	
