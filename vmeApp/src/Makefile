@@ -42,6 +42,8 @@ vme_SRCS_vxWorks += vmeRecord.c
 vme_SRCS_vxWorks += devBunchClkGen.c
 vme_SRCS_vxWorks += devAoVMI4116.c
 vme_SRCS_vxWorks += devAvme9440.c
+vme_SRCS_vxWorks += devAoAvme9210.c
+vme_SRCS_vxWorks += drvAvme9210.c
 
 # For machine-status board
 vme_SRCS_vxWorks  += devA32Vme.c
