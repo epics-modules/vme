@@ -151,7 +151,7 @@ SCALERDSET devScaler = {
 	scaler_arm,
 	scaler_done
 };
-epicsExportAddress(SCALERDSET, devScaler);
+epicsExportAddress(dset, devScaler);
 
 STATIC int scaler_total_cards;
 STATIC struct scaler_state {

@@ -835,10 +835,10 @@ typedef struct {
 	DEVSUPFUN	read_write;
 } DSET;
 DSET devBiBunchClkGen={ 5, NULL, NULL, initBiRecord, NULL, readBi };
-epicsExportAddress(DSET, devBiBunchClkGen);
+epicsExportAddress(dset, devBiBunchClkGen);
 
 DSET devBoBunchClkGen ={ 5, NULL, NULL, initBoRecord, NULL, writeBo };
-epicsExportAddress(DSET, devBoBunchClkGen);
+epicsExportAddress(dset, devBoBunchClkGen);
 
 typedef struct {
         long            number;
@@ -850,13 +850,13 @@ typedef struct {
         DEVSUPFUN       special_linconv;
 } DSETA;
 DSETA devAoBunchClkGen = {6, NULL, NULL, initAoRecord, NULL, writeAo, specialLinconvAo};
-epicsExportAddress(DSETA, devAoBunchClkGen);
+epicsExportAddress(dset, devAoBunchClkGen);
 
 DSETA devAiBunchClkGen = {6, NULL, NULL, initAiRecord, NULL, readAi, specialLinconvAi};
-epicsExportAddress(DSETA, devAiBunchClkGen);
+epicsExportAddress(dset, devAiBunchClkGen);
 
 DSETA devWfBunchClkGen = {6, NULL, NULL, initWfRecord, NULL, readWf, NULL};
-epicsExportAddress(DSETA, devWfBunchClkGen);
+epicsExportAddress(dset, devWfBunchClkGen);
 
 static struct	paramEntrys{
 	char	*param;
