@@ -46,7 +46,7 @@ Modification Log:
 typedef unsigned int uint32;
 typedef unsigned short uint16;
 
-#if defined(VXWORKSTARGET)
+#ifdef __vxworks
 #include	<vxWorks.h>
 #include	<vme.h>
 #include	<types.h>
@@ -175,11 +175,11 @@ STATIC long scaler_report(int level)
 {
 	int card;
 
-	if (vsc_num_cards <=0) {
+	if ((vsc_num_cards <=0) || (scaler_state[0]->card_exists == 0)) {
 		printf("    No Joerger VSCxx scaler cards found.\n");
 	} else {
 		for (card = 0; card < vsc_num_cards; card++) {
-			if (scaler_state[card]) {
+			if (scaler_state[card] && scaler_state[card]->card_exists) {
 				printf("    Joerger VSC%-2d card %d @ %p, id: %d %s\n",
 					scaler_state[card]->num_channels,
 					card, 
@@ -296,7 +296,6 @@ STATIC int scalerISRSetup(int card)
 {
 	long status;
 	volatile char *addr;
-	volatile unsigned short *p16;
 	int intLevel;
 	
 	Debug(5, "scalerISRSetup: Entry, card #%d\n", card);
@@ -308,7 +307,7 @@ STATIC int scalerISRSetup(int card)
 	status = devConnectInterrupt(intVME, vsc_InterruptVector + card,
 		(void *) &scalerISR, (void *) card);
 	if (!RTN_SUCCESS(status)) {
-		errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n",
+		errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %ld\n",
 			  vsc_InterruptVector + card);
 		return (ERROR);
 	}
@@ -363,10 +362,10 @@ STATIC long scaler_init(int after)
 
 		/* Can we reserve the required block of VME address space? */
 		status = devRegisterAddress(__FILE__, atVMEA32, (size_t)baseAddr,
-			CARD_ADDRESS_SPACE, &localaddr);
+			CARD_ADDRESS_SPACE, (volatile void **)&localaddr);
 		if (!RTN_SUCCESS(status)) {
 			errPrintf(status, __FILE__, __LINE__,
-				"Can't register 0x%x-byte block at address 0x%x\n", CARD_ADDRESS_SPACE, baseAddr);
+				"Can't register 0x%x-byte block at address %p\n", CARD_ADDRESS_SPACE, baseAddr);
 			return (ERROR);
 		}
 
@@ -394,7 +393,11 @@ STATIC long scaler_init(int after)
 		Debug(2,"scaler_init:Local Address=0x%8.8x\n",(int)localaddr);
 		scaler_state[card]->num_channels =  readReg16(addr,MODULE_TYPE_OFFSET) & 0x18;
 		Debug(3,"scaler_init: nchan = %d\n", scaler_state[card]->num_channels);
+		if (scaler_state[card]->num_channels < 8) {
+		    scaler_state[card]->card_exists = 0;
+		    continue;
 
+		}
 		for (i=0; i<MAX_SCALER_CHANNELS; i++) {
 			scaler_state[card]->preset[i] = 0;
 		}
@@ -483,12 +486,12 @@ STATIC long scaler_get_ioint_info(
 STATIC long scaler_reset(int card)
 {
 	volatile char *addr;
-	volatile unsigned short *pdata;
 	int i;
 	uint16 value;
 
 	Debug(5,"scaler_reset: card %d\n", card);
 	if ((card+1) > scaler_total_cards) return(ERROR);
+	if (!scaler_state[card]->card_exists) return(ERROR);
 	addr = scaler_state[card]->localaddr;
 
 	/* disable interrupt */
@@ -522,6 +525,8 @@ STATIC long scaler_read(int card, long *val)
 
 	Debug(8,"scaler_read: card %d\n", card);
 	if ((card+1) > scaler_total_cards) return(ERROR);
+	if (!scaler_state[card]->card_exists) return(ERROR);
+
 	mask = readReg16(scaler_state[card]->localaddr,DIRECTION_OFFSET);
 	for (i=0; i < scaler_state[card]->num_channels; i++, offset+=4) {
 	    preset = scaler_state[card]->preset[i];
@@ -548,6 +553,7 @@ STATIC long scaler_write_preset(int card, int signal, long val)
 	Debug(5,"scaler_write_preset: val = %d\n", (int)val);
 
 	if ((card+1) > scaler_total_cards) return(ERROR);
+	if (!scaler_state[card]->card_exists) return(ERROR);
 	if ((signal+1) > MAX_SCALER_CHANNELS) return(ERROR);
 
 	/* write preset; save a copy in scaler_state */
@@ -583,6 +589,7 @@ STATIC long scaler_arm(int card, int val)
 	Debug(5,"scaler_arm: card %d\n", card);
 	Debug(5,"scaler_arm: val = %d\n", val);
 	if ((card+1) > scaler_total_cards) return(ERROR);
+	if (!scaler_state[card]->card_exists) return(ERROR);
 
 	/* disable interrupt */
 	value = readReg16(addr,IRQ_LEVEL_ENABLE_OFFSET) & 0x7f;
@@ -646,7 +653,8 @@ void scaler_show(int card)
 	char *addr = scaler_state[card]->localaddr;
 	int i, offset;
 
-	printf("scaler_show: card %d\n", card);
+	printf("scaler_show: card %d %s\n", card, scaler_state[card]->card_exists ? "exists" : "not found");
+	if (!scaler_state[card]->card_exists) return;
 	printf("scaler_show: ctrl reg = 0x%x\n", readReg16(addr,CTRL_OFFSET) &0xf);
 	printf("scaler_show: dir reg = 0x%x\n",readReg16(addr,DIRECTION_OFFSET) );
 	printf("scaler_show: irq vector = 0x%x\n",readReg16(addr,STATUS_ID_OFFSET) &0xff);
