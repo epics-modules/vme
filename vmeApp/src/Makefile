@@ -70,7 +70,7 @@ vmeApp_SRCS_vxWorks += vmeVX_registerRecordDeviceDriver.cpp
 vmeApp_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 vmeApp_LIBS += vme
-vmeApp_LIBS += std calc sscan mpf
+vmeApp_LIBS += std calc sscan
 vmeApp_LIBS += seq pv
 vmeApp_LIBS += $(EPICS_BASE_IOC_LIBS)
 
