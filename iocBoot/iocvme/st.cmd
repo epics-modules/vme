@@ -63,21 +63,35 @@ dbLoadRecords("$(VME)/stdApp/Db/vme.db", "P=vme:,Q=vme1")
 # Acromag general purpose Digital I/O
 #dbLoadRecords("$(VME)/stdApp/Db/Acromag_16IO.db", "P=vme:, A=1")
 
-# Acromag AVME9440 setup parameters:
-# devAvem9440Config (ncards,a16base,intvecbase)
-#devAvme9440Config(1,0x0400,0x78)
+# Acromag AVME9440
+#####################################################
+# devAvme9440Config(ncards,a16base,intvec)
+#    ncards  = number of cards
+#    a16base = a16 base address
+#    intvec  = interrupt vector
+# For example:
+#    devAvme9440Config(1, 0x0400, 0x78)
+#####################################################
+# Configure the AVME9440 module
+#devAvme9440Config(1, 0x400, 0x78 )
+#dbLoadRecords("$(VME)/stdApp/Db/Acromag_9440.db","C=0,S=0")
 
-# Bunch-clock generator
+# Bunch Clock Generator (BCG) board (BCG 100)
+#####################################################
+# BunchClkGenConfigure(card, address)
+#   case = card number
+#   base = base address of card
+# For example
+#   BunchClkGenConfigure(0, 0x7000)
+#####################################################
+#BunchClkGenConfigure(0, 0x7000)
 #dbLoadRecords("$(VME)/stdApp/Db/BunchClkGen.db","P=vme:")
 #dbLoadRecords("$(VME)/stdApp/Db/BunchClkGenA.db", "UNIT=vme")
-# hardware configuration
-# example: BunchClkGenConfigure(intCard, unsigned long CardAddress)
-#BunchClkGenConfigure(0, 0x8c00)
 
-# Machine-status board (MRD-100)
+# Machine Status Link (MSL) board (MRD 100)
 #####################################################
 # devAvmeMRDConfig( base, vector, level )                 
-#    base   = base address of MRD-100              
+#    base   = base address of card              
 #    vector = interrupt vector
 #    level  = interrupt level
 # For Example                                     
