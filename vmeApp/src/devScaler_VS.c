@@ -21,11 +21,16 @@ Initial development by:
 
 Modification Log:
 -----------------
-07/01/03	tmm     Development from devScaler.c
-05/17/04	tmm		port to EPICS 3.14 OSI, following Kate Feng's port of
-					devScaler.c
+07/01/03    tmm     Development from devScaler.c
+05/17/04    tmm     port to EPICS 3.14 OSI, following Kate Feng's port of
+                    devScaler.c
+11/17/04    tmm     Enforce min/max count times.  scalerVS_show() prints
+                    software version and local address.  scalerVS_show() and
+                    scalerVS_regShow() check card arg.  Changed
+                    devScaler_VS_trig_retries to 10000 and added
+                    devScaler_VS_trig_retry_report.		
 *******************************************************************************/
-/* version 1.1 */
+#define VERSION 1.2
 
 #ifdef HAS_IOOPS_H
 #include        <basicIoOps.h>
@@ -100,7 +105,8 @@ extern int logMsg(char *fmt, ...);
 #endif
 volatile int devScaler_VSDebug=0;
 volatile int devScaler_VS_check_trig=1;
-volatile int devScaler_VS_trig_retries = 1000;
+volatile int devScaler_VS_trig_retries = 10000;
+volatile int devScaler_VS_trig_retry_report = 100;
 volatile int devScaler_VS_trig_reads = 5;
 
 #define CARD_ADDRESS_SPACE				0x800
@@ -267,7 +273,7 @@ static void writeReg16(volatile char *a16, int offset, uint16 value)
 	out_be16((volatile void*)(a16+offset), value);
 #else
 	volatile uint16 *reg;
-	Debug(10,"devScalerVS:writeReg16: writing 0x%04x to offset 0x%04x\n", value, offset);
+	Debug(16,"devScalerVS:writeReg16: writing 0x%04x to offset 0x%04x\n", value, offset);
     reg = (volatile uint16 *)(a16+offset);
     *reg = value;
 #endif
@@ -283,7 +289,7 @@ static uint16 readReg16(volatile char *a16, int offset)
 
     reg = (volatile uint16 *)(a16+offset);
     value = *reg;
-	Debug(10,"devScalerVS:readReg16: read 0x%04x from offset 0x%04x\n", value, offset);
+	Debug(15,"devScalerVS:readReg16: read 0x%04x from offset 0x%04x\n", value, offset);
     return(value);
 #endif
 }
@@ -295,7 +301,7 @@ static void writeReg32(volatile char *a32, int offset,uint32 value)
 #else
 	volatile uint32 *reg;
 
-	Debug(10,"devScalerVS:writeReg32: writing 0x%08x to offset 0x%04x\n", value, offset);
+	Debug(16,"devScalerVS:writeReg32: writing 0x%08x to offset 0x%04x\n", value, offset);
     reg = (volatile uint32 *)(a32+offset);
     *reg = value;
 #endif
@@ -313,7 +319,7 @@ static uint32 readReg32(volatile char *a32, int offset)
 
     reg = (volatile uint32 *)(a32+offset);
     value = *reg;
-	Debug(20,"devScalerVS:readReg32: read 0x%08x from offset 0x%04x\n", value, offset);
+	Debug(17,"devScalerVS:readReg32: read 0x%08x from offset 0x%04x\n", value, offset);
     return(value);
 #endif
 }
@@ -326,8 +332,9 @@ STATIC void scalerEndOfGateISR(int card)
 #ifdef vxWorks
 	if (devScaler_VSDebug >= 5) logMsg("scalerEndOfGateISR: entry\n");
 #endif
-	if ((card+1) > scalerVS_total_cards) return;
-	if ((card+1) <= scalerVS_total_cards) {
+	if (card >= scalerVS_total_cards) {
+		return;
+	} else {
 		/* tell record support the hardware is done counting */
 		scalerVS_state[card]->done = 1;
 
@@ -347,7 +354,7 @@ STATIC int scalerEndOfGateISRSetup(int card)
 	volatile uint16 u16;
 
 	Debug(5, "scalerEndOfGateISRSetup: Entry, card #%d\n", card);
-	if ((card+1) > scalerVS_total_cards) return(ERROR);
+	if (card >= scalerVS_total_cards) return(ERROR);
 	addr = scalerVS_state[card]->localAddr;
 
 	status = devConnectInterruptVME(vs_InterruptVector + card,
@@ -478,8 +485,7 @@ STATIC long scalerVS_init_record(struct scalerRecord *pscal)
 	CALLBACK *pcallbacks;
 
 	/* out must be an VME_IO */
-	switch (pscal->out.type)
-	{
+	switch (pscal->out.type) {
 	case (VME_IO) : break;
 	default:
 		recGblRecordError(S_dev_badBus,(void *)pscal,
@@ -488,15 +494,13 @@ STATIC long scalerVS_init_record(struct scalerRecord *pscal)
 	}
 
 	Debug(5,"scalerVS_init_record: card %d\n", card);
-	if (!scalerVS_state[card]->card_exists)
-	{
+	if (!scalerVS_state[card]->card_exists) {
 		recGblRecordError(S_dev_badCard,(void *)pscal,
 		    "devScaler_VS (init_record) card does not exist!");
 		return(S_dev_badCard);
     }
 
-	if (scalerVS_state[card]->card_in_use)
-	{
+	if (scalerVS_state[card]->card_in_use) {
 		recGblRecordError(S_dev_badSignal,(void *)pscal,
 		    "devScaler_VS (init_record) card already in use!");
 		return(S_dev_badSignal);
@@ -521,7 +525,7 @@ STATIC long scalerVS_init_record(struct scalerRecord *pscal)
 STATIC long scalerVS_reset(int card)
 {
 	Debug(5,"scalerVS_reset: card %d\n", card);
-	if ((card+1) > scalerVS_total_cards) return(ERROR);
+	if (card >= scalerVS_total_cards) return(ERROR);
 
 	/* reset board */
 	writeReg16(scalerVS_state[card]->localAddr, MASTER_RESET_OFFSET, 0);
@@ -542,7 +546,7 @@ STATIC long scalerVS_read(int card, long *val)
 	int i, offset;
 
 	Debug(8,"scalerVS_read: card %d\n", card);
-	if ((card+1) > scalerVS_total_cards) return(ERROR);
+	if (card >= scalerVS_total_cards) return(ERROR);
 	addr = scalerVS_state[card]->localAddr;
 
 	/* any write clocks all transfer registers */
@@ -551,7 +555,7 @@ STATIC long scalerVS_read(int card, long *val)
 	for (i=0, offset=READ_XFER_REG_OFFSET; i < scalerVS_state[card]->num_channels; i++, offset+=4) {
 		val[i] = readReg32(addr,offset);
 		if (i==0) {
-			Debug(10,"scalerVS_read: ...(chan %d = %ld)\n", i, val[i]);
+			Debug(11,"scalerVS_read: ...(chan %d = %ld)\n", i, val[i]);
 		} else {
 			Debug(20,"scalerVS_read: ...(chan %d = %ld)\n", i, val[i]);
 		}
@@ -594,8 +598,8 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 	if (devScaler_VSDebug >= 5)
 		printf("scalerVS_write_preset: card %d, signal %d, val %ld\n", card, signal, val);
 
-	if ((card+1) > scalerVS_total_cards) return(ERROR);
-	if ((signal+1) > MAX_SCALER_CHANNELS) return(ERROR);
+	if (card >= scalerVS_total_cards) return(ERROR);
+	if (signal >= MAX_SCALER_CHANNELS) return(ERROR);
 
 	addr = scalerVS_state[card]->localAddr;
 	callbackGetUser(pscal, scalerVS_state[card]->pcallback);
@@ -621,7 +625,9 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 	gate_time = val / pscal->freq;
 	/*
 	 * find largest gate-clock frequency that will allow us to specify the
-	 * requested count time with the 16-bit gate-preset register
+	 * requested count time with the 16-bit gate-preset register.  Note that
+	 * the scaler counts for one extra clock cycle, so we allow 0xffff + 1
+	 * = 65536 cycles.
 	 */
 	gate_freq_ix = 0;
 	do {
@@ -631,8 +637,21 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 			printf("scalerVS_write_preset: try f=%.0f, n=%.0f, ix=%d\n",
 				gate_freq, gate_periods, gate_freq_ix);	
 	} while ((gate_periods > 65536) && (++gate_freq_ix < GATE_FREQ_TABLE_LENGTH));
+
+	if ((gate_periods < 4) && (gate_freq_ix == 0)) {
+		/* The scaler can't count this short.  Just count as short as possible */
+		printf("devScaler_VS: min. counting time is 4E-7 seconds.\n");
+	}
+
 	/* docs recommend min of 4 periods; we're going to subtract 1 before writing. */
 	if (gate_periods < 5) gate_periods = 5;
+
+	if ((gate_periods > 65536) && (gate_freq_ix >= GATE_FREQ_TABLE_LENGTH)) {
+		/* The scaler can't count this long.  Just count as long as possible */
+		printf("devScaler_VS: max. counting time is 655.36 seconds.\n");
+		gate_periods = 65536;
+		gate_freq_ix = GATE_FREQ_TABLE_LENGTH - 1;
+	}
 
 	/* set clock frequency, and specify that software should trigger gate-start */
 	writeReg16(addr, CLOCK_TRIG_MODE_OFFSET, gate_freq_bits[gate_freq_ix] | 0x10);
@@ -672,7 +691,7 @@ STATIC long scalerVS_arm(int card, int val)
 	if (devScaler_VSDebug >= 1)
 		printf("scalerVS_arm: card %d, val %d\n", card, val);
 
-	if ((card+1) > scalerVS_total_cards) return(ERROR);
+	if (card >= scalerVS_total_cards) return(ERROR);
 	addr = scalerVS_state[card]->localAddr;
 	callbackGetUser(pscal, scalerVS_state[card]->pcallback);
 
@@ -741,8 +760,10 @@ STATIC long scalerVS_arm(int card, int val)
 					}
 				}
 			}
-			if (retry && (i==devScaler_VS_trig_retries)) {
+			if (retry) {
 				printf("scalerVS_arm: %d trigger attempts apparently failed\n", i);
+			} else if (i >= devScaler_VS_trig_retry_report) {
+				Debug(1,"scalerVS_arm: trigger succeeded after %d retries.\n", i);
 			}
 		} else {
 			writeReg16(addr, TRIG_GATE_OFFSET, 1); /* any write triggers gate */
@@ -780,7 +801,7 @@ STATIC long scalerVS_arm(int card, int val)
 ****************************************************/
 STATIC long scalerVS_done(int card)
 {
-	if ((card+1) > scalerVS_total_cards) return(ERROR);
+	if (card >= scalerVS_total_cards) return(ERROR);
 
 	if (scalerVS_state[card]->done) {
 		/* clear hardware-done flag */
@@ -816,16 +837,17 @@ void scalerVS_show(int card, int level)
 	int i, num_channels, offset, saveDebug;
 	char module_type[16];
 
-	if (vs_num_cards == 0) {
-		printf("scaler_show: No Joerger VS cards\n");
-		return;
-	}
+	printf("scalerVS_show: software version: %f\n", VERSION);
+	printf("scalerVS_show: %ld Joerger VS cards in use.\n", vs_num_cards);
+
+	if ((vs_num_cards == 0) || (card >= vs_num_cards)) return;
 
 	addr = scalerVS_state[card]->localAddr;
 	saveDebug = devScaler_VSDebug;
 	devScaler_VSDebug = 0;
 	
 	printf("scalerVS_show: card %d\n", card);
+	printf("scalerVS_show: local address %p\n", addr);
 	printf("scalerVS_show: control reg = 0x%x\n", readReg16(addr,CTRL_OFFSET) & 0x3);
 	printf("scalerVS_show: status reg = 0x%x\n", readReg16(addr,STATUS_OFFSET) & 0x1ff);
 	printf("scalerVS_show: irq level/enable = 0x%x\n", readReg16(addr,IRQ_SETUP_OFFSET) & 0xfff);
@@ -854,11 +876,17 @@ void scalerVS_show(int card, int level)
 
 void scalerVS_regShow(int card, int level)
 {
-	volatile char *addr = scalerVS_state[card]->localAddr;
+	volatile char *addr;
 	volatile uint16 stat, ctrl, a32_1, a32_0, irq, clkt, gate, ref;
 	volatile unsigned char irq1, irq2, irq3;
 	int saveDebug;
 
+	if ((vs_num_cards == 0) || (card >= vs_num_cards)) {
+		printf("scalerVS_regShow: no such card.\n");
+		return;
+	}
+
+	addr = scalerVS_state[card]->localAddr;
 	saveDebug = devScaler_VSDebug;
 	devScaler_VSDebug = 0;
 
