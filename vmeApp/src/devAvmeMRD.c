@@ -67,15 +67,10 @@
 
  =============================================================================
  History:
- Author: Ned D. Arnold, 97-11-21
+ Author: Ned D. Arnold, 97-11-21 (devA32VME)
  -----------------------------------------------------------------------------
- 98-01-23   NDA   Initially functional.
- 98-02-25   MR    Modified ai and ao to support 2's complement.
- 98-07-22   MR    Fixed Param field to accomadate both uni and bi polar
-                  inputs and outputs (AI, AO records).
- 98-10-06   NDA   Fixed a bug with li,lo,ai,ao where sum of (bit + numbits) is
-                  > MAX_ACTIVE_BITS.
- 04-12-17   DMK   Reworked driver for clarity and efficiency.
+ 22-12-17   DMK   Taken from the existing devA32Vme device support. Reworked
+                  driver for clarity and efficiency.
  -----------------------------------------------------------------------------
 
 -*/
