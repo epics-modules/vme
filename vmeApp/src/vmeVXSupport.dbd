@@ -9,6 +9,7 @@ include "vmeRecord.dbd"
 
 # vxWorks dependent only because libCom doesn't yet have OSI devLib
 device(scaler,VME_IO,devScaler,"Joerger VSC8/16")
+device(scaler,VME_IO,devScaler_VS,"Joerger VS")
 
 # Varoc SSI encoder interface board
 device(ai,VME_IO,devAiVaroc,"ESRF Varoc SSI Encoder Iface")
