@@ -50,6 +50,15 @@ device(ai,VME_IO,devIK320GroupAi,"Heidenhain IK320 Group")
 # VMI4116 16-bit D/A converter
 device(ao,VME_IO,devAoVMI4116,"VMIVME-4116")
 
+# Acromag 9210
+device(ao,VME_IO,devAoAvme9210,"AVME-9210")
+
+# Acromag 9440
+device(bi,VME_IO,devBiAvme9440,"AVME9440 I")
+device(bo,VME_IO,devBoAvme9440,"AVME9440 O")
+device(mbbi,VME_IO,devMbbiAvme9440,"AVME9440 I")
+device(mbbo,VME_IO,devMbboAvme9440,"AVME9440 O")
+
 ################
 # DRIVER SUPPORT
 ################
@@ -57,6 +66,8 @@ device(ao,VME_IO,devAoVMI4116,"VMIVME-4116")
 driver(drvBunchClkGen)
 # Heidenhain IK320 (Till Straumann/BESSY)
 driver(drvIK320)
+# Acromag 9210
+driver(drvAvme9210)
 
 registrar(devHPLaserAxis_Register)
 
