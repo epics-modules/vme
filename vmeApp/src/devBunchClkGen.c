@@ -125,7 +125,7 @@ drvBunchClkGen_drvet drvBunchClkGen={
   drvIoReport,    
   drvInitCard
 };
-epicsExportAddress(drvBunchClkGen_drvet, drvBunchClkGen);
+epicsExportAddress(drvet, drvBunchClkGen);
 
 
 static char	*drvName="drvBunchClkGen";

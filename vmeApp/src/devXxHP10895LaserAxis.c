@@ -189,7 +189,7 @@ devBiHP10895LaserAxis_dset devBiHP10895LaserAxis = {
 	read_bi
 };
 
-epicsExportAddress(devBiHP10895LaserAxis_dset, devBiHP10895LaserAxis);
+epicsExportAddress(dset, devBiHP10895LaserAxis);
 
 /* Create the DSET for devBoHP10895LaserAxis */
 typedef struct {
@@ -210,7 +210,7 @@ devBoHP10895LaserAxis_dset devBoHP10895LaserAxis = {
 	write_bo
 };
 
-epicsExportAddress(devBoHP10895LaserAxis_dset, devBoHP10895LaserAxis);
+epicsExportAddress(dset, devBoHP10895LaserAxis);
 
 /* Create the DSET for devMbbiHP10895LaserAxis */
 typedef struct {
@@ -231,7 +231,7 @@ devMbbiHP10895LaserAxis_dset devMbbiHP10895LaserAxis = {
 	read_mbbi
 };
 
-epicsExportAddress(devMbbiHP10895LaserAxis_dset, devMbbiHP10895LaserAxis);
+epicsExportAddress(dset, devMbbiHP10895LaserAxis);
 
 /* Create the DSET for devMbboHP10895LaserAxis */
 typedef struct {
@@ -252,7 +252,7 @@ devMbboHP10895LaserAxis_dset devMbboHP10895LaserAxis = {
 	write_mbbo
 };
 
-epicsExportAddress(devMbboHP10895LaserAxis_dset, devMbboHP10895LaserAxis);
+epicsExportAddress(dset, devMbboHP10895LaserAxis);
 
 /* Create the DSET for devLiHP10895LaserAxis */
 typedef struct {
@@ -273,7 +273,7 @@ devLiHP10895LaserAxis_dset devLiHP10895LaserAxis = {
 	read_li
 };
 
-epicsExportAddress(devLiHP10895LaserAxis_dset, devLiHP10895LaserAxis);
+epicsExportAddress(dset, devLiHP10895LaserAxis);
 
 /* Create the DSET for devLoHP10895LaserAxis */
 typedef struct {
@@ -294,7 +294,7 @@ devLoHP10895LaserAxis_dset devLoHP10895LaserAxis = {
 	write_lo
 };
 
-epicsExportAddress(devLoHP10895LaserAxis_dset, devLoHP10895LaserAxis);
+epicsExportAddress(dset, devLoHP10895LaserAxis);
 
 struct readHP10895 {
 	volatile unsigned short Status;

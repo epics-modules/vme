@@ -1,4 +1,4 @@
-/* $Id: devIK320.c,v 1.2 2003-12-10 21:41:17 mooney Exp $ */
+/* $Id: devIK320.c,v 1.3 2004-05-12 01:14:46 rivers Exp $ */
 
 /* DISCLAIMER: This software is provided `as is' and without _any_ kind of
  *             warranty. Use it at your own risk - I won't be responsible
@@ -12,6 +12,9 @@
  * Author: Till Straumann (PTB, 1999)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2003/12/10 21:41:17  mooney
+ * Converted to 3.14
+ *
  * Revision 1.1.1.1  2001/07/03 20:05:27  sluiter
  * Creating
  *
@@ -179,7 +182,7 @@ devIK320Funct_dset devIK320Funct = {
 	NULL,
 	ik320WriteFunct
 };
-epicsExportAddress(devIK320Funct_dset, devIK320Funct);
+epicsExportAddress(dset, devIK320Funct);
 
 typedef struct {
 	long		number;
@@ -197,7 +200,7 @@ devIK320Dir_dset devIK320Dir = {
 	NULL,
 	ik320WriteMbboSync,
 };
-epicsExportAddress(devIK320Dir_dset, devIK320Dir);
+epicsExportAddress(dset, devIK320Dir);
 
 typedef struct {
 	long		number;
@@ -215,7 +218,7 @@ devIK320ModeX3_dset devIK320ModeX3 = {
 	NULL,
 	ik320WriteMbboSync,
 };
-epicsExportAddress(devIK320ModeX3_dset, devIK320ModeX3);
+epicsExportAddress(dset, devIK320ModeX3);
 
 typedef struct DevIK320AiRec_ {
 	IK320Driver	drv;
@@ -245,7 +248,7 @@ devIK320Ai_dset devIK320Ai = {
 	ik320ReadAi,
 	NULL
 };
-epicsExportAddress(devIK320Ai_dset, devIK320Ai);
+epicsExportAddress(dset, devIK320Ai);
 
 typedef struct DevIK320GroupAiRec_ {
 	CALLBACK cbk;
@@ -282,7 +285,7 @@ devIK320GroupAi_dset devIK320GroupAi = {
 	ik320ReadGroupAi,
 	NULL
 };
-epicsExportAddress(devIK320GroupAi_dset, devIK320GroupAi);
+epicsExportAddress(dset, devIK320GroupAi);
 
 /*
  * type definitions for the stringout that supports
@@ -368,7 +371,7 @@ devIK320Parm_dset devIK320Parm = {
 	NULL,
 	ik320WriteParm,
 };
-epicsExportAddress(devIK320Parm_dset, devIK320Parm);
+epicsExportAddress(dset, devIK320Parm);
 
 /* table of all groups; since there are few,
  * we keep a static table.
