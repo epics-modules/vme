@@ -5,7 +5,7 @@
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
 #If using the sequencer, point SNCSEQ at its top directory:
-SNCSEQ=/home/oxygen/DKLINE/EPICS/synApps/support/seq/2-0-8
+SNCSEQ=/home/oxygen/DKLINE/EPICS/synApps/support/seq/2-0-10
 
 # For transform, etc. records
 CALC=/home/oxygen/DKLINE/EPICS/synApps/support/calc/2-3
@@ -17,10 +17,10 @@ SSCAN=/home/oxygen/DKLINE/EPICS/synApps/support/sscan/2-3
 STD=/home/oxygen/DKLINE/EPICS/synApps/support/std/2-3
 
 # stdSupport has some things that require ASYN
-ASYN=/home/oxygen/DKLINE/EPICS/synApps/support/asyn/1-2
+ASYN=/home/oxygen/DKLINE/EPICS/synApps/support/asyn/4-2
 
 # EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=/home/oxygen/DKLINE/EPICS/base-3.14.6
+EPICS_BASE=/home/oxygen/DKLINE/EPICS/base
 
 #Capfast users may need the following definitions
 #CAPFAST_TEMPLATES=
