@@ -1,65 +1,65 @@
-/* devBunchClkGen.c -  */
-/* SR Bunch Clock Generator  */
-/*
- * Author:      Frank Lenkszus
- * Date:        11/14/95
- *
- *      Experimental Physics and Industrial Control System (EPICS)
-*/
-/*
-*****************************************************************
-                          COPYRIGHT NOTIFICATION
-*****************************************************************
+/*+ devBunchClkGen.c
 
-THE FOLLOWING IS A NOTICE OF COPYRIGHT, AVAILABILITY OF THE CODE,
-AND DISCLAIMER WHICH MUST BE INCLUDED IN THE PROLOGUE OF THE CODE
-AND IN ALL SOURCE LISTINGS OF THE CODE.
+                          Argonne National Laboratory
+                            APS Operations Division
+                     Beamline Controls and Data Acquisition
 
-(C)  COPYRIGHT 1995 UNIVERSITY OF CHICAGO
+                         BCG-100 Driver / Device Support
 
-Argonne National Laboratory (ANL), with facilities in the States of
-Illinois and Idaho, is owned by the United States Government, and
-operated by the University of Chicago under provision of a contract
-with the Department of Energy.
 
-Portions of this material resulted from work developed under a U.S.
-Government contract and are subject to the following license:  For
-a period of five years from March 30, 1995, the Government is
-granted for itself and others acting on its behalf a paid-up,
-nonexclusive, irrevocable worldwide license in this computer
-software to reproduce, prepare derivative works, and perform
-publicly and display publicly.  With the approval of DOE, this
-period may be renewed for two additional five year periods.
-Following the expiration of this period or periods, the Government
-is granted for itself and others acting on its behalf, a paid-up,
-nonexclusive, irrevocable worldwide license in this computer
-software to reproduce, prepare derivative works, distribute copies
-to the public, perform publicly and display publicly, and to permit
-others to do so.
 
-*****************************************************************
-                                DISCLAIMER
-*****************************************************************
+ -----------------------------------------------------------------------------
+                                COPYRIGHT NOTICE
+ -----------------------------------------------------------------------------
+   Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+      National Laboratory.
+   Copyright (c) 2002 The Regents of the University of California, as
+      Operator of Los Alamos National Laboratory.
+   Synapps Versions 4-5
+   and higher are distributed subject to a Software License Agreement found
+   in file LICENSE that is included with this distribution.
+ -----------------------------------------------------------------------------
 
-NEITHER THE UNITED STATES GOVERNMENT NOR ANY AGENCY THEREOF, NOR
-THE UNIVERSITY OF CHICAGO, NOR ANY OF THEIR EMPLOYEES OR OFFICERS,
-MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LEGAL
-LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS, OR
-USEFULNESS OF ANY INFORMATION, APPARATUS, PRODUCT, OR PROCESS
-DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY
-OWNED RIGHTS.
+ Description
+   This module provides device support for the BCG-100 VMEbus module. The
+   module is found in the A16/D16 VME address space and supports the ai, ao,
+   bi, bo, and waveform record types.
 
-*****************************************************************
-LICENSING INQUIRIES MAY BE DIRECTED TO THE INDUSTRIAL TECHNOLOGY
-DEVELOPMENT CENTER AT ARGONNE NATIONAL LABORATORY (708-252-2000).
-*/
+   Diagnostic messages can be output by setting the variables to the following
+   values:
+      drvBunchClkGenDebug  = 0,  outputs no messages.
+      drvBunchClkGenDebug  > 0,  outputs driver messages.
 
-/*
-* Modification Log:
- * -----------------
- * .01   11-14-95    frl   initial
- * .02   01-22-05    DMK   reformatted for clarity
- */
+      devBunchClkGenDebug  = 0,  outputs no messages.
+      devBunchClkGenDebug  > 0,  outputs device messages.
+
+   The method BunchClkGenConfigure is called from the startup script to specify the
+   card number and VME base address. It must be called prior to iocInit(). Below is
+   the calling sequence:
+
+      BunchClkGenConfigure( card, base )
+
+      Where:
+         card     - Card number.
+         base     - VME A16/D16 address space.
+
+      For example:
+         BunchClkGenConfigure(0, 0x7000)
+
+ Developer notes:
+   1) More formatting and commenting should be done as well as porting the
+      driver / device support to EPICS base >= 3.14.6.
+
+ =============================================================================
+ History:
+ Author: Frank Lenkszus
+ -----------------------------------------------------------------------------
+ 14-11-95   FRL   - Initial.
+ 22-01-05   DMK   - Took over support for driver / device support.
+                  - Reformatted and documented for clarity.
+ -----------------------------------------------------------------------------
+
+-*/
 
 #include <vxWorks.h>
 #include <types.h>
@@ -75,6 +75,7 @@ DEVELOPMENT CENTER AT ARGONNE NATIONAL LABORATORY (708-252-2000).
 #include <errno.h>
 #include <taskLib.h>
 #include <drvSup.h>
+#include <devSup.h>
 #include <devLib.h>
 #include <dbDefs.h>
 #include <dbAccess.h>
@@ -98,9 +99,8 @@ DEVELOPMENT CENTER AT ARGONNE NATIONAL LABORATORY (708-252-2000).
 #define FREG_WRITELONG  ( 6 )
 
 int drvBunchClkGenDebug = 0;
-epicsExportAddress(int, drvBunchClkGenDebug);
-
 static int* drvDebug = &drvBunchClkGenDebug;
+epicsExportAddress(int, drvBunchClkGenDebug);
 
 static long drvInitCard();
 static long drvIoReport(int);
@@ -112,14 +112,7 @@ static long drvCopyRam(short);
 static long drvClearRam(short);
 
 /* Epics driver entry point table */
-typedef struct
-{
-   long        number;
-   DRVSUPFUN   report;
-   DRVSUPFUN   init;
-} drvBunchClkGen_drvet;
-
-drvBunchClkGen_drvet drvBunchClkGen = { 2, drvIoReport, drvInitCard };
+drvet drvBunchClkGen = { 2, drvIoReport, drvInitCard };
 epicsExportAddress(drvet, drvBunchClkGen);
 
 static char* drvName = "drvBunchClkGen";
@@ -171,7 +164,14 @@ static struct drvPrivate Card[MAX_NUM_CARDS];
 static struct drvPrivate* dio = Card;
 
 
-/*************************************************************************/
+/****************************************************************************
+ *
+ * Begin public interface
+ *
+ ****************************************************************************/
+
+
+/****************************************************************************/
 int BunchClkGenConfigure( int Card, ULONG CardAddress )
 {
 char *xname = "BunchClkGenConfigure";
@@ -203,7 +203,7 @@ USHORT junk;
       return( ERROR );
    }
 
-   if( vxMemProbe( (char*)dio[Card].dptr, READ, 2, (char*)&junk) != OK )
+   if( vxMemProbe( (char*)dio[Card].dptr, READ, 2, (char*)&junk ) != OK )
    {
       dio[Card].dptr = NULL;
       errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s: vxMemProbe failed for Card %d", xname, Card );
@@ -223,9 +223,11 @@ USHORT junk;
 
 /******************************************************************************
  *
- * Initialize all cards controlled by the driver.
+ * Begin driver support
  *
- ******************************************************************************/
+ *****************************************************************************/
+
+/****************************************************************************/
 static long drvInitCard( )
 {
 long status = 0;
@@ -269,14 +271,14 @@ USHORT val;
 } /* drvInitCard() */
 
 
-/*************************************************************************/
+/****************************************************************************/
 static long drvIoReport( int level )
 {
 int i;
 
    for( i = 0; i < MAX_NUM_CARDS; i++ )
    {
-      if( dio[i].dptr)
+      if( dio[i].dptr )
       {
          printf( "%s:\tcard %d\tcsr = 0x%x, P0 delay = 0x%x, fine Delay = 0x%x\n",
                   drvName, i,
@@ -290,7 +292,7 @@ int i;
 } /* drvIoReport() */
 
 
-/***************************************************************************/
+/****************************************************************************/
 static long check_card( USHORT card, USHORT signal )
 {
 
@@ -314,7 +316,7 @@ static long check_card( USHORT card, USHORT signal )
       return( ERROR );
    }
 
-   if( !dio[card].dptr )
+   if( dio[card].dptr == NULL )
    {
       if( *drvDebug )
       {
@@ -346,11 +348,11 @@ ULONG status;
    switch( funct )
    {
    case FREG_WRITE:
-      *((USHORT *)dio[card].dptr + signal) = *pp1;
+      *((USHORT*)dio[card].dptr + signal) = *pp1;
       break;
 
    case FREG_WRITELONG:
-      *((USHORT*)dio[card].dptr + signal)     = (USHORT)*pp1;
+      *((USHORT*)dio[card].dptr + signal)     = (USHORT)(*pp1);
       *((USHORT*)dio[card].dptr + signal + 1) = (USHORT)(*pp1 >> 16);
       break;
 
@@ -393,7 +395,7 @@ ULONG status;
       break;
 
    case FREG_READLONG:
-      val = *((USHORT*)dio[card].dptr + signal);
+      val  = *((USHORT*)dio[card].dptr + signal);
       val1 = *((USHORT*)dio[card].dptr + signal + 1);
       *pp1 = (((ULONG)val1) << 16) + val;
       break;
@@ -465,7 +467,7 @@ ULONG status;
  *
  ***************************************************************************/
 static long drvWriteReadBit(
-                              short card,     /* */
+                              short card,     /* card number */
                               short signal,   /* signal == register # */
                               USHORT mask,    /* mask */
                               USHORT value,   /* value to write */
@@ -522,7 +524,7 @@ USHORT csr;
    dio[card].dptr->reg.w.csr     = csr;
    epicsMutexUnlock( dio[card].lock );
 
-   if( *drvDebug > 10 )
+   if( *drvDebug )
    {
       errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "%s:drvWriteRamLoc: address = %d, val = 0x%x\n", drvName, location, val );
    }
@@ -934,7 +936,7 @@ static int drvGetPwrOnStatus( short card )
 
 /******************************************************************************
  *
- *  "Device"  Support stuff follows
+ * Begin device support
  *
  *****************************************************************************/
 
@@ -966,6 +968,7 @@ static int drvGetPwrOnStatus( short card )
 
 int devBunchClkGenDebug = 0;
 static int* devDebug = &devBunchClkGenDebug;
+epicsExportAddress(int, devBunchClkGenDebug);
 
 static long initBiRecord(struct biRecord*);
 static long readBi(struct biRecord*);
@@ -984,7 +987,7 @@ static long specialLinconvAi(struct aiRecord*, int);
 static long initWfRecord(struct waveformRecord*);
 static long readWf(struct waveformRecord*);
 
-typedef struct
+typedef struct DSET
 {
    long        number;
    DEVSUPFUN   report;
@@ -1000,7 +1003,7 @@ DSET devBoBunchClkGen = { 5, NULL, NULL, initBoRecord, NULL, writeBo };
 epicsExportAddress(dset, devBiBunchClkGen);
 epicsExportAddress(dset, devBoBunchClkGen);
 
-typedef struct
+typedef struct DSETA
 {
    long        number;
    DEVSUPFUN   report;
@@ -1103,7 +1106,7 @@ USHORT val;
 ULONG val1;
 char* xname="initParam";
 
-   if( parm == NULL)
+   if( parm == NULL )
    {
       if( *devDebug )
       {
@@ -1124,12 +1127,12 @@ char* xname="initParam";
       }
       else if( *parm >= 'a' && *parm <= 'f' )
       {
-         *pval = val << ( *parm - 'a' + 10 );
+         *pval = val << (*parm - 'a' + 10);
          return( OK );
       }
-      else if( *parm >= 'A' && *parm <= 'F')
+      else if( *parm >= 'A' && *parm <= 'F' )
       {
-         *pval = val << ( *parm - 'A' + 10 );
+         *pval = val << (*parm - 'A' + 10);
          return( OK );
       }
       else
@@ -1181,14 +1184,14 @@ ULONG lval1;
       break;
 
    default:
-      recGblRecordError( S_dev_badInpType, (void*)pbi,"devBiBunchClkGen (initBiRecord) : not a VME device!!!" );
+      recGblRecordError( S_dev_badInpType, (void*)pbi,"devBiBunchClkGen (initBiRecord): not a VME device!!!" );
       return( S_dev_badInpType );
    }
 
    /* call driver so that it configures card */
    if( (status = check_card( pvmeio->card, pvmeio->signal )) != OK )
    {
-      recGblRecordError( S_dev_badCard, (void*)pbi, "devBiBunchClkGen (initBiRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badCard, (void*)pbi, "devBiBunchClkGen(initBiRecord): init failed!!!" );
       return( S_dev_badCard );
    }
 
@@ -1200,7 +1203,7 @@ ULONG lval1;
          errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen: card = 0x%x param = %s (BAD PARAM)\n", pvmeio->card, pvmeio->parm );
       }
 
-      recGblRecordError( S_dev_badSignal, (void*)pbi, "devBiBunchClkGen (initBiRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badSignal, (void*)pbi, "devBiBunchClkGen(initBiRecord): init failed!!!" );
       return( S_dev_badSignal );
    }
 
@@ -1214,7 +1217,7 @@ ULONG lval1;
          errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen: card = %d  sig = %d (Malloc failed)\n", pvmeio->card, pvmeio->signal );
       }
 
-      recGblRecordError( S_dev_noMemory, (void*)pbi, "devBiBunchClkGen (initBiRecord) : init failed!!!" );
+      recGblRecordError( S_dev_noMemory, (void*)pbi, "devBiBunchClkGen(initBiRecord): init failed!!!" );
       return( S_dev_noMemory );
    }
 
@@ -1240,7 +1243,7 @@ ULONG lval1;
          errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen: vxMemProbe failed!!! card = 0x%x, sig = 0x%x\n", pvmeio->card, pvmeio->signal );
       }
 
-      recGblRecordError( S_dev_badSignal, (void*)pbi, "devBiBunchClkGen (initBiRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badSignal, (void*)pbi, "devBiBunchClkGen(initBiRecord): init failed!!!" );
       pbi->dpvt = NULL;
 
       return( S_dev_badSignal );
@@ -1258,7 +1261,7 @@ ULONG value;
 struct vmeio* pvmeio = (struct vmeio*)&(pbi->inp.value);
 struct PvtBi* ptr;
 
-   if( !pbi->dpvt )
+   if( pbi->dpvt == NULL )
    {
       return( S_dev_NoInit );
    }
@@ -1270,7 +1273,7 @@ struct PvtBi* ptr;
 
       if( *devDebug )
       {
-         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen (readBi) : read Error, card = %d, sig = %d", pvmeio->card, pvmeio->signal );
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBiBunchClkGen(readBi): read Error, card = %d, sig = %d", pvmeio->card, pvmeio->signal );
       }
 
       recGblSetSevr( pbi, READ_ALARM, INVALID_ALARM );
@@ -1279,9 +1282,9 @@ struct PvtBi* ptr;
 
    pbi->rval = value & pbi->mask;
 
-   if( *devDebug >= 10 )
+   if( *devDebug )
    {
-      printf( "devBunchClkGen: card = %d, signal = %d, raw read value = 0x%lx\n", pvmeio->card, ptr->signal,  pbi->rval );
+      printf( "devBiBunchClkGen(readBi): card = %d, signal = %d, raw read value = 0x%lx\n", pvmeio->card, ptr->signal,  pbi->rval );
    }
 
    return( 0 );
@@ -1315,7 +1318,7 @@ long status;
    /* call driver so that it configures card */
    if( (status = check_card( pvmeio->card, pvmeio->signal )) != OK )
    {
-      recGblRecordError( S_dev_badCard,(void*)pbo, "devBoBunchClkGen (initBorecord) : init failed!!!" );
+      recGblRecordError( S_dev_badCard,(void*)pbo, "devBoBunchClkGen(initBorecord): init failed!!!" );
       return( S_dev_badCard );
    }
 
@@ -1327,7 +1330,7 @@ long status;
          errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBoBunchClkGen: card = %d Sig = %d  PARM = %s (BAD PARAM)\n", pvmeio->card, pvmeio->signal,  pvmeio->parm );
       }
 
-      recGblRecordError( S_dev_badSignal,(void*)pbo, "devBoBunchClkGen (initBoRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badSignal,(void*)pbo, "devBoBunchClkGen(initBoRecord): init failed!!!" );
       return( S_dev_badSignal );
    }
 
@@ -1346,16 +1349,16 @@ long status;
          errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBoBunchClkGen: card = %d  sig = %d (Malloc failed)\n", pvmeio->card, pvmeio->signal );
       }
 
-      recGblRecordError( S_dev_noMemory,(void*)pbo, "devBoBunchClkGen (initBoRecord) : init failed!!!" );
+      recGblRecordError( S_dev_noMemory,(void*)pbo, "devBoBunchClkGen(initBoRecord): init failed!!!" );
       return( S_dev_noMemory );
    }
 
-   ptr = (struct PvtBo*)pbo->dpvt;
+   ptr       = (struct PvtBo*)pbo->dpvt;
    ptr->mask = (USHORT)(paramTbl.pentry[lval].mask);
 
    if( pvmeio->signal < NUMCHANNELS  )
    {
-      ptr->signal = (paramTbl.pentry[lval].signal + pvmeio->signal * CHANNELREGS );
+      ptr->signal = (paramTbl.pentry[lval].signal + pvmeio->signal * CHANNELREGS);
    }
    else
    {
@@ -1372,7 +1375,7 @@ long status;
          errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBoBunchClkGen: vxMemProbe failed!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
       }
 
-      recGblRecordError( S_dev_badSignal, (void*)pbo, "devBoBunchClkGen (initBorecord) : init failed!!!" );
+      recGblRecordError( S_dev_badSignal, (void*)pbo, "devBoBunchClkGen(initBorecord): init failed!!!" );
       pbo->dpvt=NULL;
 
       return( S_dev_badSignal );
@@ -1409,7 +1412,7 @@ USHORT *pReg;
 struct vmeio *pvmeio = (struct vmeio*)&(pbo->out.value);
 struct PvtBo *ptr;
 
-   if( !pbo->dpvt )
+   if( pbo->dpvt == NULL )
    {
       return( S_dev_NoInit );
    }
@@ -1433,7 +1436,7 @@ struct PvtBo *ptr;
    {
       if( *devDebug )
       {
-         errPrintf( NO_ERR_RPT, __FILE__, __LINE__,"devBoBunchClkGen (writeBo) : Write Error, card = %d", pvmeio->card );
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__,"devBoBunchClkGen(writeBo): Write Error, card = %d", pvmeio->card );
       }
 
       recGblSetSevr( pbo, WRITE_ALARM, INVALID_ALARM );
@@ -1444,9 +1447,9 @@ struct PvtBo *ptr;
    value    = *pReg;
    pbo->rbv = (ULONG)value & pbo->mask;
 
-   if( *devDebug >= 10 )
+   if( *devDebug )
    {
-      printf( "devBoBunchClkGen: card = %d, signal = %d,  write value = 0x%lx\n", pvmeio->card, ptr->signal,  pbo->rval );
+      printf( "devBoBunchClkGen(writeBo): card = %d, signal = %d, write value = 0x%lx\n", pvmeio->card, ptr->signal,  pbo->rval );
    }
 
    return( 0 );
@@ -1477,7 +1480,7 @@ long status;
    /* call driver so that it configures card */
    if( (status = check_card( pvmeio->card, pvmeio->signal )) != OK )
    {
-      recGblRecordError( S_dev_badCard,(void*)pao, "devAoBunchClkGen (initAoRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badCard,(void*)pao, "devAoBunchClkGen(initAoRecord) : init failed!!!" );
       return( S_dev_badCard );
    }
 
@@ -1485,23 +1488,23 @@ long status;
    {
       if( *devDebug )
       {
-         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen : Signal out of range!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen: Signal out of range!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
       }
 
-      recGblRecordError( S_dev_badSignal,(void*)pao, "devAoBunchClkGen (initAoRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badSignal,(void*)pao, "devAoBunchClkGen(initAoRecord): init failed!!!" );
       return( S_dev_badSignal );
    }
 
    /*  Check Card Exists */
    pReg = (USHORT*)dio[pvmeio->card].dptr;
-   if( vxMemProbe( (char*)pReg, READ, sizeof(value), (char*)&value) != OK )
+   if( vxMemProbe( (char*)pReg, READ, sizeof(value), (char*)&value ) != OK )
    {
       if( *devDebug )
       {
-         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen : vxMemProbe failed!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen: vxMemProbe failed!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
       }
 
-      recGblRecordError( S_dev_badSignal,(void*)pao, "devAoBunchClkGen (initAoRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badSignal,(void*)pao, "devAoBunchClkGen(initAoRecord): init failed!!!" );
       return( S_dev_badSignal );
    }
 
@@ -1528,7 +1531,7 @@ long status;
 
    if( *devDebug )
    {
-      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen : card = %d sig = %d", pvmeio->card, pvmeio->signal );
+      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen: card = %d sig = %d", pvmeio->card, pvmeio->signal );
    }
 
    pao->dpvt = pao;
@@ -1554,7 +1557,7 @@ short val;
 USHORT *pReg;
 struct vmeio *pvmeio = (struct vmeio*)&(pao->out.value);
 
-   if( !pao->dpvt )
+   if( pao->dpvt == NULL )
    {
       return( S_dev_NoInit );
    }
@@ -1574,7 +1577,7 @@ struct vmeio *pvmeio = (struct vmeio*)&(pao->out.value);
       {
          if( *devDebug )
          {
-            errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen (writeAo) : Write Error, card = %d, signal = %d", pvmeio->card, pvmeio->signal );
+            errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen(writeAo): Write Error, card = %d, signal = %d", pvmeio->card, pvmeio->signal );
          }
 
          recGblSetSevr( pao, WRITE_ALARM, INVALID_ALARM );
@@ -1591,7 +1594,7 @@ struct vmeio *pvmeio = (struct vmeio*)&(pao->out.value);
       {
          if( *devDebug )
          {
-            errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen (writeAo) : Write Error, card = %d", pvmeio->card );
+            errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen(writeAo): Write Error, card = %d", pvmeio->card );
          }
 
          recGblSetSevr( pao, WRITE_ALARM, INVALID_ALARM );
@@ -1610,7 +1613,7 @@ struct vmeio *pvmeio = (struct vmeio*)&(pao->out.value);
       {
          if( *devDebug )
          {
-            errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen (writeAo) : Write Error, card = %d", pvmeio->card );
+            errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAoBunchClkGen(writeAo): Write Error, card = %d", pvmeio->card );
          }
 
          recGblSetSevr( pao, WRITE_ALARM, INVALID_ALARM );
@@ -1631,9 +1634,9 @@ struct vmeio *pvmeio = (struct vmeio*)&(pao->out.value);
 
    }
 
-   if( *devDebug >= 10 )
+   if( *devDebug )
    {
-      printf( "devAoBunchClkGen: card = %d, signal = %d,  write value = 0x%x\n", pvmeio->card, pvmeio->signal,  pao->rval );
+      printf( "devAoBunchClkGen(writeAo): card = %d, signal = %d, write value = 0x%x\n", pvmeio->card, pvmeio->signal,  pao->rval );
    }
 
    return( 0 );
@@ -1697,10 +1700,10 @@ USHORT *pReg;
    {
       if( *devDebug )
       {
-         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devWfBunchClkGen : Signal out of range!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devWfBunchClkGen: Signal out of range!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
       }
 
-      recGblRecordError( S_dev_badSignal, (void*)pRec, "devWfBunchClkGen (initWfRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badSignal, (void*)pRec, "devWfBunchClkGen(initWfRecord): init failed!!!" );
       return( S_dev_badSignal );
    }
 
@@ -1710,10 +1713,10 @@ USHORT *pReg;
    {
       if( *devDebug )
       {
-         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devWfBunchClkGen : vxMemProbe failed!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devWfBunchClkGen: vxMemProbe failed!!! card = %d, sig = %d\n", pvmeio->card, pvmeio->signal );
       }
 
-      recGblRecordError( S_dev_badSignal, (void*)pRec, "devWfBunchClkGen (initWfRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badSignal, (void*)pRec, "devWfBunchClkGen(initWfRecord): init failed!!!" );
       return( S_dev_badSignal );
    }
 
@@ -1737,7 +1740,7 @@ static long readWf( struct waveformRecord* pRec )
 struct vmeio *pvmeio = (struct vmeio*)&(pRec->inp.value);
 int num;
 
-   if( !pRec->dpvt )
+   if( pRec->dpvt == NULL )
    {
       return( 0 );
    }
@@ -1790,7 +1793,7 @@ long status;
    /* call driver so that it configures card */
    if( (status = check_card( pvmeio->card, pvmeio->signal )) != OK )
    {
-      recGblRecordError( S_dev_badCard, (void*)pai, "devAiBunchClkGen (initAiRecord) : init failed!!!" );
+      recGblRecordError( S_dev_badCard, (void*)pai, "devAiBunchClkGen (initAiRecord): init failed!!!" );
       return( S_dev_badCard );
    }
 
@@ -1808,7 +1811,7 @@ long status;
 
    if( *devDebug )
    {
-      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAiBunchClkGen : card = %d sig = %d", pvmeio->card, pvmeio->signal );
+      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAiBunchClkGen: card = %d sig = %d", pvmeio->card, pvmeio->signal );
    }
 
    pai->dpvt = pai;
@@ -1829,11 +1832,11 @@ struct vmeio *pvmeio = (struct vmeio*)&(pai->inp.value);
       return( S_dev_NoInit );
    }
 
-   if( drvReadCard( pvmeio->card, FREG_READ, pvmeio->signal, &lval) != OK )
+   if( drvReadCard( pvmeio->card, FREG_READ, pvmeio->signal, &lval ) != OK )
    {
       if( *devDebug )
       {
-         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAiBunchClkGen (readAo) : Write Error, card = %d", pvmeio->card );
+         errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devAiBunchClkGen(readAi): Write Error, card = %d", pvmeio->card );
       }
 
       recGblSetSevr( pai, WRITE_ALARM, INVALID_ALARM );
@@ -1853,9 +1856,9 @@ struct vmeio *pvmeio = (struct vmeio*)&(pai->inp.value);
       pai->rval = (long)lval;
    }
 
-   if( *devDebug >= 10 )
+   if( *devDebug )
    {
-      printf( "devAiBunchClkGen: card = %d, signal = %d,  write value = 0x%x\n", pvmeio->card, pvmeio->signal,  pai->rval );
+      printf( "devAiBunchClkGen(readAi): card = %d, signal = %d, write value = 0x%x\n", pvmeio->card, pvmeio->signal,  pai->rval );
    }
 
    return( 0 );
