@@ -5,13 +5,21 @@
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
 #If using the sequencer, point SNCSEQ at its top directory:
-SNCSEQ=/home/oxygen/MOONEY/epics/synApps_5_0/support/seq
+SNCSEQ=/corvette/home/epics/3-14-devel/seq/2-0-8
+
+# For transform, etc. records
+CALC=/corvette/home/epics/3-14-devel/calc
+
+# For busy record
+SSCAN=/corvette/home/epics/3-14-devel/sscan
+
+STD=/corvette/home/epics/3-14-devel/std
+GPIBCORE=/corvette/home/epics/3-14-devel/gpibCore/1-3
+
+MPF=/corvette/home/epics/3-14-devel/mpf/2-4-2
 
 # EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=/net/beams/export/local/epics/base_R3_14_cvs_012604
-STD=/home/oxygen/MOONEY/epics/synApps_5_0/support/std
-MPF=/home/oxygen/MOONEY/epics/synApps_5_0/support/mpf
-GPIBCORE=/home/oxygen/MOONEY/epics/synApps_5_0/support/gpibCore-1_2
+EPICS_BASE=/corvette/usr/local/epics/base-3.14.5
 
 #Capfast users may need the following definitions
 #CAPFAST_TEMPLATES=
