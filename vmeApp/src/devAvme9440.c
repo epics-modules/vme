@@ -1,887 +1,1068 @@
-/*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
-*     National Laboratory.
-* Copyright (c) 2002 The Regents of the University of California, as
-*     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
-\*************************************************************************/
-/* 	devAvme9440.c	*/
+/*+ devAvme9440.c
 
-/*****************************************************************
- *
- *      Author :                     Greg Nawrocki
- *      Date:                        4/93
- *
- *****************************************************************
- */
-
-/*To Use this device, Include the following before iocInit */
-/* devAvme9440Config(ncards,a16base,intvecbase)		*/
-/* For Example						*/
-/* devAvme9440Config(1,0x2800,0x78)			*/
+                          Argonne National Laboratory
+                            APS Operations Division
+                     Beamline Controls and Data Acquisition
 
- /*
-  * This device support routine provides EPICS support for the      *
-  * Acromag AVME-9440 16 bit binary input and output board.  Change *
-  * of state I/O interrupts are available for binary input signals  *
-  * 0 -7 only, and only for the BI record.  If interrupts are       *
-  * desired for MBBI type values, they must be done via BI records  *
-  * linked to CALC records.  As many I/O interrupt scan BI records  *
-  * may be connected to a single binary input signal as desired.    *
-  *
-  */
+                           AVME-9440 Device Support
 
- /*********************************************************************/
- /**							             **/
- /**  Binary Outputs 0 - 15 ========== "AVME9440 O" Signals 0 - 15   **/
- /**  Binary Input 0 - 15 ============ "AVME9440 I" Signals 0 - 15   **/
- /**  Binary Output Readback 0 - 15 == "AVME9440 I" Signals 16 - 31  **/
- /**                                                                 **/
- /*********************************************************************/
 
-#include	<vxWorks.h>
-#include	<stdlib.h>
-#include	<stdio.h>
-#include	<sysLib.h>
-#include	<vme.h>
-#include	<intLib.h>
-#include	<string.h>
-#include	<iv.h>
-#include	<sysLib.h>
-#include	<vxLib.h>
 
-#include	<alarm.h>
-#include	<dbDefs.h>
-#include	<dbAccess.h>
-#include	<recSup.h>
-#include	<recGbl.h>
-#include	<devSup.h>
-#include	<link.h>
-#include	<epicsMutex.h>
+ -----------------------------------------------------------------------------
+                                COPYRIGHT NOTICE
+ -----------------------------------------------------------------------------
+   Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+      National Laboratory.
+   Copyright (c) 2002 The Regents of the University of California, as
+      Operator of Los Alamos National Laboratory.
+   Synapps Versions 4-5
+   and higher are distributed subject to a Software License Agreement found
+   in file LICENSE that is included with this distribution.
+ -----------------------------------------------------------------------------
 
-#include	<boRecord.h>
-#include	<biRecord.h>
-#include	<mbboRecord.h>
-#include	<mbbiRecord.h>
+ Description
+   This device support routine provides EPICS support for the Acromag AVME-9440
+   16 bit binary input and output board. Change of state I/O interrupts are
+   available for binary input signals 0 -7 only, and only for the BI record.
+   If interrupts are desired for MBBI type values, they must be done via BI
+   records linked to CALC records.  As many I/O interrupt scan BI records may
+   be connected to a single binary input signal as desired.
 
-#include	<dbScan.h>
+      Binary Outputs          0 - 15   "AVME9440 O" Signals  0 - 15
+      Binary Input            0 - 15   "AVME9440 I" Signals  0 - 15
+      Binary Output Readback  0 - 15   "AVME9440 I" Signals 16 - 31
 
-#define STATIC static
+   Diagnostic messages can be output by setting the values to the following:
+      devAvme9440Debug == 0 --- no debugging messages
+      devAvme9440Debug >= 5 --- hardware initialization information
+      devAvme9440Debug >= 10 -- record initialization information
+      devAvme9440Debug >= 15 -- write commands
+      devAvme9440Debug >= 20 -- read commands
 
-STATIC long init();
-STATIC long init_bo_record();
-STATIC long init_bi_record();
-STATIC long init_mbbo_record();
-STATIC long init_mbbi_record();
-STATIC long write_bo();
-STATIC long read_bi();
-STATIC long write_mbbo();
-STATIC long read_mbbi();
-STATIC long write_card();
-STATIC long write_mbbo_card();
-STATIC long read_card();
-STATIC long get_bi_int_info();
-STATIC int  checkLink();
-STATIC void avme9440_isr();
+   Additional public variants:
+      avme9440_int_level   - Indicates interrupt level.
+      avme9440_link_count  - Indicates number of cards.
 
-int  devAvme9440Debug = 0; 
+   The method BunchClkGenConfigure is called from the startup script to specify
+   the number of cards, base address, and interrupt vector. It must be called
+   prior to iocInit(). Below is the calling sequence:
 
-/***** devAvme9440Debug *****/
+      devAvme9440Config( ncards, base, vector )
 
-/** devAvme9440Debug == 0 --- no debugging messages **/
-/** devAvme9440Debug >= 5 --- hardware initialization information **/
-/** devAvme9440Debug >= 10 -- record initialization information **/
-/** devAvme9440Debug >= 15 -- write commands **/
-/** devAvme9440Debug >= 20 -- read commands **/
+      Where:
+         ncards   - Number of cards.
+         base     - VME A16 address space.
+         vector   - Interrupt vector.
 
-#define	INPUT_REG	1
-#define OUTPUT_REG	2
+      For example:
+         devAvme9440Config( 1, 0x400, 0x78 )
 
-struct avme9440 {
-  unsigned char	pad0[0x80];
-  unsigned char pad1;
-  unsigned char boardStatus;
-  unsigned char pad2[0x1e];
-  unsigned char pad3;
-  unsigned char intVector0;
-  unsigned char pad4;
-  unsigned char intVector1;
-  unsigned char pad5;
-  unsigned char intVector2;
-  unsigned char pad6;
-  unsigned char intVector3;
-  unsigned char pad7;
-  unsigned char intVector4;
-  unsigned char pad8;
-  unsigned char intVector5;
-  unsigned char pad9;
-  unsigned char intVector6;
-  unsigned char pada;
-  unsigned char intVector7;
-  unsigned char padb[0x10];
-  unsigned char padc;
-  unsigned char intStatus;
-  unsigned char padd;
-  unsigned char intEnable;
-  unsigned char pade;
-  unsigned char intPolarity;
-  unsigned char padf;
-  unsigned char intTypeSelect;
-  unsigned char padg;
-  unsigned char intPaternEnable;
-  unsigned short inputData;
-  unsigned short outputData;
-  unsigned char padh[0x332];
-};
+ Developer notes:
+   1) More formatting and commenting should be done as well as porting the
+      driver / device support to EPICS base >= 3.14.6.
 
-#define NUM_INT_CHAN	8
+ =============================================================================
+ History:
+ Author: Greg Nawrocki
+ -----------------------------------------------------------------------------
+ XX-04-93   GN    - Initial.
+ 28-01-05   DMK   - Took over support for driver / device support.
+                  - Reformatted and documented for clarity.
+                  - Made methods and variants more encapsulated / private.
+                  - Made OS independent by employing EPICS devLib methods.
+ -----------------------------------------------------------------------------
 
-struct ioCard {
-  volatile struct avme9440	*card;                   /* address of this card's registers */
-  int				intCnt[8];               /* array to keep track of number of */
-							 /* interrupt records attached to a channel */
-  epicsMutexId	        	lock; 	                 /* semaphore */
-  IOSCANPVT             	ioscanpvt[NUM_INT_CHAN]; /* list or records processed upon interrupt */
-};
+-*/
 
-#define 	CONST_NUM_LINKS	6
 
-STATIC int devAvme9440Report();
+/* System related include files */
+#include <math.h>
+#include <types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-static unsigned short BASEADD;
-#define         LED_INIT        0x02
-#define         LED_OKRUN       0x03
-#define         LED_OKINTS      0x0B
 
-#define		INT_LEVEL	5
-static unsigned short INT_VEC_BASE;
+/* EPICS system related include files */
+#include <alarm.h>
+#include <devLib.h>
+#include <devSup.h>
+#include <recGbl.h>
+#include <epicsPrint.h>
+#include <epicsExport.h>
 
-int		int_level = INT_LEVEL;
 
-int	        avme9440_num_links=0;
+/* EPICS record processing related include files */
+#include <dbScan.h>
+#include <dbAccess.h>
+#include <boRecord.h>
+#include <biRecord.h>
+#include <mbboRecord.h>
+#include <mbbiRecord.h>
 
-static struct ioCard cards[CONST_NUM_LINKS];
-static int		init_flag = 0;
+
+/* Define symbolic constants */
+#define NOCHANS         ( 8 )       /* Max. number of channels */
+#define NOCARDS         ( 6 )       /* Max. number of cards */
+#define IRQLEVEL        ( 5 )       /* Default IRQ Level */
+
+#define LED_INIT        ( 0x02 )
+#define LED_OKRUN       ( 0x03 )
+#define LED_OKINTS      ( 0x0B )
+
+#define ADDING          ( 0 )
+#define DELETING        ( 1 )
+#define INPUT_REG       ( 1 )
+#define OUTPUT_REG      ( 2 )
+
+
+/* Declare AVME9440 data structure */
+typedef struct avme9440
+{
+   UCHAR  pad0[0x80];
+   UCHAR  pad1;
+   UCHAR  boardStatus;
+   UCHAR  pad2[0x1e];
+   UCHAR  pad3;
+   UCHAR  intVector0;
+   UCHAR  pad4;
+   UCHAR  intVector1;
+   UCHAR  pad5;
+   UCHAR  intVector2;
+   UCHAR  pad6;
+   UCHAR  intVector3;
+   UCHAR  pad7;
+   UCHAR  intVector4;
+   UCHAR  pad8;
+   UCHAR  intVector5;
+   UCHAR  pad9;
+   UCHAR  intVector6;
+   UCHAR  pada;
+   UCHAR  intVector7;
+   UCHAR  padb[0x10];
+   UCHAR  padc;
+   UCHAR  intStatus;
+   UCHAR  padd;
+   UCHAR  intEnable;
+   UCHAR  pade;
+   UCHAR  intPolarity;
+   UCHAR  padf;
+   UCHAR  intTypeSelect;
+   UCHAR  padg;
+   UCHAR  intPaternEnable;
+   USHORT inputData;
+   USHORT outputData;
+   UCHAR  padh[0x332];
+} avme9440;
+
+
+/* Declare card data structure */
+typedef struct ioCard
+{
+   volatile avme9440* card;               /* card base address */
+   int                intCnt[NOCHANS];    /* interrupt records per channel */
+   epicsMutexId       lock;               /* semaphore */
+   IOSCANPVT          ioscanpvt[NOCHANS]; /* records processed upon interrupt */
+} ioCard;
+
+
+/* Define public variants */
+int avme9440_int_level  = IRQLEVEL;
+int avme9440_link_count = 0;
+int devAvme9440Debug    = 0;
+
+
+/* Define private variants */
+static USHORT vecBase;
+static USHORT addrBase;
+static UCHAR  initFlag = FALSE;
+static ioCard cards[NOCARDS];
+
+
+/* Forward references */
+static long init(int);
+static long checkLink(short);
+static long devAvme9440Report();
+static void avme9440_isr(ioCard*);
+static long write_card(short,ULONG,ULONG);
+static long read_card(short,ULONG,USHORT*,int);
+
+static long write_bo(boRecord*);
+static long init_bo_record(boRecord*);
+
+static long read_bi(biRecord*);
+static long init_bi_record(biRecord*);
+static long get_bi_int_info(int,biRecord*,IOSCANPVT*);
+
+static long write_mbbo(mbboRecord*);
+static long init_mbbo_record(mbboRecord*);
+
+static long read_mbbi(mbbiRecord*);
+static long write_mbbo_card(short,ULONG,ULONG);
+static long init_mbbi_record(mbbiRecord*);
+
 
 /* Create the dset for devBoAvme9440 */
-struct {
-	long		number;
-	DEVSUPFUN	report;		/* used by dbior */
-	DEVSUPFUN	init;		/* called 1 time before & after all records */
-	DEVSUPFUN	init_record;	/* called 1 time for each record */
-	DEVSUPFUN	get_ioint_info;	/* used for COS processing (not used for outputs)*/
-	DEVSUPFUN	write_bo;	/* output command goes here */
-}devBoAvme9440={
-	5,
-	(DEVSUPFUN) devAvme9440Report,
-	init,
-	init_bo_record,
-	NULL,
-	write_bo
-};
+static struct
+{
+   long      number;
+   DEVSUPFUN report;          /* used by dbior */
+   DEVSUPFUN init;            /* called 1 time before & after all records */
+   DEVSUPFUN init_record;     /* called 1 time for each record */
+   DEVSUPFUN get_ioint_info;  /* used for COS processing (not used for outputs)*/
+   DEVSUPFUN write_bo;        /* output command goes here */
+}
+devBoAvme9440 = {5, devAvme9440Report, init, init_bo_record, NULL, write_bo};
+epicsExportAddress( dset, devBoAvme9440 );
+
 
 /* Create the dset for devBiAvme9440 */
-struct {
-        long            number;
-        DEVSUPFUN       report;         /* used by dbior */
-        DEVSUPFUN       init;           /* called 1 time before & after all records */
-        DEVSUPFUN       init_record;    /* called 1 time for each record */
-	DEVSUPFUN       get_ioint_info; /* used for COS processing */
-        DEVSUPFUN       read_bi;        /* input command goes here */
-}devBiAvme9440={
-        5,
-        NULL,
-        NULL,
-	init_bi_record,
-        get_bi_int_info,
-        read_bi
-};
+static struct
+{
+   long      number;
+   DEVSUPFUN report;         /* used by dbior */
+   DEVSUPFUN init;           /* called 1 time before & after all records */
+   DEVSUPFUN init_record;    /* called 1 time for each record */
+   DEVSUPFUN get_ioint_info; /* used for COS processing */
+   DEVSUPFUN read_bi;        /* input command goes here */
+}
+devBiAvme9440 = {5, NULL, NULL, init_bi_record, get_bi_int_info, read_bi};
+epicsExportAddress( dset, devBiAvme9440 );
+
 
 /* Create the dset for devMbboAvme9440 */
-struct {
-        long            number;
-        DEVSUPFUN       report;
-        DEVSUPFUN       init;
-        DEVSUPFUN       init_record;
-	DEVSUPFUN       get_ioint_info;
-        DEVSUPFUN       write_mbbo;
-}devMbboAvme9440={
-        5,
-        NULL,
-        NULL,
-        init_mbbo_record,
-        NULL,
-        write_mbbo
-};
+static struct
+{
+   long      number;
+   DEVSUPFUN report;
+   DEVSUPFUN init;
+   DEVSUPFUN init_record;
+   DEVSUPFUN get_ioint_info;
+   DEVSUPFUN write_mbbo;
+}
+devMbboAvme9440 = {5, NULL, NULL, init_mbbo_record, NULL, write_mbbo};
+epicsExportAddress( dset, devMbboAvme9440 );
+
 
 /* Create the dset for devMbbiAvme9440 */
-struct {
-        long            number;
-        DEVSUPFUN       report;
-        DEVSUPFUN       init;
-        DEVSUPFUN       init_record;
-        DEVSUPFUN       get_ioint_info;
-        DEVSUPFUN       read_mbbi;
-}devMbbiAvme9440={
-        5,
-        NULL,
-        NULL,
-        init_mbbi_record,
-	NULL,
-        read_mbbi
-};
-
-/**************************************************************************
+static struct
+{
+   long      number;
+   DEVSUPFUN report;
+   DEVSUPFUN init;
+   DEVSUPFUN init_record;
+   DEVSUPFUN get_ioint_info;
+   DEVSUPFUN read_mbbi;
+}
+devMbbiAvme9440 = {5, NULL, NULL, init_mbbi_record, NULL, read_mbbi};
+epicsExportAddress( dset, devMbbiAvme9440 );
+
+
+/***************************************************************************
  *
  * Ultra groovy and useful reporting function called from 'dbior'.
  *
- **************************************************************************/
-STATIC int devAvme9440Report()
+ ***************************************************************************/
+static long devAvme9440Report()
 {
-	int		LinkNum = 0;
-	int		CardBase = BASEADD;
-	int		IntVec = INT_VEC_BASE;
+int i;
+int vec  = vecBase;
+int base = addrBase;
 
-	while (LinkNum < avme9440_num_links)
-	{
-		if (cards[LinkNum].card != NULL)
-		{
-			printf("    Link %2.2d at 0x%4.4X, IRQ 0x%2.2X, input 0x%4.4X, output 0x%4.4X\n", 
-					LinkNum, 
-					CardBase, 
-					IntVec, 
-					cards[LinkNum].card->inputData, 
-					cards[LinkNum].card->outputData);
 
-		}
-		LinkNum++;
-		CardBase += sizeof(struct avme9440);
-		IntVec++;
-	}
-	return(0);
-}
-
-/**************************************************************************
-*
-* Initialization of AVME9440 Binary I/O Card
-*
-***************************************************************************/
-int devAvme9440Config(ncards,a16base,intvecbase)
-int	ncards;
-int	a16base;
-int	intvecbase;
-{
-    avme9440_num_links = ncards;
-    BASEADD = a16base;
-    INT_VEC_BASE = intvecbase;
-    init(0);
-    return(0);
-}
+   /* Output information */
+   printf( "\nAVME9440 Configuration - " );
 
-STATIC long
-init(flag)
-int	flag;
-{
-  int				cardNum, chanNum;
-  unsigned char			probeVal;
-  volatile struct avme9440	*p;
+   if( initFlag == TRUE )
+   {
+      printf( "%d card(s) are configured\n", avme9440_link_count );
+   }
+   else
+   {
+      printf( "no cards are configured\n" );
+   }
 
-  if (init_flag != 0)
-    return(OK);
+   for( i = 0; i < avme9440_link_count; ++i )
+   {
 
-  init_flag = 1;
-
-  if (sysBusToLocalAdrs(VME_AM_SUP_SHORT_IO, (char *)(int)BASEADD, (char **)&p) == ERROR)
-  {
-    if (devAvme9440Debug >= 5)
-       printf("devAvme9440: can not find short address space\n");
-    return(ERROR);
-  }
-
-  /* We end up here 1 time before all records are initialized */
-  for (cardNum=0; cardNum < avme9440_num_links; cardNum++)
-  {
-    if (devAvme9440Debug >= 5)
-    printf("devAvme9440: Init card %d\n", cardNum);
-
-    probeVal = LED_INIT;  /* sends init value to LEDs and disables interrupts */
-
-    if (vxMemProbe((char*) &(p->boardStatus) , WRITE, 1, &probeVal) < OK)
-    {
-
-      if (devAvme9440Debug >= 5)
-         printf("devAvme9440: Probe at %p failed\n", &(p->boardStatus));
-      cards[cardNum].card = NULL;		/* No card found */
-    }
-    else
-    {
-      if (devAvme9440Debug >= 5)
+      if( cards[i].card == NULL )
       {
-         printf("devAvme9440: Probe at %p success, board status = 0x%2.2X\n", &(p->boardStatus), probeVal);
-	 printf("             Beginning card %d initialization\n", cardNum);
+         continue;
       }
 
-      probeVal = INT_VEC_BASE + cardNum; 
+      printf( "\tCard %2.2d at 0x%4.4X, IRQ 0x%2.2X, input 0x%4.4X, output 0x%4.4X\n",
+              (i + 1), base, vec, cards[i].card->inputData, cards[i].card->outputData );
 
-      for (chanNum=0; chanNum <= 7; chanNum++)
+      ++vec;
+      base += sizeof(avme9440);
+   }
+
+   printf( "\n" );
+
+   return( 0 );
+}
+
+
+/**************************************************************************
+ *
+ * Initialization of AVME9440 Binary I/O Card
+ *
+ ***************************************************************************/
+int devAvme9440Config( int ncards, int a16base, int intvecbase )
+{
+
+   if( ncards >= NOCARDS )
+   {
+      printf( "devAvme9440: Max. number of cards exceeded (%d/%d)\n", ncards, NOCARDS );
+
+      return( ERROR );
+   }
+
+   avme9440_link_count  = ncards;
+   addrBase             = a16base;
+   vecBase              = intvecbase;
+
+   init( 0 );
+
+   return( 0 );
+}
+
+
+/***************************************************************************
+ *
+ * Common initialization
+ *
+ ***************************************************************************/
+static long init( int flag )
+{
+UCHAR value;
+int card, chan;
+volatile avme9440* p;
+
+
+   /* Evaluate initialization flag */
+   if( initFlag == TRUE )
+   {
+      return( OK );
+   }
+
+   /* Indicate initialization attempted */
+   initFlag = TRUE;
+
+   /* Register device address */
+   if( devRegisterAddress( "devAvme9440", atVMEA16, addrBase, (sizeof(avme9440) * avme9440_link_count), (volatile void**)&p ) )
+   {
+      if( devAvme9440Debug >= 5 )
       {
-	 if ((vxMemProbe(((char*) &(p->intVector0) + (2 * chanNum))  , WRITE, 1, &probeVal) == OK) && (devAvme9440Debug >= 5))
-	 {
-	     printf("devAvme9440: Interrupt vector 0x%2.2X being written to channel %d interrupt\n", probeVal, chanNum);
-	     printf("             vector table entry at address %p\n", (&(p->intVector0) + (2 * chanNum)));
+         printf( "devAvme9440: can not find short address space\n" );
+      }
 
-             cards[cardNum].intCnt[chanNum] = 0;  /* clear channel interrupt counter */
+      return( ERROR );
+   }
+
+   /* We end up here 1 time before all records are initialized */
+   for( card = 0; card < avme9440_link_count; card++, p++ )
+   {
+
+      if( devAvme9440Debug >= 5 )
+      {
+         printf( "devAvme9440: Initializing card %d\n", card );
+      }
+
+      /* Probe module for access */
+      if( devReadProbe( 1, &p->boardStatus, &value ) )
+      {
+
+         if( devAvme9440Debug >= 5 )
+         {
+            printf( "devAvme9440: Probe at %p failed\n", &p->boardStatus );
          }
 
-         scanIoInit(&cards[cardNum].ioscanpvt[chanNum]);  /* interrupt initialized per channel */
+         /* No card found */
+         cards[card].card = NULL;
+
+         /* Next instance */
+         continue;
       }
 
-      probeVal = 0x00;
+      /* Sends init value to LEDs and disables interrupts */
+      p->boardStatus = LED_INIT;
+      value          = p->boardStatus;
 
-      if ((vxMemProbe((char*) &(p->intEnable) , WRITE, 1, &probeVal) == OK) && (devAvme9440Debug >= 5))
-         printf("devAvme9440: Interrupts disabled for channels 0 - 7\n");
-
-      probeVal = 0xFF;
-
-      if ((vxMemProbe((char*) &(p->intTypeSelect) , WRITE, 1, &probeVal) == OK) && (devAvme9440Debug >= 5))
+      if( devAvme9440Debug >= 5 )
       {
-	 printf("devAvme9440: Change of state interrupts set for channels 0 - 7\n");
-         printf("             Interrupt level should be set at %d\n", int_level);
+         printf( "devAvme9440: Probe at %p success, board status = 0x%2.2X\n", &p->boardStatus, value );
+         printf( "             Beginning card %d initialization\n", card );
       }
 
-      probeVal = 0x00;
+      /* Write interrupt vectors */
+      value = vecBase + card;
 
-      if ((vxMemProbe((char*) &(p->intPaternEnable) , WRITE, 1, &probeVal) == OK) && (devAvme9440Debug >= 5))
-         printf("devAvme9440: Input pattern detection interrupts disabled for channels 0 - 7\n");
+      for( chan = 0; chan < NOCHANS; chan++ )
+      {
 
-      probeVal = LED_OKRUN;  /* sends init value to LEDs and disables interrupts */
+         /* Write vector */
+         *((char*)&p->intVector0 + (2 * chan)) = value;
 
-      if ((vxMemProbe((char*) &(p->boardStatus) , WRITE, 1, &probeVal) == OK) && (devAvme9440Debug >= 5))
-	 printf("devAvme9440: Card %d initialization complete\n", cardNum);
+         if( devAvme9440Debug >= 5 )
+         {
+            printf( "devAvme9440: Interrupt vector 0x%2.2X being written to channel %d interrupt\n", value, chan );
+            printf( "             vector table entry at address %p\n", ((char*)&p->intVector0 + (2 * chan)) );
 
-      cards[cardNum].card = p;		/* Remember address of the board */
+            /* Clear channel interrupt counter */
+            cards[card].intCnt[chan] = 0;
+         }
 
-      if (intConnect(INUM_TO_IVEC(INT_VEC_BASE + cardNum),
-			(VOIDFUNCPTR)avme9440_isr,
-			(int)&cards[cardNum]) != OK) 
-          printf("devAvme9440: Interrupt connect failed for card %d\n", cardNum);
+         /* Interrupt initialized per channel */
+         scanIoInit( &cards[card].ioscanpvt[chan] );
+      }
 
-         
-      cards[cardNum].lock = epicsMutexCreate();
-    }
-    p++;
-  }
-  return(OK);
+      /* Disable interrupts for channels 0-7 */
+      value          = 0x00;
+      p->intEnable   = value;
+
+      if( devAvme9440Debug >= 5 )
+      {
+         printf("devAvme9440: Interrupts disabled for channels 0 - 7\n");
+      }
+
+      /* Set interrupt level */
+      value             = 0xFF;
+      p->intTypeSelect  = value;
+
+      if( devAvme9440Debug >= 5 )
+      {
+         printf( "devAvme9440: Change of state interrupts set for channels 0 - 7\n" );
+         printf( "             Interrupt level should be set at %d\n", avme9440_int_level );
+      }
+
+      /* Disable input pattern detection interrupts */
+      value                = 0x00;
+      p->intPaternEnable   = value;
+
+      if( devAvme9440Debug >= 5 )
+      {
+         printf( "devAvme9440: Input pattern detection interrupts disabled for channels 0 - 7\n" );
+      }
+
+      /* Sends init value to LEDs and enables interrupts */
+      value          = LED_OKRUN;
+      p->boardStatus = value;
+
+      if( devAvme9440Debug >= 5 )
+      {
+         printf( "devAvme9440: Card %d initialization complete\n", card );
+      }
+
+      /* Remember base address */
+      cards[card].card = p;
+
+      if( devConnectInterrupt( intVME, (vecBase + card), avme9440_isr, &cards[card] ) )
+      {
+         printf( "devAvme9440: Interrupt connect failed for card %d\n", card );
+      }
+
+      /* Create access semaphore */
+      cards[card].lock = epicsMutexCreate();
+
+   } /* end-for: (card number) */
+
+   return( OK );
 }
 
-
-/**************************************************************************
+
+/***************************************************************************
  *
  * Interrupt service routine
  *
- **************************************************************************/
-STATIC void avme9440_isr(struct ioCard *pc)
+ ***************************************************************************/
+static void avme9440_isr( ioCard* pc )
 {
-   volatile struct avme9440                *p = pc->card;
-   volatile unsigned char         intStatusLocal = p->intStatus;
-   unsigned int                   chanNum;
-   volatile unsigned char         intStatWrite = 0;
+unsigned int chanNum;
+volatile avme9440* p          = pc->card;
+volatile UCHAR intStatusLocal = p->intStatus;
+volatile UCHAR intStatWrite   = 0;
 
-   for (chanNum=0; chanNum <= 7; chanNum++)
+
+   for( chanNum = 0; chanNum < NOCHANS; chanNum++ )
    {
-      if(intStatusLocal & (1 << chanNum))
+      if( intStatusLocal & (1 << chanNum) )
       {
-         scanIoRequest(pc -> ioscanpvt[chanNum]);
+         scanIoRequest( pc->ioscanpvt[chanNum] );
          intStatWrite |= (1 << chanNum);
       }
+
    }
 
    p->intStatus = intStatWrite;
 }
 
-
+
 /**************************************************************************
  *
  * BO Initialization (Called one time for each BO AVME9440 card record)
  *
  **************************************************************************/
-STATIC long init_bo_record(pbo)
-struct boRecord *pbo;
+static long init_bo_record( boRecord* pbo )
 {
-    int status = 0;
-    unsigned short	stupid;
- 
-    /* bo.out must be an VME_IO */
-    switch (pbo->out.type) {
+int status = 0;
+USHORT stupid;
 
-    case (VME_IO) :
+   /* bo.out must be an VME_IO */
+   switch( pbo->out.type )
+   {
+   case VME_IO:
+      if( pbo->out.value.vmeio.signal > 15 )
+      {
+         pbo->pact   = 1;          /* make sure we don't process this thing */
+         status      = S_db_badField;
 
-        if (pbo->out.value.vmeio.signal > 15)
-        {
-           pbo->pact = 1;          /* make sure we don't process this thing */
-           status = S_db_badField;
+         if( devAvme9440Debug >= 10 )
+         {
+            printf( "devAvme9440: Illegal SIGNAL field ->%s<- \n", pbo->name );
+         }
 
-           if (devAvme9440Debug >= 10)
-              printf("devAvme9440: Illegal SIGNAL field ->%s<- \n", pbo->name);
+         recGblRecordError( status, (void*)pbo, "devAvme9440 (init_record) Illegal SIGNAL field" );
+      }
+      else
+      {
+         pbo->mask = 1;
+         pbo->mask <<= pbo->out.value.vmeio.signal;
 
-           recGblRecordError(status,(void *)pbo,
-            "devAvme9440 (init_record) Illegal SIGNAL field");
-        }
-        else
-        {
+         if( read_card( pbo->out.value.vmeio.card, pbo->mask, &stupid, OUTPUT_REG ) == OK )
+         {
+            pbo->rbv = pbo->rval = stupid;
 
-           pbo->mask = 1;
-           pbo->mask <<= pbo->out.value.vmeio.signal;
+            if( devAvme9440Debug >= 10 )
+            {
+               printf( "devAvme9440: ->%s<- Record initialized \n", pbo->name );
+            }
 
-           if (read_card(pbo->out.value.vmeio.card, pbo->mask, &stupid, OUTPUT_REG) == OK)
-              {
-              pbo->rbv = pbo->rval = stupid;
-              if (devAvme9440Debug >= 10)
-                 printf("devAvme9440: ->%s<- Record initialized \n", pbo->name);
-              }
+         }
+         else
+         {
+            status = 2;
 
-           else 
-              {
-              status = 2;
-              if (devAvme9440Debug >= 10)
-                 printf("devAvme9440: ->%s<- Record failed to initialize \n", pbo->name);
-              }
+            if( devAvme9440Debug >= 10 )
+            {
+               printf( "devAvme9440: ->%s<- Record failed to initialize \n", pbo->name );
+            }
 
-        }
-        break;
-         
-    default :
-	pbo->pact = 1;		/* make sure we don't process this thing */
-        status = S_db_badField;
+         }
 
-        if (devAvme9440Debug >= 10)
-           printf("devAvme9440: Illegal OUT field ->%s<- \n", pbo->name);
+      }
+      break;
 
-        recGblRecordError(status,(void *)pbo,
-            "devAvme9440 (init_record) Illegal OUT field");
-    }
-    return(status);
+   default:
+      pbo->pact   = 1;    /* make sure we don't process this thing */
+      status      = S_db_badField;
+
+      if( devAvme9440Debug >= 10 )
+      {
+         printf( "devAvme9440: Illegal OUT field ->%s<- \n", pbo->name );
+      }
+
+      recGblRecordError( status, (void*)pbo, "devAvme9440 (init_record) Illegal OUT field" );
+      break;
+
+   }
+
+   return( status );
 }
 
-/**************************************************************************
+
+/***************************************************************************
  *
  * BI Initialization (Called one time for each BI AVME9440 card record)
  *
- **************************************************************************/
-STATIC long init_bi_record(pbi)
-struct biRecord *pbi;
+ ***************************************************************************/
+static long init_bi_record( biRecord* pbi )
 {
-  int status = 0;
-  unsigned short	stupid;
+int status = 0;
+USHORT stupid;
 
-  switch (pbi->inp.type) {
-  case (VME_IO) :
+   switch( pbi->inp.type )
+   {
+   case VME_IO:
+      if( pbi->inp.value.vmeio.signal > 31 )
+      {
+         pbi->pact   = 1;          /* make sure we don't process this thing */
+         status      = S_db_badField;
 
-     if (pbi->inp.value.vmeio.signal > 31)
-     {
-        pbi->pact = 1;          /* make sure we don't process this thing */
-        status = S_db_badField;
+         if( devAvme9440Debug >= 10 )
+         {
+            printf( "devAvme9440: Illegal SIGNAL field ->%s<-\n", pbi->name );
+         }
 
-        if (devAvme9440Debug >= 10)
-           printf("devAvme9440: Illegal SIGNAL field ->%s<- \n", pbi->name);
+         recGblRecordError( status, (void*)pbi, "devAvme9440 (init_record) Illegal SIGNAL field" );
+      }
+      else
+      {
+         pbi->mask = 1;
 
-        recGblRecordError(status,(void *)pbi,
-         "devAvme9440 (init_record) Illegal SIGNAL field");
+         if( pbi->inp.value.vmeio.signal <= 15 )
+         {
+            pbi->mask <<= pbi->inp.value.vmeio.signal;
+         }
+         else
+         {
+            pbi->mask <<= pbi->inp.value.vmeio.signal - 16;
+         }
 
-     }
-     else
-     {
-        pbi->mask = 1;
-        if (pbi->inp.value.vmeio.signal <= 15)
-           pbi->mask <<= pbi->inp.value.vmeio.signal;
-        else
-           pbi->mask <<= pbi->inp.value.vmeio.signal - 16;
-        if (read_card(pbi->inp.value.vmeio.card, pbi->mask, &stupid, INPUT_REG) == OK)
-        {
-           pbi->rval = stupid;
-           if (devAvme9440Debug >= 10)
-              printf("devAvme9440: ->%s<- Record initialized \n", pbi->name);
-        }
+         if( read_card( pbi->inp.value.vmeio.card, pbi->mask, &stupid, INPUT_REG ) == OK )
+         {
+            pbi->rval = stupid;
 
-        else 
-           {
-           status = 2;
-           if (devAvme9440Debug >= 10)
-              printf("devAvme9440: ->%s<- Record failed to initialize \n", pbi->name);
-           }
-     }
+            if( devAvme9440Debug >= 10 )
+            {
+               printf(" devAvme9440: ->%s<- Record initialized\n", pbi->name );
+            }
 
-     break;
-  default:
-     pbi->pact = 1;		/* make sure we don't process this thing */
-     status = S_db_badField;
-     if (devAvme9440Debug >= 10)
-        printf("devAvme9440: Illegal INP field ->%s<- \n", pbi->name);
-     recGblRecordError(status,(void *)pbi,
-        "devAvme9440 (init_record) Illegal INP field");
+         }
+         else
+         {
+            status = 2;
+
+            if( devAvme9440Debug >= 10 )
+            {
+               printf( "devAvme9440: ->%s<- Record failed to initialize\n", pbi->name );
+            }
+
+         }
+
+      }
+      break;
+
+   default:
+      pbi->pact   = 1;     /* make sure we don't process this thing */
+      status      = S_db_badField;
+
+      if( devAvme9440Debug >= 10 )
+      {
+         printf( "devAvme9440: Illegal INP field ->%s<- \n", pbi->name );
+      }
+
+      recGblRecordError( status, (void*)pbi, "devAvme9440 (init_record) Illegal INP field" );
+      break;
+
    }
-   return(status);
+
+   return( status );
 }
 
-
-/**************************************************************************
+
+/***************************************************************************
  *
  * MBBO Initialization (Called one time for each MBBO AVME9440 card record)
  *
- **************************************************************************/
-STATIC long init_mbbo_record(pmbbo)
-struct mbboRecord   *pmbbo;
+ ***************************************************************************/
+static long init_mbbo_record( mbboRecord* pmbbo )
 {
-    unsigned short stupid;
-    struct vmeio *pvmeio;
-    int status = 0;
+USHORT stupid;
+int status = 0;
+struct vmeio* pvmeio;
 
-    /* mbbo.out must be an VME_IO */
-    switch (pmbbo->out.type) {
-    case (VME_IO) :
+   /* mbbo.out must be an VME_IO */
+   switch( pmbbo->out.type )
+   {
+   case VME_IO:
+      if( pmbbo->out.value.vmeio.signal > 15 )
+      {
+         pmbbo->pact = 1;          /* make sure we don't process this thing */
+         status = S_db_badField;
 
-        if (pmbbo->out.value.vmeio.signal > 15)
-        {
-           pmbbo->pact = 1;          /* make sure we don't process this thing */
-           status = S_db_badField;
+         if( devAvme9440Debug >= 10 )
+         {
+            printf( "devAvme9440: Illegal SIGNAL field ->%s<- \n", pmbbo->name );
+         }
 
-           if (devAvme9440Debug >= 10)
-              printf("devAvme9440: Illegal SIGNAL field ->%s<- \n", pmbbo->name);
+         recGblRecordError( status, (void*)pmbbo, "devAvme9440 (init_record) Illegal SIGNAL field" );
+      }
+      else
+      {
+         pvmeio = &pmbbo->out.value.vmeio;
+         pmbbo->shft = pvmeio->signal;
+         pmbbo->mask <<= pmbbo->shft;
 
-           recGblRecordError(status,(void *)pmbbo,
-            "devAvme9440 (init_record) Illegal SIGNAL field");
-        }
-        else
-        {
+         if( read_card( pmbbo->out.value.vmeio.card, pmbbo->mask, &stupid, OUTPUT_REG ) == OK )
+         {
+            pmbbo->rbv = pmbbo->rval = stupid;
 
-           pvmeio = &(pmbbo->out.value.vmeio);
-           pmbbo->shft = pvmeio->signal;
-           pmbbo->mask <<= pmbbo->shft;
- 
-           if (read_card(pmbbo->out.value.vmeio.card, pmbbo->mask, &stupid, OUTPUT_REG) == OK) 
-              {
-              pmbbo->rbv = pmbbo->rval = stupid;
-              if (devAvme9440Debug >= 10)
-                 printf("devAvme9440: ->%s<- Record initialized \n", pmbbo->name);
-              }
+            if( devAvme9440Debug >= 10 )
+            {
+               printf( "devAvme9440: ->%s<- Record initialized \n", pmbbo->name );
+            }
 
-           else
-	      {
-              status = 2;
-	      if (devAvme9440Debug >= 10)
-	         printf("devAvme9440: ->%s<- Record failed to initialize \n", pmbbo->name);
-              }
+         }
+         else
+         {
+            status = 2;
 
-        }
-        break;
+            if( devAvme9440Debug >= 10 )
+            {
+               printf( "devAvme9440: ->%s<- Record failed to initialize \n", pmbbo->name );
+            }
 
-    default :
+         }
 
-        pmbbo->pact = 1;          /* make sure we don't process this thing */
-        status = S_db_badField;
+      }
+      break;
 
-        if (devAvme9440Debug >= 10)
-           printf("devAvme9440: Illegal OUT field ->%s<- \n", pmbbo->name);
+   default:
+      pmbbo->pact = 1;          /* make sure we don't process this thing */
+      status = S_db_badField;
 
-        recGblRecordError(status,(void *)pmbbo,
-            "devAvme9440 (init_record) Illegal OUT field");
-    }
-    return(status);
+      if( devAvme9440Debug >= 10 )
+      {
+         printf( "devAvme9440: Illegal OUT field ->%s<- \n", pmbbo->name );
+      }
+
+      recGblRecordError( status, (void*)pmbbo, "devAvme9440 (init_record) Illegal OUT field" );
+      break;
+
+   }
+
+   return( status );
 }
 
-/**************************************************************************
+
+/***************************************************************************
  *
  * MBBI Initialization (Called one time for each MBBI AVME9440 card record)
  *
- **************************************************************************/
-STATIC long init_mbbi_record(pmbbi)
-struct mbbiRecord   *pmbbi;
+ ***************************************************************************/
+static long init_mbbi_record( mbbiRecord* pmbbi )
 {
-    int status = 0;
-    unsigned short stupid;
+int status = 0;
+USHORT stupid;
 
-    /* mbbi.inp must be an VME_IO */
-    switch (pmbbi->inp.type) {
-    case (VME_IO) :
+   /* mbbi.inp must be an VME_IO */
+   switch( pmbbi->inp.type )
+   {
+   case VME_IO:
+      if( pmbbi->inp.value.vmeio.signal > 31 )
+      {
+         pmbbi->pact = 1;          /* make sure we don't process this thing */
+         status      = S_db_badField;
 
-     if (pmbbi->inp.value.vmeio.signal > 31)
-     {
-        pmbbi->pact = 1;          /* make sure we don't process this thing */
-        status = S_db_badField;
+         if( devAvme9440Debug >= 10 )
+         {
+            printf( "devAvme9440: Illegal SIGNAL field ->%s<- \n", pmbbi->name );
+         }
 
-        if (devAvme9440Debug >= 10)
-           printf("devAvme9440: Illegal SIGNAL field ->%s<- \n", pmbbi->name);
+         recGblRecordError( status, (void*)pmbbi, "devAvme9440 (init_record) Illegal SIGNAL field" );
+      }
+      else
+      {
+         if( pmbbi->inp.value.vmeio.signal <= 15 )
+         {
+            pmbbi->shft = pmbbi->inp.value.vmeio.signal;
+         }
+         else
+         {
+            pmbbi->shft = pmbbi->inp.value.vmeio.signal - 16;
+         }
 
-        recGblRecordError(status,(void *)pmbbi,
-         "devAvme9440 (init_record) Illegal SIGNAL field");
+         pmbbi->mask <<= pmbbi->shft;
 
-     }
-     else
-     {
-        if (pmbbi->inp.value.vmeio.signal <= 15)
-           pmbbi->shft = pmbbi->inp.value.vmeio.signal;
-        else
-           pmbbi->shft = pmbbi->inp.value.vmeio.signal - 16;
-        pmbbi->mask <<= pmbbi->shft;
-        if (read_card(pmbbi->inp.value.vmeio.card, pmbbi->mask, &stupid, INPUT_REG) == OK)
-        {
-           pmbbi->rval = stupid;
-           if (devAvme9440Debug >= 10)
-              printf("devAvme9440: ->%s<- Record initialized \n", pmbbi->name);
-        }
-        else
-	{
-           status = 2;
-	   if (devAvme9440Debug >= 10)
-	      printf("devAvme9440: ->%s<- Record failed to initialize \n", pmbbi->name);
-        }
-     }
+         if( read_card( pmbbi->inp.value.vmeio.card, pmbbi->mask, &stupid, INPUT_REG ) == OK )
+         {
+            pmbbi->rval = stupid;
 
-     break;
+            if( devAvme9440Debug >= 10 )
+            {
+               printf( "devAvme9440: ->%s<- Record initialized \n", pmbbi->name );
+            }
 
-     default :
-        pmbbi->pact = 1;              /* make sure we don't process this thing */
-        status = S_db_badField;
-        if (devAvme9440Debug >= 10)
-           printf("devAvme9440: Illegal INP field ->%s<- \n", pmbbi->name);
-        recGblRecordError(status,(void *)pmbbi,
-                "devAvme9440 (init_record) Illegal INP field");
-        return(status);
-    }
-    return(0);
+         }
+         else
+         {
+            status = 2;
+
+            if( devAvme9440Debug >= 10 )
+            {
+               printf( "devAvme9440: ->%s<- Record failed to initialize \n", pmbbi->name );
+            }
+
+         }
+
+      }
+      break;
+
+   default:
+      pmbbi->pact = 1;              /* make sure we don't process this thing */
+      status      = S_db_badField;
+
+      if( devAvme9440Debug >= 10 )
+      {
+         printf( "devAvme9440: Illegal INP field ->%s<- \n", pmbbi->name );
+      }
+
+      recGblRecordError( status, (void*)pmbbi, "devAvme9440 (init_record) Illegal INP field" );
+      return( status );
+   }
+
+return( 0 );
 }
 
-
-/**************************************************************************
+
+/***************************************************************************
  *
  * Perform a write operation from a BO record
  *
- **************************************************************************/
-STATIC long write_bo(pbo)
-struct boRecord *pbo;
+ ***************************************************************************/
+static long write_bo( boRecord* pbo )
 {
+USHORT stupid;
 
-  unsigned short	stupid;
+   if( write_card( pbo->out.value.vmeio.card, pbo->mask, pbo->rval ) == OK )
+   {
 
-  if (write_card(pbo->out.value.vmeio.card, pbo->mask, pbo->rval) == OK)
-  {
-    if(read_card(pbo->out.value.vmeio.card, pbo->mask, &stupid, OUTPUT_REG) == OK)
-    {
-      pbo->rbv = stupid;
-      return(0);
-    }
-  }
+      if( read_card( pbo->out.value.vmeio.card, pbo->mask, &stupid, OUTPUT_REG ) == OK )
+      {
+         pbo->rbv = stupid;
+         return( 0 );
+      }
 
-  /* Set an alarm for the record */
-  recGblSetSevr(pbo, WRITE_ALARM, INVALID_ALARM);
-  return(2);
+   }
+
+   /* Set an alarm for the record */
+   recGblSetSevr( pbo, WRITE_ALARM, INVALID_ALARM );
+
+   return( 2 );
 }
 
-/**************************************************************************
+
+/***************************************************************************
  *
  * Perform a read operation from a BI record
  *
- **************************************************************************/
-STATIC long read_bi(pbi)
-struct biRecord *pbi;
+ ***************************************************************************/
+static long read_bi( biRecord* pbi )
 {
+unsigned int reg;
+USHORT stupid;
 
-  unsigned short	stupid;
-  unsigned int          reg;
+   if( pbi->inp.value.vmeio.signal <= 15 )
+   {
+      reg = INPUT_REG;
+   }
+   else
+   {
+      reg = OUTPUT_REG;
+   }
 
-  if (pbi->inp.value.vmeio.signal <= 15)
-     reg = INPUT_REG;
-  else
-     reg = OUTPUT_REG;
+   if( read_card( pbi->inp.value.vmeio.card, pbi->mask, &stupid, reg ) == OK )
+   {
+      pbi->rval = stupid;
+      return( 0 );
+   }
 
-  if (read_card(pbi->inp.value.vmeio.card, pbi->mask, &stupid, reg) == OK)
-  {
-     pbi->rval = stupid;
-     return(0);
-  }
+   /* Set an alarm for the record */
+   recGblSetSevr( pbi, READ_ALARM, INVALID_ALARM );
 
-  /* Set an alarm for the record */
-  recGblSetSevr(pbi, READ_ALARM, INVALID_ALARM);
-  return(2);
+   return( 2 );
 }
 
-
-/**************************************************************************
+
+/***************************************************************************
  *
  * Perform a write operation from a MBBO record
  *
- **************************************************************************/
-STATIC long write_mbbo(pmbbo)
-struct mbboRecord *pmbbo;
+ ***************************************************************************/
+static long write_mbbo( mbboRecord* pmbbo )
 {
+USHORT stupid;
 
-  unsigned short        stupid;
+   if( write_mbbo_card( pmbbo->out.value.vmeio.card, pmbbo->mask, pmbbo->rval ) == OK )
+   {
 
-  if (write_mbbo_card(pmbbo->out.value.vmeio.card, pmbbo->mask, pmbbo->rval) == OK)
-  {
-    if(read_card(pmbbo->out.value.vmeio.card, pmbbo->mask, &stupid, OUTPUT_REG) == OK)
-    {
-      pmbbo->rbv = stupid;
-      return(0);
-    }
-  }
+      if( read_card( pmbbo->out.value.vmeio.card, pmbbo->mask, &stupid, OUTPUT_REG ) == OK )
+      {
+         pmbbo->rbv = stupid;
+         return( 0 );
+      }
 
-  /* Set an alarm for the record */
-  recGblSetSevr(pmbbo, WRITE_ALARM, INVALID_ALARM);
-  return(2);
+   }
+
+   /* Set an alarm for the record */
+   recGblSetSevr( pmbbo, WRITE_ALARM, INVALID_ALARM );
+
+   return( 2 );
 }
 
-/**************************************************************************
+
+/***************************************************************************
  *
  * Perform a read operation from a MBBI record
  *
- **************************************************************************/
-STATIC long read_mbbi(pmbbi)
-struct mbbiRecord *pmbbi;
+ ***************************************************************************/
+static long read_mbbi( mbbiRecord* pmbbi )
 {
+unsigned int reg;
+USHORT stupid;
 
-  unsigned short        stupid;
-  unsigned int          reg;
+   if( pmbbi->inp.value.vmeio.signal <= 15 )
+   {
+      reg = INPUT_REG;
+   }
+   else
+   {
+      reg = OUTPUT_REG;
+   }
 
-  if (pmbbi->inp.value.vmeio.signal <= 15)
-     reg = INPUT_REG;
-  else
-     reg = OUTPUT_REG;
+   if( read_card( pmbbi->inp.value.vmeio.card, pmbbi->mask, &stupid, reg ) == OK )
+   {
+      pmbbi->rval = stupid;
+      return( 0 );
+   }
 
-  if (read_card(pmbbi->inp.value.vmeio.card, pmbbi->mask, &stupid, reg) == OK)
-  {
-    pmbbi->rval = stupid;
-    return(0);
-  }
-  /* Set an alarm for the record */
-  recGblSetSevr(pmbbi, READ_ALARM, INVALID_ALARM);
-  return(2);
+   /* Set an alarm for the record */
+   recGblSetSevr( pmbbi, READ_ALARM, INVALID_ALARM );
+
+   return( 2 );
 }
 
-
-/**************************************************************************
+
+/***************************************************************************
  *
  * Raw read a bitfield from the card
  *
- **************************************************************************/
-STATIC long read_card(card, mask, value, reg)
-short           card;   /* Link number from DCT */
-unsigned long   mask;   /* created in init_bo_record() */
-unsigned short  *value; /* the value to return from the card */
-int             reg;
+ ***************************************************************************/
+static long read_card( short card, ULONG mask, USHORT* value, int reg )
 {
-  if (checkLink(card) == ERROR)
-    return(ERROR);
 
-  if (reg == INPUT_REG)
-    *value = cards[card].card->inputData & mask;
-  else
-    *value = cards[card].card->outputData & mask;
+   if( checkLink( card ) == ERROR )
+   {
+      return( ERROR );
+   }
 
-  if (devAvme9440Debug >= 20)
-    printf("devAvme9440: read 0x%4.4X from card %d\n", *value, card);
+   if( reg == INPUT_REG )
+   {
+      *value = cards[card].card->inputData & mask;
+   }
+   else
+   {
+      *value = cards[card].card->outputData & mask;
+   }
 
-  return(OK);
+   if( devAvme9440Debug >= 20 )
+   {
+      printf( "devAvme9440: read 0x%4.4X from card %d\n", *value, card );
+   }
+
+   return( OK );
 }
 
-/**************************************************************************
+
+/***************************************************************************
  *
  * Raw write a bitfield to the card
  *
- **************************************************************************/
-STATIC long write_card(card, mask, value)
-short           card;
-unsigned long   mask;
-unsigned long   value;
+ ***************************************************************************/
+static long write_card( short card, ULONG mask, ULONG value )
 {
-  if (checkLink(card) == ERROR)
-    return(ERROR);
 
-  epicsMutexMustLock(cards[card].lock);
-  cards[card].card->outputData = (cards[card].card->outputData & ~mask) | value;
-  epicsMutexUnlock(cards[card].lock);
+   if( checkLink( card ) == ERROR )
+   {
+      return( ERROR );
+   }
 
-  if (devAvme9440Debug >= 15)
-    printf("devAvme9440: wrote 0x%4.4X to card %d\n", cards[card].card->outputData, card);
+   epicsMutexMustLock( cards[card].lock );
+   cards[card].card->outputData = (cards[card].card->outputData & ~mask) | value;
+   epicsMutexUnlock( cards[card].lock );
 
-  return(0);
+   if( devAvme9440Debug >= 15 )
+   {
+      printf( "devAvme9440: wrote 0x%4.4X to card %d\n", cards[card].card->outputData, card );
+   }
+
+   return( 0 );
 }
 
-/**************************************************************************
+
+/***************************************************************************
  *
  * Raw write a bitfield to the card for MBBO records
  *
- **************************************************************************/
-STATIC long write_mbbo_card(card, mask, value)
-short           card;
-unsigned long   mask;
-unsigned long   value;
+ ***************************************************************************/
+static long write_mbbo_card( short card, ULONG mask, ULONG value )
 {
-  if (checkLink(card) == ERROR)
-    return(ERROR);
 
-  epicsMutexMustLock(cards[card].lock);
-  cards[card].card->outputData = ((cards[card].card->outputData & ~mask) | (value & mask));
-  epicsMutexUnlock(cards[card].lock);
+   if( checkLink( card ) == ERROR )
+   {
+      return( ERROR );
+   }
 
-  if (devAvme9440Debug >= 15)
-    printf("devAvme9440: wrote 0x%4.4X to card %d\n", cards[card].card->outputData, card);
+   epicsMutexMustLock( cards[card].lock );
+   cards[card].card->outputData = ((cards[card].card->outputData & ~mask) | (value & mask));
+   epicsMutexUnlock( cards[card].lock );
 
-  return(0);
+   if( devAvme9440Debug >= 15 )
+   {
+      printf( "devAvme9440: wrote 0x%4.4X to card %d\n", cards[card].card->outputData, card );
+   }
+
+   return( 0 );
 }
 
-
-/**************************************************************************
+
+/***************************************************************************
  *
  * Make sure card number is valid
  *
- **************************************************************************/
-STATIC int checkLink(card)
-short   card;
+ ***************************************************************************/
+static long checkLink( short card )
 {
-  if (card >= avme9440_num_links)
-    return(ERROR);
-  if (cards[card].card == NULL)
-    return(ERROR);
 
-  return(OK);
+   if( card >= avme9440_link_count )
+   {
+      return( ERROR );
+   }
+
+   if( cards[card].card == NULL )
+   {
+      return( ERROR );
+   }
+
+   return( OK );
 }
 
-#define	ADDING  	0
-#define DELETING	1
-/**************************************************************************
+
+/***************************************************************************
  *
  * BI record interrupt routine
  *
- **************************************************************************/
-STATIC long get_bi_int_info(cmd, pbi, ppvt)
-int    			cmd;
-struct biRecord 	*pbi;
-IOSCANPVT		*ppvt;       
+ ***************************************************************************/
+static long get_bi_int_info( int cmd, biRecord* pbi, IOSCANPVT* ppvt )
 {
+struct vmeio* pvmeio;
+volatile avme9440* pc;
 
-   struct vmeio *pvmeio = (struct vmeio *)(&pbi->inp.value);
-   volatile struct avme9440 *pc = cards[pvmeio->card].card;
+   pvmeio   = (struct vmeio*)&pbi->inp.value;
 
-   *ppvt = cards[pvmeio->card].ioscanpvt[pvmeio->signal];
+   pc       = cards[pvmeio->card].card;
+   *ppvt    = cards[pvmeio->card].ioscanpvt[pvmeio->signal];
 
-   if (cmd == ADDING) /* enable interrupts */
+   if( cmd == ADDING )
    {
-      sysIntEnable(int_level);
+      /* enable interrupts */
+      devEnableInterruptLevel( intVME, avme9440_int_level );
 
-      pc->boardStatus = LED_OKINTS;  /* Initialize global board interrupts */
-
-      pc->intEnable |= (1 << pvmeio->signal);  /* Initialize individual channel interrupts */
-
+      pc->boardStatus   = LED_OKINTS;                 /* Initialize global board interrupts */
+      pc->intEnable     |= (1 << pvmeio->signal);     /* Initialize individual channel interrupts */
       cards[pvmeio->card].intCnt[pvmeio->signal]++;
-
    }
    else
-      if(!(--(cards[pvmeio->card].intCnt[pvmeio->signal])))
-         pc->intEnable &= ~(1 << pvmeio->signal);  /* Disable individual channel interrupts */
+   {
 
-   return(0);
+      if( !(--(cards[pvmeio->card].intCnt[pvmeio->signal])) )
+      {
+         pc->intEnable  &= ~(1 << pvmeio->signal);    /* Disable individual channel interrupts */
+      }
+
+   }
+
+   return( 0 );
 }
 
