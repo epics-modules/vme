@@ -79,6 +79,7 @@ DEVELOPMENT CENTER AT ARGONNE NATIONAL LABORATORY (708-252-2000).
 #include <link.h>
 #include <epicsMutex.h>
 #include <recGbl.h>
+#include <epicsExport.h>
 
 #define MAX_NUM_CARDS	4
 #define NO_ERR_RPT	-1
@@ -96,6 +97,8 @@ DEVELOPMENT CENTER AT ARGONNE NATIONAL LABORATORY (708-252-2000).
 #define FREG_WRITELONG  FREG_READLONG +1
 
 int drvBunchClkGenDebug = 0;
+epicsExportAddress(int, drvBunchClkGenDebug);
+
 static   int	*drvDebug = &drvBunchClkGenDebug;
 
 static long 	drvInitCard();
@@ -111,11 +114,18 @@ static long drvClearRam(short card);
 
 /* Epics driver entry point table */
 
-struct drvet drvBunchClkGen={
+typedef struct {
+	long 		number;
+	DRVSUPFUN	report;
+	DRVSUPFUN	init;
+} drvBunchClkGen_drvet;
+
+drvBunchClkGen_drvet drvBunchClkGen={
   2,
   drvIoReport,    
   drvInitCard
 };
+epicsExportAddress(drvBunchClkGen_drvet, drvBunchClkGen);
 
 
 static char	*drvName="drvBunchClkGen";
@@ -825,7 +835,10 @@ typedef struct {
 	DEVSUPFUN	read_write;
 } DSET;
 DSET devBiBunchClkGen={ 5, NULL, NULL, initBiRecord, NULL, readBi };
+epicsExportAddress(DSET, devBiBunchClkGen);
+
 DSET devBoBunchClkGen ={ 5, NULL, NULL, initBoRecord, NULL, writeBo };
+epicsExportAddress(DSET, devBoBunchClkGen);
 
 typedef struct {
         long            number;
@@ -837,8 +850,13 @@ typedef struct {
         DEVSUPFUN       special_linconv;
 } DSETA;
 DSETA devAoBunchClkGen = {6, NULL, NULL, initAoRecord, NULL, writeAo, specialLinconvAo};
+epicsExportAddress(DSETA, devAoBunchClkGen);
+
 DSETA devAiBunchClkGen = {6, NULL, NULL, initAiRecord, NULL, readAi, specialLinconvAi};
+epicsExportAddress(DSETA, devAiBunchClkGen);
+
 DSETA devWfBunchClkGen = {6, NULL, NULL, initWfRecord, NULL, readWf, NULL};
+epicsExportAddress(DSETA, devWfBunchClkGen);
 
 static struct	paramEntrys{
 	char	*param;
@@ -1560,3 +1578,10 @@ static long specialLinconvAi(
 	}
     return(0);
 }
+
+
+/* user callable functions
+int BunchClkGenConfigure(int Card,unsigned long CardAddress)
+long drvBunchClkGenDump(int card)
+long drvBunchClkGenDumpRam(int card)
+*/

@@ -48,6 +48,7 @@
 #include	<devSup.h>
 #include	<special.h>
 #include	<aoRecord.h>
+#include	<epicsExport.h>
 
 static long vmi4116_num_cards = 1;
 static long vmi4116_max_chan = 8;
@@ -62,7 +63,7 @@ static long special_linconv(aoRecord *pao, int after);
 static long vmi4116_io_report(short level);
 static long	vmi4116_init();
 
-struct {
+typedef struct {
 	long		number;
 	DEVSUPFUN	report;
 	DEVSUPFUN	init;
@@ -70,7 +71,9 @@ struct {
 	DEVSUPFUN	get_ioint_info;
 	DEVSUPFUN	write_ao;
 	DEVSUPFUN	special_linconv;
-} devAoVMI4116 = {
+} DSET;
+
+DSET devAoVMI4116 = {
 	6,
 	vmi4116_io_report,
 	vmi4116_init,
@@ -79,6 +82,7 @@ struct {
 	write_ao,
 	special_linconv
 };
+epicsExportAddress(DSET, devAoVMI4116);
 
 #define VMI_ENABLE_OUT		0x4100 /*Fail LED off, enable P3 output.*/
 #define VMI_DISABLE_OUT		0x0100 /*Fail LED on, enable P3 output.*/
@@ -203,3 +207,7 @@ static long special_linconv(aoRecord *pao, int after)
     pao->eslo = (pao->eguf -pao->egul)/65535.0;
     return(0);
 }
+
+/* user callable functions
+void VMI4116_setup(int num_cards,void *addrs)
+*/
