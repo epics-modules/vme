@@ -74,21 +74,18 @@ dbLoadRecords("$(VME)/stdApp/Db/vme.db", "P=vme:,Q=vme1")
 # example: BunchClkGenConfigure(intCard, unsigned long CardAddress)
 #BunchClkGenConfigure(0, 0x8c00)
 
-# Machine-status board (MRD 100)
+# Machine-status board (MRD-100)
 #####################################################
-# dev32VmeConfig(card,a32base,nreg,iVector,iLevel)                 
-#    card    = card number                         
-#    a32base = base address of card               
-#    nreg    = number of A32 registers on this card
-#    iVector = interrupt vector (MRD100 Only !!)
-#    iLevel  = interrupt level  (MRD100 Only !!)
-#  For Example                                     
-#   devA32VmeConfig(0, 0x80000000, 44, 0, 0)             
+# devAvmeMRDConfig( base, vector, level )                 
+#    base   = base address of MRD-100              
+#    vector = interrupt vector
+#    level  = interrupt level
+# For Example                                     
+#    devAvmeMRDConfig(0xA0000200, 0xA0, 5)             
 #####################################################
 #  Configure the MSL MRD 100 module.....
-#devA32VmeConfig(0, 0xa0000200, 30, 0xa0, 5)
-
-#dbLoadRecords("$(VME)/stdApp/Db/msl_mrd100.db","C=0,S=01,ID1=00,ID2=00us")
+#devAvmeMRDConfig(0, 0xA0000200, 30, 0xA0, 5)
+#dbLoadRecords("../../vmeApp/Db/msl_mrd100.db","C=0,S=01,ID1=00,ID2=00us")
 
 ### Bit Bus configuration
 # BBConfig(Link, LinkType, BaseAddr, IrqVector, IrqLevel)

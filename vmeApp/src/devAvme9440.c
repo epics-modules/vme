@@ -60,6 +60,7 @@
 #include	<devSup.h>
 #include	<link.h>
 #include	<epicsMutex.h>
+#include	<epicsExport.h>
 
 #include	<boRecord.h>
 #include	<biRecord.h>
@@ -182,6 +183,8 @@ struct {
 	write_bo
 };
 
+epicsExportAddress(dset, devBoAvme9440);
+
 /* Create the dset for devBiAvme9440 */
 struct {
         long            number;
@@ -198,6 +201,8 @@ struct {
         get_bi_int_info,
         read_bi
 };
+
+epicsExportAddress(dset, devBiAvme9440);
 
 /* Create the dset for devMbboAvme9440 */
 struct {
@@ -216,6 +221,8 @@ struct {
         write_mbbo
 };
 
+epicsExportAddress(dset, devMbboAvme9440);
+
 /* Create the dset for devMbbiAvme9440 */
 struct {
         long            number;
@@ -232,6 +239,9 @@ struct {
 	NULL,
         read_mbbi
 };
+
+epicsExportAddress(dset, devMbbiAvme9440);
+
 
 /**************************************************************************
  *
