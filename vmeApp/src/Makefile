@@ -51,6 +51,9 @@ vme_SRCS_vxWorks += devA32Vme.c
 # For Machine Status Link MRD-100 board
 vme_SRCS_vxWorks += devAvmeMRD.c
 
+# For general test of VME modules
+vme_SRCS_vxWorks += vmeTest.c
+
 # The following adds support from base/src/vxWorks
 ### The following builds SNL programs as components of vme
 # NOTE: for suffix .st, code is run through cpp; for .stt, it's not
