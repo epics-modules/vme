@@ -39,6 +39,13 @@ device(mbbo,VME_IO,devMbboA32Vme,"Generic A32 VME")
 device(longin,VME_IO,devLiA32Vme,"Generic A32 VME")
 device(longout,VME_IO,devLoA32Vme,"Generic A32 VME")
 
+# Machine Status Link (MSL) MRD-100
+device(ai,VME_IO,devAiAvmeMRD,"devAvmeMRD")
+device(bi,VME_IO,devBiAvmeMRD,"devAvmeMRD")
+device(bo,VME_IO,devBoAvmeMRD,"devAvmeMRD")
+device(mbbi,VME_IO,devMbbiAvmeMRD,"devAvmeMRD")
+device(longin,VME_IO,devLiAvmeMRD,"devAvmeMRD")
+
 # Heidenhain IK320 VME counter/interpolator (Till Straumann/BESSY)
 device(mbbo,VME_IO,devIK320Funct,"Heidenhain IK320 Command")
 device(mbbo,VME_IO,devIK320Dir,"Heidenhain IK320 Sign")
@@ -70,4 +77,3 @@ driver(drvIK320)
 driver(drvAvme9210)
 
 registrar(devHPLaserAxis_Register)
-
