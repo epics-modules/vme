@@ -12,6 +12,8 @@
 #include <logLib.h>
 #include <intLib.h>
 
+#include <epicsExport.h>
+
 #define FEXIT   1
 
 static void  ttylinemode();
@@ -97,6 +99,9 @@ static int a32raddtest();
 static int seta32ramdadd();
 static int seta32intvector();
 static void a32inthandler();
+
+static void vmeTest_Register();
+epicsExportRegistrar(vmeTest_Register);
 
 static unsigned short   *modbase;   /* module base address */
 static unsigned short   vxila;      /* vxi logical address */
@@ -270,6 +275,12 @@ static struct fmenu a32rm = {
    a32ram_prompts
 };
 
+/* Here simply to expose the module */
+static void vmeTest_Register(void)
+{
+   return;
+}
+
 void vmeTest()
 {
    int   choice;
@@ -277,7 +288,6 @@ void vmeTest()
 
    reg = 0;
    selected = 0;
-   setbase();
    while( selected == 0 )
    {
       ttycharmode();
