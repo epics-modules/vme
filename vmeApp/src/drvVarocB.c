@@ -72,7 +72,7 @@ drvVaroc_drvet drvVaroc = {
         varoc_drv_init
 };
 
-epicsExportAddress(drvVaroc_drvet, drvVaroc);
+epicsExportAddress(drvet, drvVaroc);
 
 union varoc_reg {
   unsigned short int data;       /* 16 bits of data */ 

@@ -5,14 +5,22 @@
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
 #If using the sequencer, point SNCSEQ at its top directory:
-SNCSEQ=/home/oxygen/MOONEY/epics/synApps_5_0/support/seq/2-0-8
+SNCSEQ=/home/oxygen/DKLINE/EPICS/synApps/support/seq/2-0-10
+
+# For transform, etc. records
+CALC=/home/oxygen/DKLINE/EPICS/synApps/support/calc/2-3
+
+# For busy record
+SSCAN=/home/oxygen/DKLINE/EPICS/synApps/support/sscan/2-3
+
+# For scaler record
+STD=/home/oxygen/DKLINE/EPICS/synApps/support/std/2-3
+
+# stdSupport has some things that require ASYN
+ASYN=/home/oxygen/DKLINE/EPICS/synApps/support/asyn/4-2
 
 # EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=/net/beams/export/local/epics/baseR3.14.5
-# Need scaler
-STD=/home/oxygen/MOONEY/epics/synApps_5_0/support/std/2-3
-CALC=/home/oxygen/MOONEY/epics/synApps_5_0/support/calc/2-3
-SSCAN=/home/oxygen/MOONEY/epics/synApps_5_0/support/sscan/2-3
+EPICS_BASE=/home/oxygen/DKLINE/EPICS/base
 
 #Capfast users may need the following definitions
 #CAPFAST_TEMPLATES=
