@@ -850,7 +850,7 @@ record(bi,"BL$(S):InterruptTopUp") {
 }
 record(bo,"BL$(S):ParityErrorClr") {
         field(DTYP,"Generic A32 VME")
-        field(OUT,"#C1 S26 @0")
+        field(OUT,"#C$(C) S26 @0")
         field(HIGH,"1")
         field(ZNAM,"Off")
         field(ONAM,"Clear")
