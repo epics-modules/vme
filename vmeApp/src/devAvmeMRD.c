@@ -6,6 +6,20 @@
 
                              MRD-100 Device Support
 
+
+
+ -----------------------------------------------------------------------------
+                                COPYRIGHT NOTICE
+ -----------------------------------------------------------------------------
+   Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+      National Laboratory.
+   Copyright (c) 2002 The Regents of the University of California, as
+      Operator of Los Alamos National Laboratory.
+   Synapps Versions 4-5
+   and higher are distributed subject to a Software License Agreement found
+   in file LICENSE that is included with this distribution.
+ -----------------------------------------------------------------------------
+
  Description
    This module provides device support for the MRD-100 VMEbus module. The
    module is found in the A32/D32 VME address space and supports the ai,
@@ -17,12 +31,12 @@
       bi       "Cn Sr @s"
       bo       "Cn Sr @s"
       longin   "Cn Sr @s,w"
-      mbbi     "Cn Sr @s,w"
+      mbbi     "Cn Sr @s"
 
       Where:
          n  - Card number (always set to 0).
          r  - Register number 'r'.
-         s  - Data start bit number (0..32).
+         s  - Data start bit number (0..31).
          w  - Data width (1..32).
          t  - Data type which can be either 0 for normal (unipolar) or
               1 (bipolar) for a twos complement signal.
@@ -32,10 +46,8 @@
 
    When:
       devAvmeMRDDebug  =  0, outputs no messages.
-      devAvmeMRDDebug >=  5, outputs hardware initialization messages (unused).
-      devAvmeMRDDebug >= 10, outputs record initialization messages (unused).
-      devAvmeMRDDebug >= 15, outputs write command messages.
-      devAvmeMRDDebug >= 20, outputs read command messages.
+      devAvmeMRDDebug >=  5, outputs write command messages.
+      devAvmeMRDDebug >= 10, outputs read command messages.
 
    The method devAvmeMRDConfig is called from the startup script to specify the
    VME address and interrupt configuration. It must be called prior to iocInit().
@@ -64,40 +76,39 @@
       - Typedefs:
         r   - is a struct.
         u   - is a union.
+   2) Only one instance of the MRD-100 is supported.
 
  =============================================================================
  History:
- Author: Ned D. Arnold, 97-11-21 (devA32VME)
+ Author: David M. Kline (Derived from devA32VME)
  -----------------------------------------------------------------------------
- 22-12-17   DMK   Taken from the existing devA32Vme device support. Reworked
+ 22-12-04   DMK   Taken from the existing devA32Vme device support. Reworked
                   driver for clarity and efficiency.
+ 14-01-05   DMK   Modified given 'code inspection' comments and suggestions.
  -----------------------------------------------------------------------------
 
 -*/
 
 
+/* EPICS base version-specific definitions (must be performed first) */
+#include <epicsVersion.h>
+#define MRD__IS_EPICSBASE(v,r,l)  \
+   ((EPICS_VERSION==(v)) && (EPICS_REVISION==(r)) && (EPICS_MODIFICATION==(l)))
+#define MRD__GT_EPICSBASE(v,r,l)  \
+   ((EPICS_VERSION>=(v)) && (EPICS_REVISION>=(r)) && (EPICS_MODIFICATION>(l)))
+
+
 /* System related include files */
-#include <vme.h>
 #include <math.h>
+#include <types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-/* VxWorks related include files */
-#ifdef vxWorks
-   #include <iv.h>
-   #include <vxLib.h>
-   #include <sysLib.h>
-   #include <intLib.h>
-   #include <rebootLib.h>
-#else
-   #error "devAvmeMRD: Unsupported operating system"
-#endif
-
-
 /* EPICS system related include files */
 #include <alarm.h>
+#include <devLib.h>
 #include <devSup.h>
 #include <recGbl.h>
 #include <epicsPrint.h>
@@ -113,6 +124,18 @@
 #include <longinRecord.h>
 
 
+/* EPICS base version-specific include files */
+#if ( MRD__GT_EPICSBASE(3,14,6) )
+   #include <epicsExit.h>
+#else
+
+   #ifdef vxWorks
+      #include <rebootLib.h>
+   #endif
+
+#endif
+
+
 /* Define general symbolic constants */
 #define MRD__K_ACTIVE      (  1 )         /* Record active */
 #define MRD__K_INACTIVE    (  0 )         /* Record inactive */
@@ -126,8 +149,8 @@
 #define MRD__K_UNIPOLAR    (  0 )         /* AI/AO unipolar value */
 
 #define MRD__K_SHOWNONE    (  0 )         /* Diagnostic level indicators */
-#define MRD__K_SHOWWRITE   ( 15 )
-#define MRD__K_SHOWREAD    ( 20 )
+#define MRD__K_SHOWWRITE   (  5 )
+#define MRD__K_SHOWREAD    ( 10 )
 
 #define MRD__K_MAXCOL      (  3 )         /* Max. # of columns in report */
 
@@ -149,19 +172,20 @@
 
 #define MRD__S_REGS        ( sizeof(uMRD__REGS) )
 
-typedef union umrd__regs
+typedef union uMRD__REGS
 {
-   unsigned long data[MRD__K_MAXREGS];    /* Linear register map */
+   ULONG data[MRD__K_MAXREGS];            /* Linear register map */
 
-   struct rregs
+   struct rREGS
    {
-      unsigned long regs[MRD__K_OPRREGS]; /* Operational Registers   (0..26) */
-      unsigned long IDC;                  /* Interrupt Dectect/Clear    (27) */
-      unsigned long ICR;                  /* Interrupt Control          (28) */
-      unsigned long IVEC;                 /* Interrupt Vector           (29) */
+      ULONG regs[MRD__K_OPRREGS];         /* Operational Registers   (0..26) */
+      ULONG IDC;                          /* Interrupt Dectect/Clear    (27) */
+      ULONG ICR;                          /* Interrupt Control          (28) */
+      ULONG IVEC;                         /* Interrupt Vector           (29) */
    } rREGS;
 
 } uMRD__REGS;
+
 
 /* Declare MRD info structure */
 #define MRD__S_INFO        ( sizeof(rMRD__INFO) )
@@ -169,30 +193,33 @@ typedef union umrd__regs
 typedef struct rmrd__info
 {
    uMRD__REGS*    base;          /* Base address */
-   unsigned long  card;          /* Card number */
+   ULONG          card;          /* Card number */
    epicsMutexId   lock;          /* Access sync. */
-   unsigned long  instCount;     /* Instance count */
+   ULONG          recReadCount;  /* Record read count */
+   ULONG          recWritCount;  /* Record write count */
+   ULONG          recInstCount;  /* Record instance count */
    IOSCANPVT      ioscanpvt;     /* scan IO event */
 
 } rMRD__INFO;
 
+
 /* Declare MRD record instance structure */
 #define MRD__S_INST        ( sizeof(rMRD__INST) )
 
-typedef struct rmrd__inst
+typedef struct rMRD__INST
 {
-   rMRD__INFO*    pmrd;          /* Pointer to MRD info */
-   unsigned long* pdata;         /* Pointer to data register */
-   unsigned long  dmask;         /* Data mask */
-   unsigned long  dsbn;          /* Data start bit number */
-   unsigned long  dwid;          /* Data width */
-   unsigned long  dtyp;          /* Data type (0=unipolar / 1=bipolar) */
+   rMRD__INFO* pmrd;             /* Pointer to MRD info */
+   ULONG*      pdata;            /* Pointer to data register */
+   ULONG       dmask;            /* Data mask */
+   ULONG       dsbn;             /* Data start bit number */
+   ULONG       dwid;             /* Data width */
+   ULONG       dtyp;             /* Data type (0=unipolar / 1=bipolar) */
 
 } rMRD__INST;
 
 
 /* Declare DSET data structure */
-typedef struct rmrd__dset
+typedef struct rMRD__DSET
 {
    long      number;             /* # of method pointers */
    DEVSUPFUN report;             /* Reports device support information */
@@ -205,42 +232,51 @@ typedef struct rmrd__dset
 } rMRD__DSET;
 
 
-/* Define local variants */
-static rMRD__INFO    mrd__info;
+/* Define local variants (one instance of MRD-100 only) */
+static rMRD__INFO rMRD__info;
 
 
 /* Declare local forward references for device-processing methods */
-static void mrd__isr( );
-static long mrd__read( );
-static long mrd__write( );
-static void mrd__reboot( );
-static long mrd__report( );
+static void mrd__isr( rMRD__INFO* );
+static long mrd__read( ULONG*, ULONG, ULONG* );
+static long mrd__write( ULONG*, ULONG, ULONG );
+static void mrd__reboot( void* );
+static long mrd__report( int );
 
 
 /* Declare local forward references for record-processing methods */
-static long ai__init( );
-static long ai__read( );
+static rMRD__INST* mrd__inputCommon( ULONG, char*, struct vmeio* );
+static long        mrd__compareCommon( short, char*, struct vmeio* );
 
-static long bi__init( );
-static long bi__read( );
-static long bi__getIntInfo( );
 
-static long bo__init( );
-static long bo__write( );
+static long ai__init( struct aiRecord* );
+static long ai__read( struct aiRecord* );
 
-static long longin__init( );
-static long longin__read( );
+static long bi__init( struct biRecord* );
+static long bi__read( struct biRecord* );
+static long bi__getIntInfo( int, struct biRecord*, IOSCANPVT* );
 
-static long mbbi__init( );
-static long mbbi__read( );
+static long bo__init( struct boRecord* );
+static long bo__write( struct boRecord* );
+
+static long longin__init( struct longinRecord* );
+static long longin__read( struct longinRecord* );
+
+static long mbbi__init( struct mbbiRecord* );
+static long mbbi__read( struct mbbiRecord* );
 
 
 /* Define DSET structures */
-static rMRD__DSET devAiAvmeMRD   = {6, NULL,        NULL, ai__init,      NULL,           ai__read,       NULL};
-static rMRD__DSET devBiAvmeMRD   = {5, mrd__report, NULL, bi__init,      bi__getIntInfo, bi__read,       NULL};
-static rMRD__DSET devBoAvmeMRD   = {5, NULL,        NULL, bo__init,      NULL,           bo__write,      NULL};
-static rMRD__DSET devLiAvmeMRD   = {5, NULL,        NULL, longin__init,  NULL,           longin__read,   NULL};
-static rMRD__DSET devMbbiAvmeMRD = {5, NULL,        NULL, mbbi__init,    NULL,           mbbi__read,     NULL};
+static rMRD__DSET devAiAvmeMRD   =
+   {6, NULL,        NULL, ai__init,      NULL,           ai__read,       NULL};
+static rMRD__DSET devBiAvmeMRD   =
+   {5, mrd__report, NULL, bi__init,      bi__getIntInfo, bi__read,       NULL};
+static rMRD__DSET devBoAvmeMRD   =
+   {5, NULL,        NULL, bo__init,      NULL,           bo__write,      NULL};
+static rMRD__DSET devLiAvmeMRD   =
+   {5, NULL,        NULL, longin__init,  NULL,           longin__read,   NULL};
+static rMRD__DSET devMbbiAvmeMRD =
+   {5, NULL,        NULL, mbbi__init,    NULL,           mbbi__read,     NULL};
 
 
 /* Publish DSET structure references to EPICS */
@@ -252,7 +288,7 @@ epicsExportAddress(dset, devMbbiAvmeMRD);
 
 
 /* Define global variants */
-unsigned long devAvmeMRDDebug = 0;
+ULONG devAvmeMRDDebug = 0;
 
 
 /****************************************************************************
@@ -278,8 +314,7 @@ unsigned long devAvmeMRDDebug = 0;
  * Developer notes:
  *
  */
-static void mrd__isr( pmrd )
-rMRD__INFO* pmrd;
+static void mrd__isr( rMRD__INFO* pmrd )
 {
    /* Process scan IO requests */
    scanIoRequest( pmrd->ioscanpvt );
@@ -293,8 +328,8 @@ rMRD__INFO* pmrd;
  * mrd__reboot()
  *
  * Description:
- *    This method is executed when a 'reboot' command or ^X is entered from
- *    the VxWorks shell. It will disable all interrupts.
+ *    This method is executed when a 'reboot' command is initiated. It will
+ *    disable all interrupts.
  *
  * Input Parameters:
  *    None.
@@ -308,9 +343,9 @@ rMRD__INFO* pmrd;
  * Developer notes:
  *
  */
-static void mrd__reboot( void )
+static void mrd__reboot( void* pvoid )
 {
-   mrd__info.base->rREGS.ICR = 0;
+   rMRD__info.base->rREGS.ICR = 0;
 }
 
 
@@ -331,35 +366,46 @@ static void mrd__reboot( void )
  *    Completion status: MRD__STS_OK
  *
  * Developer notes:
+ *    1) Interest level > 0 displays operational registers.
  *
  */
-static long mrd__report( level )
-int level;
+static long mrd__report( int level )
 {
-unsigned int i, r;
-
 
    /* Output MRD-100 information */
    printf( "\nMRD-100 Configuration\n" );
-   printf( "\tBase address                    - 0x%8.8X\n", (unsigned int)mrd__info.base );
-   printf( "\tInterrupt vector                - 0x%4.4X\n", (unsigned int)mrd__info.base->rREGS.IVEC );
-   printf( "\tInterrupt control register      - 0x%4.4X\n", (unsigned int)mrd__info.base->rREGS.ICR );
-   printf( "\tInterrupt detect/clear register - 0x%4.4X\n", (unsigned int)mrd__info.base->rREGS.IDC );
-   printf( "\tRecord instance count           - %d\n",      (unsigned int)mrd__info.instCount );
+   printf( "\tBase address                    - 0x%8.8X\n", (UINT)rMRD__info.base );
+   printf( "\tInterrupt vector                - 0x%4.4X\n", (UINT)rMRD__info.base->rREGS.IVEC );
+   printf( "\tInterrupt control register      - 0x%4.4X\n", (UINT)rMRD__info.base->rREGS.ICR );
+   printf( "\tInterrupt detect/clear register - 0x%4.4X\n", (UINT)rMRD__info.base->rREGS.IDC );
+   printf( "\tRecord read count               - %d\n",      (UINT)rMRD__info.recReadCount );
+   printf( "\tRecord write count              - %d\n",      (UINT)rMRD__info.recWritCount );
+   printf( "\tRecord instance count           - %d\n",      (UINT)rMRD__info.recInstCount );
+   printf( "\tEPICS release version           - %s\n",      epicsReleaseVersion );
 
-   printf( "\tOperational register contents:\n" );
-   for( i = 0, r = 1; i < MRD__K_OPRREGS; ++i, ++r )
+   /* Output MRD-100 operational registers */
+   if( level > 0 )
    {
-      /* Output register contents */
-      printf( "\t%2.2d - 0x%8.8X", i, (unsigned int)mrd__info.base->data[i] );
+   UINT i, r;
 
-      /* Evaluate row break */
-      if( (r % MRD__K_MAXCOL) == 0 )
+      printf( "\tOperational register contents:\n" );
+      for( i = 0, r = 1; i < MRD__K_OPRREGS; ++i, ++r )
       {
-         printf( "\n" );
+
+         /* Output register contents */
+         printf( "\t%2.2d - 0x%8.8X", i, (UINT)rMRD__info.base->data[i] );
+
+         /* Evaluate row break */
+         if( (r % MRD__K_MAXCOL) == 0 )
+         {
+            printf( "\n" );
+         }
+
       }
+
+      printf( "\n" );
+
    }
-   printf( "\n" );
 
    /* Return completion status */
    return( MRD__STS_OK );
@@ -387,25 +433,25 @@ unsigned int i, r;
  * Developer notes:
  *
  */
-static long mrd__write( paddr, mask, value )
-unsigned long* paddr;
-unsigned long  mask;
-unsigned long  value;
+static long mrd__write( ULONG* paddr, ULONG mask, ULONG value )
 {
 
    /* Acquire access mutex */
-   epicsMutexMustLock( mrd__info.lock );
+   epicsMutexMustLock( rMRD__info.lock );
 
    /* Write raw value given mask */
    *paddr = (*paddr & ~mask) | (value & mask);
 
    /* Release access mutex */
-   epicsMutexUnlock( mrd__info.lock );
+   epicsMutexUnlock( rMRD__info.lock );
+
+   /* Increment write count */
+   ++rMRD__info.recWritCount;
 
    /* Output diagnostic */
    if( devAvmeMRDDebug >= MRD__K_SHOWWRITE )
    {
-      epicsPrintf( "devAvmeMRD:mrd__write(): Wrote 0x%8.8X to 0x%8.8X\n", (unsigned int)*paddr, (unsigned int)paddr );
+      epicsPrintf( "devAvmeMRD:mrd__write(): Wrote 0x%8.8X to 0x%8.8X\n", (UINT)*paddr, (UINT)paddr );
    }
 
    /* Return completion status */
@@ -421,11 +467,11 @@ unsigned long  value;
  *    This method performs the longword read from the MRD-100 given the address.
  *
  * Input Parameters:
- *    paddr    - Address to write.
+ *    paddr    - Address to read.
  *    mask     - Mask to preserve existing bits.
  *
  * Output Parameters:
- *    value    - Address of value read.
+ *    pvalue   - Address of value read.
  *
  * Returns:
  *    Completion status: MRD__STS_OK
@@ -433,19 +479,19 @@ unsigned long  value;
  * Developer notes:
  *
  */
-static long mrd__read( paddr, mask, value )
-unsigned long* paddr;
-unsigned long  mask;
-unsigned long* value;
+static long mrd__read( ULONG* paddr, ULONG mask, ULONG* pvalue )
 {
 
    /* Read raw value from MRD and mask */
-   *value = *paddr & mask;
+   *pvalue = *paddr & mask;
+
+   /* Increment read count */
+   ++rMRD__info.recReadCount;
 
    /* Output diagnostic */
    if( devAvmeMRDDebug >= MRD__K_SHOWREAD )
    {
-      epicsPrintf( "devAvmeMRD:mrd__read(): Read 0x%8.8X from 0x%8.8X\n", (unsigned int)*value, (unsigned int)paddr );
+      epicsPrintf( "devAvmeMRD:mrd__read(): Read 0x%8.8X from 0x%8.8X\n", (UINT)*pvalue, (UINT)paddr );
    }
 
    /* Return completion status */
@@ -457,6 +503,189 @@ unsigned long* value;
 /****************************************************************************
  * Define record-specific methods
  ****************************************************************************/
+
+
+/*
+ * mrd__inputCommon()
+ *
+ * Description:
+ *    This method provides the common input specifications for record types.
+ *
+ * Input Parameters:
+ *    count    - # of input specification parameters.
+ *    precnam  - Pointer to record name string.
+ *    pvmeio   - Pointer to VME IO information.
+ *
+ * Output Parameters:
+ *    NONE.
+ *
+ * Returns:
+ *    Completion status:   Pointer to rMRD__INST structure
+ *                         NULL
+ *
+ * Developer notes:
+ *
+ */
+static rMRD__INST* mrd__inputCommon( ULONG count, char* precnam, struct vmeio* pvmeio )
+{
+int         cnt;
+UINT        start,
+            width,
+            type;
+rMRD__INST* pinst;
+
+
+   /* Initialize local variants */
+   cnt   = 0;
+   start = 0;
+   width = 0;
+   type  = 0;
+
+   /* Acquire data start bit number, width, and data type */
+   switch( count )
+   {
+   case 1:
+      cnt = sscanf( pvmeio->parm, "%d", &start );
+      break;
+
+   case 2:
+      cnt = sscanf( pvmeio->parm, "%d,%d", &start, &width );
+      break;
+
+   case 3:
+      cnt = sscanf( pvmeio->parm, "%d,%d,%d", &start, &width, &type );
+      break;
+   }
+
+   /* Evaluate return count */
+   if( cnt != count )
+   {
+      printf( "devAvmeMRD: Unexpected returned count (%d/%d) from sscanf() for %s\n", cnt, (UINT)count, precnam );
+
+      return( NULL );
+   }
+
+   /* Evaluate starting bit number */
+   if( count >= 1 )
+   {
+
+      if( start >= MRD__K_MAXBITS )
+      {
+         printf( "devAvmeMRD: Invalid start bit number %d specified for %s\n", start, precnam );
+
+         return( NULL );
+      }
+
+   }
+
+   /* Evaluate bit width */
+   if( count >= 2 )
+   {
+
+      if( (width <= 0) || ((start + width) > MRD__K_MAXBITS) )
+      {
+         printf( "devAvmeMRD: Invalid bit width %d specified for %s\n", width, precnam );
+
+         return( NULL );
+      }
+
+   }
+
+   /* Evaluate bit type */
+   if( count >= 3 )
+   {
+
+      if( type < 0 || type > 1 )
+      {
+         epicsPrintf( "devAvmeMRD: Invalid bit type %d specified for %s\n", type, precnam );
+
+         return( NULL );
+      }
+
+   }
+
+   /* Allocate memory for record instance */
+   pinst = calloc( 1, MRD__S_INST );
+   if( pinst == NULL )
+   {
+      printf( "devAvmeMRD: Failure to allocate instance memory for %s\n", precnam );
+
+      return( NULL );
+   }
+
+   /* Initialize MRD record instance structure */
+   pinst->pmrd    = &rMRD__info;
+   pinst->pdata   = &rMRD__info.base->data[pvmeio->signal];
+   pinst->dsbn    = start;
+   pinst->dtyp    = type;
+   pinst->dwid    = width;
+
+   /* Return instance pointer */
+   return( pinst );
+
+} /* end-method: mrd__inputCommon() */
+
+
+/*
+ * mrd__compareCommon()
+ *
+ * Description:
+ *    This method provides the common comparisons for record types.
+ *
+ * Input Parameters:
+ *    type     - Input type.
+ *    precnam  - Pointer to record name string.
+ *    pvmeio   - Pointer to VME IO information.
+ *
+ * Output Parameters:
+ *    NONE.
+ *
+ * Returns:
+ *    Completion status:   MRD__STS_OK
+ *                         MRD__STS_ERROR
+ *
+ * Developer notes:
+ *
+ */
+static long mrd__compareCommon( short type, char* precnam, struct vmeio* pvmeio )
+{
+
+   /* Evaluate input specification type */
+   if( type != VME_IO )
+   {
+      printf( "devAvmeMRD: Invalid input specification type %s\n", precnam );
+
+      return( MRD__STS_ERROR );
+   }
+
+   /* Evaluate base address */
+   if( rMRD__info.base == NULL )
+   {
+      printf( "devAvmeMRD: Base address not specified for %s\n", precnam );
+
+      return( MRD__STS_ERROR );
+   }
+
+   /* Evaluate card number */
+   if( pvmeio->card != rMRD__info.card )
+   {
+      printf( "devAvmeMRD: Invalid card number %d for %s\n", (UINT)pvmeio->card, precnam );
+
+      return( MRD__STS_ERROR );
+   }
+
+   /* Evaluate register number */
+   if( pvmeio->signal >= MRD__K_MAXREGS )
+   {
+      printf( "devAvmeMRD: Invalid register number %d specified for %s\n", pvmeio->signal, precnam );
+
+      return( MRD__STS_ERROR );
+   }
+
+   /* Return completion status */
+   return( MRD__STS_OK );
+
+} /* end-method: mrd__compareCommon() */
 
 
 /*
@@ -478,118 +707,47 @@ unsigned long* value;
  * Developer notes:
  *
  */
-static long ai__init( pai )
-struct aiRecord* pai;
+static long ai__init( struct aiRecord* pai )
 {
-long sts = MRD__STS_OK;
+long        sts = MRD__STS_OK;
+rMRD__INST* pinst;
 
 
-   /* Evaluate input type */
-   switch( pai->inp.type )
+   /* Initialize device private pointer */
+   pai->dpvt = NULL;
+
+   /* Evaluate common comparisons */
+   sts = mrd__compareCommon( pai->inp.type, pai->name, &pai->inp.value.vmeio );
+   if( sts != MRD__STS_OK )
    {
-      case VME_IO:
-      {
-      unsigned long  type;
-      unsigned long  start;
-      unsigned long  width;
-      rMRD__INST*    pinst;
+      pai->pact   = MRD__K_ACTIVE;
 
-         /* Evaluate base address */
-         if( mrd__info.base == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:ai__init(): Base address not specified for %s\n", pai->name );
-            sts         = MRD__STS_ERROR;
-            pai->pact   = MRD__K_ACTIVE;
+      return( sts );
+   }
 
-            break;
-         }
+   /* Evaluate common input specification */
+   pinst = mrd__inputCommon( 3, pai->name, &pai->inp.value.vmeio );
+   if( pinst == NULL )
+   {
+      pai->pact   = MRD__K_ACTIVE;
 
-         /* Evaluate card number */
-         if( pai->inp.value.vmeio.card != mrd__info.card )
-         {
-            epicsPrintf( "devAvmeMRD:ai__init(): Invalid card number %d for %s\n", (unsigned int)pai->inp.value.vmeio.card, pai->name );
-            sts         = MRD__STS_ERROR;
-            pai->pact   = MRD__K_ACTIVE;
+      return( MRD__STS_ERROR );
+   }
 
-            break;
-         }
+   /* Update record instance structure */
+   pinst->dmask   = ((1 << pinst->dwid) - 1) << pinst->dsbn;
 
-         /* Evaluate register number */
-         if( pai->inp.value.vmeio.signal >= MRD__K_MAXREGS )
-         {
-            epicsPrintf( "devAvmeMRD:ai__init(): Invalid register number %d specified for %s\n", pai->inp.value.vmeio.signal, pai->name );
-            sts         = MRD__STS_ERROR;
-            pai->pact   = MRD__K_ACTIVE;
+   /* Update AI record structure */
+   pai->dpvt      = pinst;
+   pai->eslo      = (pai->eguf - pai->egul) / (pow(2, pinst->dwid) - 1);
 
-            break;
-         }
+   if( pinst->dtyp == MRD__K_BIPOLAR )
+   {
+      pai->roff = pow(2, (pinst->dwid - 1));
+   }
 
-         /* Acquire data start bit number, width, and data type */
-         sts = sscanf( pai->inp.value.vmeio.parm, "%d,%d,%d", (unsigned int*)&start, (unsigned int*)&width, (unsigned int*)&type );
-
-         /* Evaluate completion status */
-         if( sts != 3 )
-         {
-            epicsPrintf( "devAvmeMRD:ai__init(): Completion status failure %d from sscanf() for %s\n", (unsigned int)sts, pai->name );
-            sts         = MRD__STS_ERROR;
-            pai->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Evaluate starting bit number, width, and type */
-         if( (start >= MRD__K_MAXBITS) || (width <= 0) || ((start + width) > MRD__K_MAXBITS) || (type < 0 || type > 1) )
-         {
-            epicsPrintf( "devAvmeMRD:ai__init(): Invalid bit number %d specified for %s\n", (unsigned int)start, pai->name );
-            sts         = MRD__STS_ERROR;
-            pai->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Allocate memory for MRD record instance */
-         pinst = calloc( 1, MRD__S_INST );
-         if( pinst == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:ai__init(): Failure to allocate instance memory for %s\n", pai->name );
-            sts         = MRD__STS_ERROR;
-            pai->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Initialize MRD record instance structure */
-         pinst->pmrd    = &mrd__info;
-         pinst->pdata   = &mrd__info.base->data[pai->inp.value.vmeio.signal];
-         pinst->dsbn    = start;
-         pinst->dtyp    = type;
-         pinst->dwid    = width;
-         pinst->dmask   = ((1 << width) - 1) << start;
-
-         /* Update AI record structure */
-         pai->dpvt      = pinst;
-         pai->eslo      = (pai->eguf - pai->egul) / (pow(2, width) - 1);
-
-         if( type == MRD__K_BIPOLAR )
-         {
-            pai->roff = pow(2, (width - 1));
-         }
-
-         /* Increment record instance count */
-         ++mrd__info.instCount;
-         break;
-      }
-
-      default:
-      {
-         sts         = MRD__STS_ERROR;
-         pai->pact   = MRD__K_ACTIVE;
-
-         epicsPrintf( "devAvmeMRD:ai__init(): Invalid input specified for %s\n", pai->name );
-         break;
-      }
-
-   } /* end-switch: ( pai->inp.type ) */
+   /* Increment record instance count */
+   ++rMRD__info.recInstCount;
 
    /* Return completion status */
    return( sts );
@@ -616,46 +774,57 @@ long sts = MRD__STS_OK;
  * Developer notes:
  *
  */
-static long ai__read( pai )
-struct aiRecord* pai;
+static long ai__read( struct aiRecord* pai )
 {
-long           sts;
-unsigned long  readback;
-rMRD__INST*    pinst;
 
-
-   /* Initialize local variants */
-   pinst = (rMRD__INST*)pai->dpvt;
-
-   /* Read register value */
-   sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
-   if( sts == MRD__STS_OK )
+   /* Validate device private pointer */
+   if( pai->dpvt == NULL)
    {
-      pai->rval   = readback >> pinst->dsbn;
+      pai->pact = MRD__K_ACTIVE;
 
-      /* Process sign extensions for bipolar */
-      if( pinst->dtyp == MRD__K_BIPOLAR )
+      return( MRD__STS_OKNOVAL );
+   }
+
+   /* start-block: process read */
+   {
+   long        sts;
+   ULONG       readback;
+   rMRD__INST* pinst;
+
+      /* Initialize local variants */
+      pinst = (rMRD__INST*)pai->dpvt;
+
+      /* Read register value */
+      sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
+      if( sts == MRD__STS_OK )
       {
-      unsigned long value = ( 2 << (pinst->dwid - 2) );
+         pai->rval   = readback >> pinst->dsbn;
 
-         if( pai->rval & value )
+         /* Process sign extensions for bipolar */
+         if( pinst->dtyp == MRD__K_BIPOLAR )
          {
-            pai->rval   |= ((2 << 31) - value) * 2;
+         ULONG value = ( 2 << (pinst->dwid - 2) );
+
+            if( pai->rval & value )
+            {
+               pai->rval   |= ((2 << 31) - value) * 2;
+            }
+
          }
 
       }
+      else
+      {
+         sts   = MRD__STS_OKNOVAL;
 
-   }
-   else
-   {
-      sts   = MRD__STS_OKNOVAL;
+         /* Set an alarm for the record */
+         recGblSetSevr( pai, READ_ALARM, INVALID_ALARM );
+      }
 
-      /* Set an alarm for the record */
-      recGblSetSevr( pai, READ_ALARM, INVALID_ALARM);
-   }
+      /* Return completion status */
+      return( sts );
 
-   /* Return completion status */
-   return( sts );
+   } /* end-block: process read */
 
 } /* end-method: ai__read() */
 
@@ -679,120 +848,54 @@ rMRD__INST*    pinst;
  * Developer notes:
  *
  */
-static long bi__init( pbi )
-struct biRecord* pbi;
+static long bi__init( struct biRecord* pbi )
 {
-long sts = MRD__STS_OK;
+long        sts = MRD__STS_OK;
+ULONG       readback;
+rMRD__INST* pinst;
 
 
-   /* Evaluate input type */
-   switch( pbi->inp.type )
+   /* Initialize device private pointer */
+   pbi->dpvt = NULL;
+
+   /* Evaluate common comparisons */
+   sts = mrd__compareCommon( pbi->inp.type, pbi->name, &pbi->inp.value.vmeio );
+   if( sts != MRD__STS_OK )
    {
-      case VME_IO:
-      {
-      unsigned long  sbn;
-      unsigned long  readback;
-      rMRD__INST*    pinst;
+      pbi->pact   = MRD__K_ACTIVE;
 
-         /* Evaluate base address */
-         if( mrd__info.base == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:bi__init(): Base address not specified for %s\n", pbi->name );
-            sts         = MRD__STS_ERROR;
-            pbi->pact   = MRD__K_ACTIVE;
+      return( sts );
+   }
 
-            break;
-         }
+   /* Evaluate common input specification */
+   pinst = mrd__inputCommon( 1, pbi->name, &pbi->inp.value.vmeio );
+   if( pinst == NULL )
+   {
+      pbi->pact   = MRD__K_ACTIVE;
 
-         /* Evaluate card number */
-         if( pbi->inp.value.vmeio.card != mrd__info.card )
-         {
-            epicsPrintf( "devAvmeMRD:bi__init(): Invalid card number %d for %s\n", (unsigned int)pbi->inp.value.vmeio.card, pbi->name );
-            sts         = MRD__STS_ERROR;
-            pbi->pact   = MRD__K_ACTIVE;
+      return( MRD__STS_ERROR );
+   }
 
-            break;
-         }
+   /* Update record instance structure */
+   pinst->dmask   = 1 << pinst->dsbn;
 
-         /* Evaluate register number */
-         if( pbi->inp.value.vmeio.signal >= MRD__K_MAXREGS )
-         {
-            epicsPrintf( "devAvmeMRD:bi__init(): Invalid register number %d specified for %s\n", pbi->inp.value.vmeio.signal, pbi->name );
-            sts         = MRD__STS_ERROR;
-            pbi->pact   = MRD__K_ACTIVE;
+   /* Update BI record structure */
+   pbi->dpvt      = pinst;
+   pbi->mask      = pinst->dmask;
 
-            break;
-         }
+   /* Initialize record raw input value */
+   sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
+   if( sts == MRD__STS_OK )
+   {
+      pbi->rval   = readback;
+   }
+   else
+   {
+      sts         = MRD__STS_OKNOVAL;
+   }
 
-         /* Acquire data start bit number */
-         sts = sscanf( pbi->inp.value.vmeio.parm, "%d", (unsigned int*)&sbn );
-
-         /* Evaluate completion status */
-         if( sts != 1 )
-         {
-            epicsPrintf( "devAvmeMRD:bi__init(): Completion status failure %d from sscanf() for %s\n", (unsigned int)sts, pbi->name );
-            sts         = MRD__STS_ERROR;
-            pbi->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Evaluate starting bit number */
-         if( sbn >= MRD__K_MAXBITS )
-         {
-            epicsPrintf( "devAvmeMRD:bi__init(): Invalid bit number %d specified for %s\n", (unsigned int)sbn, pbi->name );
-            sts         = MRD__STS_ERROR;
-            pbi->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Allocate memory for MRD record instance */
-         pinst = calloc( 1, MRD__S_INST );
-         if( pinst == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:bi__init(): Failure to allocate instance memory for %s\n", pbi->name );
-            sts         = MRD__STS_ERROR;
-            pbi->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Initialize MRD record instance structure */
-         pinst->pmrd    = &mrd__info;
-         pinst->pdata   = &mrd__info.base->data[pbi->inp.value.vmeio.signal];
-         pinst->dmask   = 1 << sbn;
-
-         /* Update BI record structure */
-         pbi->dpvt      = pinst;
-         pbi->mask      = pinst->dmask;
-
-         /* Initialize record raw input value */
-         sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
-         if( sts == MRD__STS_OK )
-         {
-            pbi->rval   = readback;
-         }
-         else
-         {
-            sts         = MRD__STS_OKNOVAL;
-         }
-
-         /* Increment record instance count */
-         ++mrd__info.instCount;
-         break;
-      }
-
-      default:
-      {
-         sts         = MRD__STS_ERROR;
-         pbi->pact   = MRD__K_ACTIVE;
-
-         epicsPrintf( "devAvmeMRD:bi__init(): Invalid INP type specified for %s\n", pbi->name );
-         break;
-      }
-
-   } /* end-switch: ( pbi->inp.type ) */
+   /* Increment record instance count */
+   ++rMRD__info.recInstCount;
 
    /* Return completion status */
    return( sts );
@@ -819,33 +922,45 @@ long sts = MRD__STS_OK;
  * Developer notes:
  *
  */
-static long bi__read( pbi )
-struct biRecord* pbi;
+static long bi__read( struct biRecord* pbi )
 {
-long           sts;
-unsigned long  readback;
-rMRD__INST*    pinst;
 
-
-   /* Initialize local variants */
-   pinst = (rMRD__INST*)pbi->dpvt;
-
-   /* Read register value */
-   sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
-   if( sts == MRD__STS_OK )
+   /* Validate device private pointer */
+   if( pbi->dpvt == NULL)
    {
-      pbi->rval   = readback;
-   }
-   else
-   {
-      sts         = MRD__STS_OKNOVAL;
+      pbi->pact = MRD__K_ACTIVE;
 
-      /* Set an alarm for the record */
-      recGblSetSevr( pbi, READ_ALARM, INVALID_ALARM);
+      return( MRD__STS_OKNOVAL );
    }
 
-   /* Return completion status */
-   return( sts );
+   /* start-block: proccess read */
+   {
+   long        sts;
+   ULONG       readback;
+   rMRD__INST* pinst;
+
+
+      /* Initialize local variants */
+      pinst = (rMRD__INST*)pbi->dpvt;
+
+      /* Read register value */
+      sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
+      if( sts == MRD__STS_OK )
+      {
+         pbi->rval   = readback;
+      }
+      else
+      {
+         sts         = MRD__STS_OKNOVAL;
+
+         /* Set an alarm for the record */
+         recGblSetSevr( pbi, READ_ALARM, INVALID_ALARM );
+      }
+
+      /* Return completion status */
+      return( sts );
+
+   } /* end-block: process read */
 
 } /* end-method: bi__read() */
 
@@ -869,19 +984,16 @@ rMRD__INST*    pinst;
  * Developer notes:
  *
  */
-static long bi__getIntInfo( cmd, pbi, ppvt )
-int             cmd;
-struct biRecord *pbi;
-IOSCANPVT       *ppvt;
+static long bi__getIntInfo( int cmd, struct biRecord* pbi, IOSCANPVT* ppvt )
 {
 long sts;
 
    /* Acquire IO scan address */
-   if( mrd__info.ioscanpvt )
+   if( rMRD__info.ioscanpvt )
    {
       sts   = MRD__STS_OK;
 
-      *ppvt = mrd__info.ioscanpvt;
+      *ppvt = rMRD__info.ioscanpvt;
    }
    else
    {
@@ -913,120 +1025,54 @@ long sts;
  * Developer notes:
  *
  */
-static long bo__init( pbo )
-struct boRecord *pbo;
+static long bo__init( struct boRecord* pbo )
 {
-long sts = MRD__STS_OK;
+long        sts = MRD__STS_OK;
+ULONG       readback;
+rMRD__INST* pinst;
 
 
-   /* Evaluate input type */
-   switch( pbo->out.type )
+   /* Initialize device private pointer */
+   pbo->dpvt = NULL;
+
+   /* Evaluate common comparisons */
+   sts = mrd__compareCommon( pbo->out.type, pbo->name, &pbo->out.value.vmeio );
+   if( sts != MRD__STS_OK )
    {
-      case VME_IO:
-      {
-      unsigned long  sbn;
-      unsigned long  readback;
-      rMRD__INST*    pinst;
+      pbo->pact   = MRD__K_ACTIVE;
 
-         /* Evaluate base address */
-         if( mrd__info.base == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:bo__init(): Base address not specified for %s\n", pbo->name );
-            sts         = MRD__STS_ERROR;
-            pbo->pact   = MRD__K_ACTIVE;
+      return( sts );
+   }
 
-            break;
-         }
+   /* Evaluate common output specification */
+   pinst = mrd__inputCommon( 1, pbo->name, &pbo->out.value.vmeio );
+   if( pinst == NULL )
+   {
+      pbo->pact   = MRD__K_ACTIVE;
 
-         /* Evaluate card number */
-         if( pbo->out.value.vmeio.card != mrd__info.card )
-         {
-            epicsPrintf( "devAvmeMRD:bo__init(): Invalid card number %d for %s\n", (unsigned int)pbo->out.value.vmeio.card, pbo->name );
-            sts         = MRD__STS_ERROR;
-            pbo->pact   = MRD__K_ACTIVE;
+      return( MRD__STS_ERROR );
+   }
 
-            break;
-         }
+   /* Update record instance structure */
+   pinst->dmask   = 1 << pinst->dsbn;
 
-         /* Evaluate register number */
-         if( pbo->out.value.vmeio.signal >= MRD__K_MAXREGS )
-         {
-            epicsPrintf( "devAvmeMRD:bo__init(): Invalid register number %d specified for %s\n", pbo->out.value.vmeio.signal, pbo->name );
-            sts         = MRD__STS_ERROR;
-            pbo->pact   = MRD__K_ACTIVE;
+   /* Update BO record structure */
+   pbo->dpvt      = pinst;
+   pbo->mask      = pinst->dmask;
 
-            break;
-         }
+   /* Initialize record raw input value */
+   sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
+   if( sts == MRD__STS_OK )
+   {
+      pbo->rbv = readback;
+   }
+   else
+   {
+      sts      = MRD__STS_OKNOVAL;
+   }
 
-         /* Acquire data start bit number */
-         sts = sscanf( pbo->out.value.vmeio.parm, "%d", (unsigned int*)&sbn );
-
-         /* Evaluate completion status */
-         if( sts != 1 )
-         {
-            epicsPrintf( "devAvmeMRD:bo__init(): Completion status failure %d from sscanf() for %s\n", (unsigned int)sts, pbo->name );
-            sts         = MRD__STS_ERROR;
-            pbo->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Evaluate starting bit number */
-         if( sbn >= MRD__K_MAXBITS )
-         {
-            epicsPrintf( "devAvmeMRD:bo__init(): Invalid bit number %d specified for %s\n", (unsigned int)sbn, pbo->name );
-            sts         = MRD__STS_ERROR;
-            pbo->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Allocate memory for MRD record instance */
-         pinst = calloc( 1, MRD__S_INST );
-         if( pinst == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:bo__init(): Failure to allocate instance memory for %s\n", pbo->name );
-            sts         = MRD__STS_ERROR;
-            pbo->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Initialize MRD record instance structure */
-         pinst->pmrd    = &mrd__info;
-         pinst->pdata   = &mrd__info.base->data[pbo->out.value.vmeio.signal];
-         pinst->dmask   = 1 << sbn;
-
-         /* Update BO record structure */
-         pbo->dpvt      = pinst;
-         pbo->mask      = pinst->dmask;
-
-         /* Initialize record raw input value */
-         sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
-         if( sts == MRD__STS_OK )
-         {
-            pbo->rbv = readback;
-         }
-         else
-         {
-            sts      = MRD__STS_OKNOVAL;
-         }
-
-         /* Increment record instance count */
-         ++mrd__info.instCount;
-         break;
-      }
-
-      default:
-      {
-         sts         = MRD__STS_ERROR;
-         pbo->pact   = MRD__K_ACTIVE;
-
-         epicsPrintf( "devAvmeMRD:bo__init(): Invalid OUT type specified for %s\n", pbo->name );
-         break;
-      }
-
-   } /* end-switch: ( pbo->inp.type ) */
+   /* Increment record instance count */
+   ++rMRD__info.recInstCount;
 
    /* Return completion status */
    return( sts );
@@ -1053,40 +1099,62 @@ long sts = MRD__STS_OK;
  * Developer notes:
  *
  */
-static long bo__write( pbo )
-struct boRecord *pbo;
+static long bo__write( struct boRecord* pbo )
 {
-long        sts;
-rMRD__INST* pinst;
 
-
-   /* Initialize local variants */
-   pinst = (rMRD__INST*)pbo->dpvt;
-
-   /* Write register value */
-   sts = mrd__write( pinst->pdata, pinst->dmask, pbo->rval );
-   if( sts == MRD__STS_OK )
+   /* Validate device private pointer */
+   if( pbo->dpvt == NULL)
    {
-   unsigned long  readback;
+      pbo->pact = MRD__K_ACTIVE;
 
-      /* Read register value */
-      sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
-      if( sts == MRD__STS_OK )
-      {
-         /* Assign readback to record */
-         pbo->rbv = readback;
-
-         /* Return completion status */
-         return( MRD__STS_OK );
-      }
-
+      return( MRD__STS_OKNOVAL );
    }
 
-   /* Set an alarm for the record */
-   recGblSetSevr( pbo, WRITE_ALARM, INVALID_ALARM);
+   /* start-block: process write */
+   {
+   long        sts;
+   rMRD__INST* pinst;
 
-   /* Return completion status */
-   return( MRD__STS_OKNOVAL );
+
+      /* Initialize local variants */
+      pinst = (rMRD__INST*)pbo->dpvt;
+
+      /* Write register value */
+      sts = mrd__write( pinst->pdata, pinst->dmask, pbo->rval );
+      if( sts == MRD__STS_OK )
+      {
+      ULONG  readback;
+
+         /* Read register value */
+         sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
+         if( sts == MRD__STS_OK )
+         {
+
+            /* Compare read / write data */
+            if( (pinst->dmask & pbo->rval) != readback )
+            {
+               pbo->pact = MRD__K_ACTIVE;
+               recGblSetSevr( pbo, READ_ALARM, INVALID_ALARM );
+
+               return( MRD__STS_OKNOVAL );
+            }
+
+            /* Assign readback to record */
+            pbo->rbv = readback;
+
+            /* Return completion status */
+            return( MRD__STS_OK );
+         }
+
+      }
+
+      /* Set an alarm for the record */
+      recGblSetSevr( pbo, WRITE_ALARM, INVALID_ALARM );
+
+      /* Return completion status */
+      return( MRD__STS_OKNOVAL );
+
+   } /* end-block: process write */
 
 } /* end-method: bo__write() */
 
@@ -1110,109 +1178,41 @@ rMRD__INST* pinst;
  * Developer notes:
  *
  */
-static long longin__init( pli )
-struct longinRecord* pli;
+static long longin__init( struct longinRecord* pli )
 {
-long sts = MRD__STS_OK;
+long        sts = MRD__STS_OK;
+rMRD__INST* pinst;
 
 
-   /* Evaluate input type */
-   switch( pli->inp.type )
+   /* Initialize device private pointer */
+   pli->dpvt = NULL;
+
+   /* Evaluate common comparisons */
+   sts = mrd__compareCommon( pli->inp.type, pli->name, &pli->inp.value.vmeio );
+   if( sts != MRD__STS_OK )
    {
-      case VME_IO:
-      {
-      unsigned long  start;
-      unsigned long  width;
-      rMRD__INST*    pinst;
+      pli->pact   = MRD__K_ACTIVE;
 
-         /* Evaluate base address */
-         if( mrd__info.base == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:longin__init(): Base address not specified for %s\n", pli->name );
-            sts         = MRD__STS_ERROR;
-            pli->pact   = MRD__K_ACTIVE;
+      return( sts );
+   }
 
-            break;
-         }
+   /* Evaluate common input specification */
+   pinst = mrd__inputCommon( 2, pli->name, &pli->inp.value.vmeio );
+   if( pinst == NULL )
+   {
+      pli->pact   = MRD__K_ACTIVE;
 
-         /* Evaluate card number */
-         if( pli->inp.value.vmeio.card != mrd__info.card )
-         {
-            epicsPrintf( "devAvmeMRD:longin__init(): Invalid card number %d for %s\n", (unsigned int)pli->inp.value.vmeio.card, pli->name );
-            sts         = MRD__STS_ERROR;
-            pli->pact   = MRD__K_ACTIVE;
+      return( MRD__STS_ERROR );
+   }
 
-            break;
-         }
+   /* Update record instance structure */
+   pinst->dmask   = ((1 << pinst->dwid) - 1) << pinst->dsbn;
 
-         /* Evaluate register number */
-         if( pli->inp.value.vmeio.signal >= MRD__K_MAXREGS )
-         {
-            epicsPrintf( "devAvmeMRD:longin__init(): Invalid register number %d specified for %s\n", pli->inp.value.vmeio.signal, pli->name );
-            sts         = MRD__STS_ERROR;
-            pli->pact   = MRD__K_ACTIVE;
+   /* Update LONGIN record structure */
+   pli->dpvt      = pinst;
 
-            break;
-         }
-
-         /* Acquire data start bit number and data width */
-         sts = sscanf( pli->inp.value.vmeio.parm, "%d,%d", (unsigned int*)&start, (unsigned int*)&width );
-
-         /* Evaluate completion status */
-         if( sts != 2 )
-         {
-            epicsPrintf( "devAvmeMRD:longin__init(): Completion status failure %d from sscanf() for %s\n", (unsigned int)sts, pli->name );
-            sts         = MRD__STS_ERROR;
-            pli->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Evaluate data start bit number and width */
-         if( (start >= MRD__K_MAXBITS) || (width <= 0) || ((start + width) > MRD__K_MAXBITS) )
-         {
-            epicsPrintf( "devAvmeMRD:longin__init(): Invalid bit number %d specified for %s\n", (unsigned int)start, pli->name );
-            sts         = MRD__STS_ERROR;
-            pli->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Allocate memory for MRD record instance */
-         pinst = calloc( 1, MRD__S_INST );
-         if( pinst == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:longin__init(): Failure to allocate instance memory for %s\n", pli->name );
-            sts         = MRD__STS_ERROR;
-            pli->pact   = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Initialize MRD record instance structure */
-         pinst->pmrd    = &mrd__info;
-         pinst->pdata   = &mrd__info.base->data[pli->inp.value.vmeio.signal];
-         pinst->dsbn    = start;
-         pinst->dmask   = ((1 << width) - 1) << start;
-
-         /* Update LONGIN record structure */
-         pli->dpvt      = pinst;
-
-         /* Increment record instance count */
-         ++mrd__info.instCount;
-         break;
-      }
-
-      default:
-      {
-         sts         = MRD__STS_ERROR;
-         pli->pact   = MRD__K_ACTIVE;
-
-         epicsPrintf( "devAvmeMRD:longin__init(): Invalid INP type specified for %s\n", pli->name );
-         break;
-      }
-
-   } /* end-switch: ( pli->inp.type ) */
+   /* Increment record instance count */
+   ++rMRD__info.recInstCount;
 
    /* Return completion status */
    return( sts );
@@ -1239,34 +1239,46 @@ long sts = MRD__STS_OK;
  * Developer notes:
  *
  */
-static long longin__read( pli )
-struct longinRecord* pli;
+static long longin__read( struct longinRecord* pli )
 {
-long           sts;
-unsigned long  readback;
-rMRD__INST*    pinst;
 
-
-   /* Initialize local variants */
-   pinst = (rMRD__INST*)pli->dpvt;
-
-   /* Read register value */
-   sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
-   if( sts == MRD__STS_OK )
+   /* Validate device private pointer */
+   if( pli->dpvt == NULL)
    {
-      pli->val = readback >> pinst->dsbn;
-      pli->udf = 0;
-   }
-   else
-   {
-      sts      = MRD__STS_OKNOVAL;
+      pli->pact = MRD__K_ACTIVE;
 
-      /* Set an alarm for the record */
-      recGblSetSevr( pli, READ_ALARM, INVALID_ALARM);
+      return( MRD__STS_OKNOVAL );
    }
 
-   /* Return completion status */
-   return( sts );
+   /* start-block: process read */
+   {
+   long        sts;
+   ULONG       readback;
+   rMRD__INST* pinst;
+
+
+      /* Initialize local variants */
+      pinst = (rMRD__INST*)pli->dpvt;
+
+      /* Read register value */
+      sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
+      if( sts == MRD__STS_OK )
+      {
+         pli->val = readback >> pinst->dsbn;
+         pli->udf = 0;
+      }
+      else
+      {
+         sts      = MRD__STS_OKNOVAL;
+
+         /* Set an alarm for the record */
+         recGblSetSevr( pli, READ_ALARM, INVALID_ALARM );
+      }
+
+      /* Return completion status */
+      return( sts );
+
+   } /* end-block: process read */
 
 } /* end-method: longin__read() */
 
@@ -1291,121 +1303,55 @@ rMRD__INST*    pinst;
  *    1) The mask (data width) is determined from the NOBT field.
  *
  */
-static long mbbi__init( pmbbi )
-struct mbbiRecord* pmbbi;
+static long mbbi__init( struct mbbiRecord* pmbbi )
 {
-long sts = MRD__STS_OK;
+long        sts = MRD__STS_OK;
+ULONG       readback;
+rMRD__INST* pinst;
 
 
-   /* Evaluate input type */
-   switch( pmbbi->inp.type )
+   /* Initialize device private pointer */
+   pmbbi->dpvt = NULL;
+
+   /* Evaluate common comparisons */
+   sts = mrd__compareCommon( pmbbi->inp.type, pmbbi->name, &pmbbi->inp.value.vmeio );
+   if( sts != MRD__STS_OK )
    {
-      case VME_IO:
-      {
-      unsigned long  sbn;
-      unsigned long  readback;
-      rMRD__INST*    pinst;
+      pmbbi->pact = MRD__K_ACTIVE;
 
-         /* Evaluate base address */
-         if( mrd__info.base == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:mbbi__init(): Base address not specified for %s\n", pmbbi->name );
-            sts         = MRD__STS_ERROR;
-            pmbbi->pact = MRD__K_ACTIVE;
+      return( sts );
+   }
 
-            break;
-         }
+   /* Evaluate common input specification */
+   pinst = mrd__inputCommon( 1, pmbbi->name, &pmbbi->inp.value.vmeio );
+   if( pinst == NULL )
+   {
+      pmbbi->pact = MRD__K_ACTIVE;
 
-         /* Evaluate card number */
-         if( pmbbi->inp.value.vmeio.card != mrd__info.card )
-         {
-            epicsPrintf( "devAvmeMRD:mbbi__init(): Invalid card number %d for %s\n", (unsigned int)pmbbi->inp.value.vmeio.card, pmbbi->name );
-            sts         = MRD__STS_ERROR;
-            pmbbi->pact = MRD__K_ACTIVE;
+      return( MRD__STS_ERROR );
+   }
 
-            break;
-         }
+   /* Update record instance structure */
+   pinst->dmask   = pmbbi->mask << pinst->dsbn;
 
-         /* Evaluate register number */
-         if( pmbbi->inp.value.vmeio.signal >= MRD__K_MAXREGS )
-         {
-            epicsPrintf( "devAvmeMRD:mbbi__init(): Invalid register number %d specified for %s\n", pmbbi->inp.value.vmeio.signal, pmbbi->name );
-            sts         = MRD__STS_ERROR;
-            pmbbi->pact = MRD__K_ACTIVE;
+   /* Update MBBI record structure */
+   pmbbi->dpvt    = pinst;
+   pmbbi->shft    = pinst->dsbn;
+   pmbbi->mask    = pinst->dmask;
 
-            break;
-         }
+   /* Initialize record raw input value */
+   sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
+   if( sts == MRD__STS_OK )
+   {
+      pmbbi->rval = readback;
+   }
+   else
+   {
+      sts         = MRD__STS_OKNOVAL;
+   }
 
-         /* Acquire data start bit number */
-         sts = sscanf( pmbbi->inp.value.vmeio.parm, "%d", (unsigned int*)&sbn );
-
-         /* Evaluate completion status */
-         if( sts != 1 )
-         {
-            epicsPrintf( "devAvmeMRD:mbbi__init(): Completion status failure %d from sscanf() for %s\n", (unsigned int)sts, pmbbi->name );
-            sts         = MRD__STS_ERROR;
-            pmbbi->pact = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Evaluate starting bit number */
-         if( sbn >= MRD__K_MAXBITS )
-         {
-            epicsPrintf( "devAvmeMRD:mbbi__init(): Invalid bit number %d specified for %s\n", (unsigned int)sbn, pmbbi->name );
-            sts         = MRD__STS_ERROR;
-            pmbbi->pact = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Allocate memory for MRD record instance */
-         pinst = calloc( 1, MRD__S_INST );
-         if( pinst == NULL )
-         {
-            epicsPrintf( "devAvmeMRD:mbbi__init(): Failure to allocate instance memory for %s\n", pmbbi->name );
-            sts         = MRD__STS_ERROR;
-            pmbbi->pact = MRD__K_ACTIVE;
-
-            break;
-         }
-
-         /* Initialize MRD record instance structure */
-         pinst->pmrd    = &mrd__info;
-         pinst->pdata   = &mrd__info.base->data[pmbbi->inp.value.vmeio.signal];
-         pinst->dmask   = pmbbi->mask << sbn;
-
-         /* Update MBBI record structure */
-         pmbbi->dpvt    = pinst;
-         pmbbi->shft    = sbn;
-         pmbbi->mask    = pinst->dmask;
-
-         /* Initialize record raw input value */
-         sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
-         if( sts == MRD__STS_OK )
-         {
-            pmbbi->rval = readback;
-         }
-         else
-         {
-            sts         = MRD__STS_OKNOVAL;
-         }
-
-         /* Increment record instance count */
-         ++mrd__info.instCount;
-         break;
-      }
-
-      default:
-      {
-         sts         = MRD__STS_ERROR;
-         pmbbi->pact = MRD__K_ACTIVE;
-
-         epicsPrintf( "devAvmeMRD:mbbi__init(): Invalid INP type specified for %s\n", pmbbi->name );
-         break;
-      }
-
-   } /* end-switch: ( pmbbi->inp.type ) */
+   /* Increment record instance count */
+   ++rMRD__info.recInstCount;
 
    /* Return completion status */
    return( sts );
@@ -1432,33 +1378,57 @@ long sts = MRD__STS_OK;
  * Developer notes:
  *
  */
-static long mbbi__read( pmbbi )
-struct mbbiRecord* pmbbi;
+static long mbbi__read( struct mbbiRecord* pmbbi )
 {
-long           sts;
-unsigned long  readback;
-rMRD__INST*    pinst;
 
-
-   /* Initialize local variants */
-   pinst = (rMRD__INST*)pmbbi->dpvt;
-
-   /* Read register value */
-   sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
-   if( sts == MRD__STS_OK )
+   /* Validate device private pointer */
+   if( pmbbi->dpvt == NULL)
    {
-      pmbbi->rval = readback;
-   }
-   else
-   {
-      sts         = MRD__STS_OKNOVAL;
+      pmbbi->pact = MRD__K_ACTIVE;
 
-      /* Set an alarm for the record */
-      recGblSetSevr( pmbbi, READ_ALARM, INVALID_ALARM);
+      return( MRD__STS_OKNOVAL );
    }
 
-   /* Return completion status */
-   return( sts );
+   /* start-block: process read */
+   {
+   long        sts;
+   ULONG       readback;
+   rMRD__INST* pinst;
+
+
+      /* Initialize local variants */
+      pinst = (rMRD__INST*)pmbbi->dpvt;
+
+      /* Initialize local variants */
+      if( pmbbi->dpvt )
+      {
+         pinst     = (rMRD__INST*)pmbbi->dpvt;
+      }
+      else
+      {
+         pmbbi->pact = MRD__K_ACTIVE;
+
+         return( MRD__STS_OKNOVAL );
+      }
+
+      /* Read register value */
+      sts = mrd__read( pinst->pdata, pinst->dmask, &readback );
+      if( sts == MRD__STS_OK )
+      {
+         pmbbi->rval = readback;
+      }
+      else
+      {
+         sts         = MRD__STS_OKNOVAL;
+
+         /* Set an alarm for the record */
+         recGblSetSevr( pmbbi, READ_ALARM, INVALID_ALARM );
+      }
+
+      /* Return completion status */
+      return( sts );
+
+   } /* end-block: process read */
 
 } /* end-method: mbbi__read() */
 
@@ -1489,7 +1459,7 @@ rMRD__INST*    pinst;
  */
 int devAvmeMRDReport( )
 {
-   return( mrd__report( 0 ) );
+   return( mrd__report( 1 ) );
 }
 
 /*
@@ -1512,17 +1482,14 @@ int devAvmeMRDReport( )
  *    Completion status:   MRD__STS_OK
  *                         MRD__STS_ERROR
  *
- * ssDeveloper notes:
+ * Developer notes:
  *
  */
-int devAvmeMRDConfig( base, vector, level )
-unsigned long base;
-unsigned long vector;
-unsigned long level;
+int devAvmeMRDConfig( ULONG base, ULONG vector, ULONG level )
 {
-STATUS               sts;
-unsigned long        value;
-static unsigned char init = FALSE;
+STATUS         sts;
+ULONG          value;
+static UCHAR   init = FALSE;
 
 
    /* Evaluate card initialization */
@@ -1540,7 +1507,7 @@ static unsigned char init = FALSE;
    /* Evaluate passed base address */
    if( base >= MRD__K_MAXADDR )
    {
-      epicsPrintf( "devAvmeMRDConfig(): Invalid base address 0x%8.8X\n", (unsigned int)base );
+      epicsPrintf( "devAvmeMRDConfig(): Invalid base address 0x%8.8X\n", (UINT)base );
 
       return( MRD__STS_ERROR );
    }
@@ -1548,7 +1515,7 @@ static unsigned char init = FALSE;
    /* Evaluate passed interrupt vector */
    if( (vector == 0) || (vector > MRD__K_IVEC) )
    {
-      epicsPrintf( "devAvmeMRDConfig(): Invalid vector 0x%8.8X\n", (unsigned int)vector );
+      epicsPrintf( "devAvmeMRDConfig(): Invalid vector 0x%8.8X\n", (UINT)vector );
 
       return( MRD__STS_ERROR );
    }
@@ -1556,64 +1523,73 @@ static unsigned char init = FALSE;
    /* Evaluate passed interrupt level */
    if( (level < 1) || (level > 7) )
    {
-      epicsPrintf( "devAvmeMRDConfig(): Invalid Interrupt level %d\n", (unsigned int)level );
+      epicsPrintf( "devAvmeMRDConfig(): Invalid Interrupt level %d\n", (UINT)level );
 
       return( MRD__STS_ERROR );
    }
 
    /* Map base address into local space */
-   sts = sysBusToLocalAdrs( VME_AM_EXT_USR_DATA, (char*)base, (char**)&mrd__info.base );
+   sts = devRegisterAddress( "devAvmeMRD", atVMEA32, base, MRD__S_REGS, (volatile void**)&rMRD__info.base );
    if( sts )
    {
-      memset( &mrd__info, 0, MRD__S_INFO );
-      epicsPrintf( "devAvmeMRDConfig(): Failure to map address 0x%8.8X\n", (unsigned int)base );
+      memset( &rMRD__info, 0, MRD__S_INFO );
+      epicsPrintf( "devAvmeMRDConfig(): Failure to map address 0x%8.8X\n", (UINT)base );
 
       return( MRD__STS_ERROR );
    }
 
    /* Probe (read) base address */
-   sts = vxMemProbe( (char*)mrd__info.base, VX_READ, sizeof(value), (char*)&value );
+   sts = devReadProbe( sizeof(value), (char*)rMRD__info.base, (char*)&value );
    if( sts )
    {
-      memset( &mrd__info, 0, MRD__S_INFO );
-      epicsPrintf( "devAvmeMRDConfig(): Failure to probe address 0x%8.8X\n", (unsigned int)base );
+      memset( &rMRD__info, 0, MRD__S_INFO );
+      epicsPrintf( "devAvmeMRDConfig(): Failure to probe address 0x%8.8X\n", (UINT)base );
 
       return( MRD__STS_ERROR );
    }
 
    /* Initialize MRD INFO structure */
-   mrd__info.card = 0;
-   mrd__info.lock = epicsMutexMustCreate();
+   rMRD__info.card = 0;
+   rMRD__info.lock = epicsMutexMustCreate();
 
    /* Initialize EPICS IO scan */
-   scanIoInit( &mrd__info.ioscanpvt );
+   scanIoInit( &rMRD__info.ioscanpvt );
 
-   /* Connect with VxWorks interrupt mechanism */
-   sts = intConnect( INUM_TO_IVEC(vector), mrd__isr, (int)&mrd__info );
+   /* Connect with interrupt mechanism */
+   sts = devConnectInterrupt( intVME, vector, mrd__isr, &rMRD__info );
    if( sts )
    {
-      memset( &mrd__info, 0, MRD__S_INFO );
+      memset( &rMRD__info, 0, MRD__S_INFO );
       epicsPrintf( "devAvmeMRDConfig(): Failure to connect with interrupt\n" );
 
       return( MRD__STS_ERROR );
    }
 
    /* Initialize MRD */
-   mrd__info.base->rREGS.IVEC  = vector;
-   mrd__info.base->rREGS.IDC   = MRD__K_IDC;
-   mrd__info.base->rREGS.ICR   = MRD__K_ICR;
+   rMRD__info.base->rREGS.IVEC  = vector;
+   rMRD__info.base->rREGS.IDC   = MRD__K_IDC;
+   rMRD__info.base->rREGS.ICR   = MRD__K_ICR;
 
    /* Enable VME interrupt (IRQ) level */
-   sts = sysIntEnable( level );
+   sts = devEnableInterruptLevel( intVME, level );
    if( sts )
    {
-      epicsPrintf( "devAvmeMRDConfig(): Failure to enable IRQ%1.1d\n", (unsigned int)level );
+      epicsPrintf( "devAvmeMRDConfig(): Failure to enable IRQ%1.1d\n", (UINT)level );
 
       return( MRD__STS_ERROR );
    }
 
-   /* Add to the list of routines called when VxWorks is rebooted */
-   sts = rebootHookAdd( (FUNCPTR)mrd__reboot );
+   /* Add to the list of routines called when IOC rebooted */
+#if ( MRD__GT_EPICSBASE(3,14,6) )
+   sts = epicsAtExit( mrd__reboot, NULL );
+#else
+
+   #ifdef vxWorks
+      sts = rebootHookAdd( (FUNCPTR)mrd__reboot );
+   #endif
+
+#endif
+
    if( sts )
    {
       epicsPrintf( "devAvmeMRDConfig(): Failure to add reboot hook\n" );
