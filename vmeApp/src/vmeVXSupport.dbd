@@ -23,11 +23,11 @@ device(longin,VME_IO,devLiHP10895LaserAxis,"HP interferometer")
 device(longout,VME_IO,devLoHP10895LaserAxis,"HP interferometer")
 
 # Bunch clock generator (Frank Lenkszus)
-#device(ai,VME_IO,devAiBunchClkGen,"APS Bunch Clock")
-#device(ao,VME_IO,devAoBunchClkGen,"APS Bunch Clock")
-#device(bi,VME_IO,devBiBunchClkGen,"APS Bunch Clock")
-#device(bo,VME_IO,devBoBunchClkGen,"APS Bunch Clock")
-#device(waveform,VME_IO,devWfBunchClkGen,"APS Bunch Clock")
+device(ai,VME_IO,devAiBunchClkGen,"APS Bunch Clock")
+device(ao,VME_IO,devAoBunchClkGen,"APS Bunch Clock")
+device(bi,VME_IO,devBiBunchClkGen,"APS Bunch Clock")
+device(bo,VME_IO,devBoBunchClkGen,"APS Bunch Clock")
+device(waveform,VME_IO,devWfBunchClkGen,"APS Bunch Clock")
 
 # Generic A32/D32 VME Access 
 device(ai,VME_IO,devAiA32Vme,"Generic A32 VME")
