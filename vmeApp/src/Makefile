@@ -45,14 +45,6 @@ vme_SRCS_vxWorks += devAvme9440.c
 # For machine-status board
 vme_SRCS_vxWorks  += devA32Vme.c
 
-# <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
-vme_SRCS += vme_registerRecordDeviceDriver.cpp
-vme_SRCS_vxWorks += vmeVX_registerRecordDeviceDriver.cpp
-#vme_SRCS_DEFAULT += vmeMain.cpp #maybe only for win32
-
-#The following adds support from base/src/vxWorks
-#vme_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
-
 ### The following builds SNL programs as components of vme
 # NOTE: for suffix .st, code is run through cpp; for .stt, it's not
 vme_SRCS += getFilledBuckets.st
@@ -71,13 +63,13 @@ PROD_IOC = vmeApp
 # <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
 vmeApp_SRCS_DEFAULT += vme_registerRecordDeviceDriver.cpp
 vmeApp_SRCS_DEFAULT += vmeMain.cpp
+vmeApp_SRCS_vxWorks += vmeVX_registerRecordDeviceDriver.cpp
 
 #The following adds support from base/src/vxWorks
 vmeApp_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 vmeApp_LIBS += vme
 vmeApp_LIBS += std
-std_DIR = $(STD_LIB)
 vmeApp_LIBS += seq pv
 vmeApp_LIBS += $(EPICS_BASE_IOC_LIBS)
 
