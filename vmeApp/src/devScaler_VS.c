@@ -99,6 +99,9 @@ extern int logMsg(char *fmt, ...);
 #endif
 #endif
 volatile int devScaler_VSDebug=0;
+volatile int devScaler_VS_check_trig=1;
+volatile int devScaler_VS_trig_retries = 1000;
+volatile int devScaler_VS_trig_reads = 5;
 
 #define CARD_ADDRESS_SPACE				0x800
 #define READ_XFER_REG_OFFSET			0x000
@@ -186,6 +189,9 @@ STATIC long scalerVS_read(int card, long *val);
 STATIC long scalerVS_write_preset(int card, int signal, long val);
 STATIC long scalerVS_arm(int card, int val);
 STATIC long scalerVS_done(int card);
+void scalerVS_Setup(int num_cards, int addrs, int vector, int intlevel);
+void scalerVS_show(int card, int level);
+void scalerVS_regShow(int card, int level);
 
 SCALERDSET devScaler_VS = {
 	7, 
@@ -254,13 +260,14 @@ STATIC int scalerVS_shutdown()
 	return(0);
 }
 
-static void writeReg16(volatile char *a16, int offset,uint16 value)
+static void writeReg16(volatile char *a16, int offset, uint16 value)
 {
-#ifdef HAS_IOOPS_H
-   out_be16((volatile void*)(a16+offset), value);
-#else
-   volatile uint16 *reg;
 
+#ifdef HAS_IOOPS_H
+	out_be16((volatile void*)(a16+offset), value);
+#else
+	volatile uint16 *reg;
+	Debug(10,"devScalerVS:writeReg16: writing 0x%04x to offset 0x%04x\n", value, offset);
     reg = (volatile uint16 *)(a16+offset);
     *reg = value;
 #endif
@@ -276,6 +283,7 @@ static uint16 readReg16(volatile char *a16, int offset)
 
     reg = (volatile uint16 *)(a16+offset);
     value = *reg;
+	Debug(10,"devScalerVS:readReg16: read 0x%04x from offset 0x%04x\n", value, offset);
     return(value);
 #endif
 }
@@ -283,10 +291,11 @@ static uint16 readReg16(volatile char *a16, int offset)
 static void writeReg32(volatile char *a32, int offset,uint32 value)
 {
 #ifdef HAS_IOOPS_H
-   out_be32((volatile void*)(a32+offset), value);
+	out_be32((volatile void*)(a32+offset), value);
 #else
-   volatile uint32 *reg;
+	volatile uint32 *reg;
 
+	Debug(10,"devScalerVS:writeReg32: writing 0x%08x to offset 0x%04x\n", value, offset);
     reg = (volatile uint32 *)(a32+offset);
     *reg = value;
 #endif
@@ -304,6 +313,7 @@ static uint32 readReg32(volatile char *a32, int offset)
 
     reg = (volatile uint32 *)(a32+offset);
     value = *reg;
+	Debug(20,"devScalerVS:readReg32: read 0x%08x from offset 0x%04x\n", value, offset);
     return(value);
 #endif
 }
@@ -620,15 +630,17 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 		if (devScaler_VSDebug >= 10)
 			printf("scalerVS_write_preset: try f=%.0f, n=%.0f, ix=%d\n",
 				gate_freq, gate_periods, gate_freq_ix);	
-	} while ((gate_periods > 65535) && (++gate_freq_ix < GATE_FREQ_TABLE_LENGTH));
-	/* docs recommend min of 4 periods */
-	if (gate_periods < 4) gate_periods = 4;
+	} while ((gate_periods > 65536) && (++gate_freq_ix < GATE_FREQ_TABLE_LENGTH));
+	/* docs recommend min of 4 periods; we're going to subtract 1 before writing. */
+	if (gate_periods < 5) gate_periods = 5;
 
 	/* set clock frequency, and specify that software should trigger gate-start */
 	writeReg16(addr, CLOCK_TRIG_MODE_OFFSET, gate_freq_bits[gate_freq_ix] | 0x10);
 
-	/* set the gate-size register to the number of clock periods to count */
-	writeReg16(addr, INTERNAL_GATE_SIZE_OFFSET, (uint16)gate_periods);
+	/* Set the gate-size register to the number of clock periods to count. */
+	/* Scaler must be in trigger mode at the time gate size is written. */
+	/* Docs say to specify (desired_clock_periods - 1) */
+	writeReg16(addr, INTERNAL_GATE_SIZE_OFFSET, (uint16)(gate_periods-1));
 
 	/* save preset and frequency mask in scalerVS_state */
 	scalerVS_state[card]->gate_periods = gate_periods;
@@ -655,8 +667,7 @@ STATIC long scalerVS_arm(int card, int val)
     scalerRecord *pscal;
 	volatile char *addr;
 	volatile uint16 u16;
-	unsigned short retry;
-	int i;
+	int i, j, retry, read_again, numBad, numGood;
 
 	if (devScaler_VSDebug >= 1)
 		printf("scalerVS_arm: card %d, val %d\n", card, val);
@@ -670,7 +681,14 @@ STATIC long scalerVS_arm(int card, int val)
 	writeReg16(addr,IRQ_SETUP_OFFSET, u16 & 0x07ff);
 
 	if (val) {
-		/* Set up and enable interrupts */
+		/*** start counting ***/
+
+		/* reset counters, overflows, and overflow-IRQ source */
+		writeReg16(addr,RESET_ALL_COUNTERS_OFFSET, (uint16)1);
+		/* clear other IRQ's */
+		writeReg16(addr,CLEAR_INTERRUPT_2_3_OFFSET, (uint16)3);
+
+		/** Set up and enable interrupts **/
 		/* Write interrupt vector to hardware */
 		writeReg16(addr,IRQ_3_GATE_VECTOR_OFFSET, (uint16)(vs_InterruptVector + card));
 		Debug(10,"scalerVS_arm: irq vector=%d\n", (int)readReg16(addr,IRQ_3_GATE_VECTOR_OFFSET) & 0x00ff);
@@ -680,7 +698,6 @@ STATIC long scalerVS_arm(int card, int val)
 		u16 = (u16 & 0x0ff) | (vs_InterruptLevel << 8) | 0x800;
 		writeReg16(addr, IRQ_SETUP_OFFSET, u16);
 
-		/*** start counting ***/
 
 		/*
 		 * How do I make sure the internal-gate counter is zero, and that it
@@ -696,22 +713,39 @@ STATIC long scalerVS_arm(int card, int val)
 		/* arm scaler */
 		writeReg16(addr, ARM_OFFSET, 1);	/* any write sets ARM */
 
-		/* Set trigger mode for internal gate */
+		/* Make sure trigger mode is set for internal gate. */
+		/* (This was already done in write_preset().  It's ok to do it again.) */
  		u16 = readReg16(addr, CLOCK_TRIG_MODE_OFFSET);
 		writeReg16(addr, CLOCK_TRIG_MODE_OFFSET, u16 | 0x0010);
 
 		/* trigger gate */
-		for (retry=4; retry; retry--) {
-			writeReg16(addr, TRIG_GATE_OFFSET, 1); /* any write triggers gate */
-			if ((scalerVS_state[card]->ident&0x3ff) < 8) {
-				/* Early version of the firmware didn't reliably accept gate trigger */
-				for (i=0; i<100; i++) writeReg16(addr, TRIG_GATE_OFFSET, 1);
+		if (devScaler_VS_check_trig) {
+			for (i=0, retry=1; retry && i<devScaler_VS_trig_retries; i++) {
+				writeReg16(addr, TRIG_GATE_OFFSET, 1); /* any write triggers gate */
+				/*
+				 * Check status register bit 9 to make sure internal gate is open.
+				 * Repeat reading until we get the same value devScaler_VS_trig_reads
+				 * times in a row.
+				 */
+				for (read_again = 1; read_again; ) {
+					for (j=0, numBad=numGood=0; j<devScaler_VS_trig_reads; j++) {
+						u16 = readReg16(addr, STATUS_OFFSET);
+						if (u16 & 0x0200) numGood++; else numBad++;
+					}
+					if (numBad == devScaler_VS_trig_reads) {
+						/* we believe the gate did NOT get triggered */
+						retry = 1; read_again = 0;
+					} else if (numGood == devScaler_VS_trig_reads) {
+						/* we believe the gate got triggered */
+						retry = 0; read_again = 0;
+					}
+				}
 			}
-			/* check status register to make sure internal gate is open */
-			u16 = readReg16(addr, STATUS_OFFSET);
-			if ((u16 & 0x0200) == 0) retry = 3;
-			if ((devScaler_VSDebug && retry) || (devScaler_VSDebug>=5))
-				printf("scalerVS_arm: gate looks %s; SR=0x%x; retry=%d\n", ((u16 & 0x0200) == 0)?"bad":"good", u16, retry);
+			if (retry && (i==devScaler_VS_trig_retries)) {
+				printf("scalerVS_arm: %d trigger attempts apparently failed\n", i);
+			}
+		} else {
+			writeReg16(addr, TRIG_GATE_OFFSET, 1); /* any write triggers gate */
 		}
 
 		Debug(5,"scalerVS_arm: gate open; SR=0x%x; irq vector=%d\n",
@@ -779,9 +813,12 @@ void scalerVS_Setup(int num_cards,	/* maximum number of cards in crate */
 void scalerVS_show(int card, int level)
 {
 	volatile char *addr = scalerVS_state[card]->localAddr;
-	int i, num_channels, offset;
+	int i, num_channels, offset, saveDebug;
 	char module_type[16];
 
+	saveDebug = devScaler_VSDebug;
+	devScaler_VSDebug = 0;
+	
 	printf("scalerVS_show: card %d\n", card);
 	printf("scalerVS_show: control reg = 0x%x\n", readReg16(addr,CTRL_OFFSET) & 0x3);
 	printf("scalerVS_show: status reg = 0x%x\n", readReg16(addr,STATUS_OFFSET) & 0x1ff);
@@ -804,5 +841,60 @@ void scalerVS_show(int card, int level)
 		printf("    scalerVS_show: channel %d xfer-reg counts = %u\n", i, readReg32(addr,offset));
 	}
 	printf("scalerVS_show: scalerVS_state[card]->done = %d\n", scalerVS_state[card]->done);
+
+	devScaler_VSDebug = saveDebug;
 	return;
+}
+
+void scalerVS_regShow(int card, int level)
+{
+	volatile char *addr = scalerVS_state[card]->localAddr;
+	volatile uint16 stat, ctrl, a32_1, a32_0, irq, clkt, gate, ref;
+	volatile unsigned char irq1, irq2, irq3;
+	int saveDebug;
+
+	saveDebug = devScaler_VSDebug;
+	devScaler_VSDebug = 0;
+
+	stat = readReg16(addr,0x400);
+	ctrl = readReg16(addr,0x402);
+	a32_1 = readReg16(addr,0x404);
+	a32_0 = readReg16(addr,0x406);
+	irq1 = readReg16(addr,0x408)&0xff;
+	irq2 = readReg16(addr,0x40A)&0xff;
+	irq3 = readReg16(addr,0x40C)&0xff;
+	irq = readReg16(addr,0x40E);
+	clkt = readReg16(addr,0x410);
+	gate = readReg16(addr,0x412);
+	ref = readReg16(addr,0x414);
+	
+	if (level>1) printf("scalerVS_regShow: 0400 0402 0404 0406 0408 040A 040C 040E 0410 0412 0414\n");
+	if (level>0) printf("scalerVS_regShow: STAT CTRL A321 A320 IRQ1 IRQ2 IRQ3 IRQ* CLKT GATE  REF\n");
+	printf("scalerVS_regShow: %04hX %04hX %04hX %04hX %04hX %04hX %04hX %04hX %04hX %04hX %04hX\n",
+		stat, ctrl, a32_1, a32_0, (uint16)irq1, (uint16)irq2, (uint16)irq3, irq, clkt, gate, ref);
+	
+	if (level>2) {
+		printf("   STAT         CTRL                IRQ*       CLKT      REF\n");
+		printf("15 -            -                   -          -        -\n");
+		printf("14 -            -                   -          -        -\n");
+		printf("13 -            -                   -          -        -\n");
+		printf("12 FPArmOut     -                   -          -        -\n");
+		printf("\n");
+		printf("11 FPArmIn      -                   GateEnbl   -        -\n");
+		printf("10 FPGateIn     -                   Gate_2     -        -\n");
+		printf("09 ProgGate     -                   Gate_1     -        -\n");
+		printf("08 FPReset      -                   Gate_0     -        -\n");
+		printf("\n");
+		printf("07 Gate         -                   FPXferEnbl -        -\n");
+		printf("06 FPXfer       -                   FPXfer_2   -        -\n");
+		printf("05 Ovflo        -                   FPXfer_1   -        -\n");
+		printf("04 GateSrc      -                   IFPXfer_0  TrigMode -\n");
+		printf("\n");
+		printf("03 FPXferSrc    -                   OfloEnbl   Freq_3   EnblRefClk\n");
+		printf("02 OvfloSrc     -                   OfloLev_2  Freq_2   Freq_2\n");
+		printf("01 GblCntEnblFF EnblGblResOnFPXClk  OfloLev_1  Freq_1   Freq_1\n");
+		printf("00 GblCntEnbl   EnblGblResOnVMEXClk OfloLev_0  Freq_0   Freq_0\n");
+	}
+	devScaler_VSDebug = saveDebug;
+
 }
