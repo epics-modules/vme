@@ -199,7 +199,7 @@ SCALERDSET devScaler_VS = {
 	scalerVS_arm,
 	scalerVS_done
 };
-epicsExportAddress(SCALERDSET, devScaler_VS);
+epicsExportAddress(dset, devScaler_VS);
 
 STATIC int scalerVS_total_cards;
 STATIC struct scalerVS_state {
