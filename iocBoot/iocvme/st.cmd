@@ -98,7 +98,7 @@ dbLoadRecords("$(VME)/stdApp/Db/vme.db", "P=vme:,Q=vme1")
 #    devAvmeMRDConfig(0xA0000200, 0xA0, 5)             
 #####################################################
 #  Configure the MSL MRD 100 module.....
-#devAvmeMRDConfig(0, 0xA0000200, 30, 0xA0, 5)
+#devAvmeMRDConfig(0xA0000200, 0xA0, 5)             
 #dbLoadRecords("../../vmeApp/Db/msl_mrd100.db","C=0,S=01,ID1=00,ID2=00us")
 
 ### Bit Bus configuration
