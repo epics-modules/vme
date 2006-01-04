@@ -1,3 +1,5 @@
+include vmeSupport.dbd
+
 ################
 # RECORD SUPPORT
 ################
