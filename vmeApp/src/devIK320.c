@@ -1,4 +1,4 @@
-/* $Id: devIK320.c,v 1.4 2006-01-05 18:39:22 sluiter Exp $ */
+/* $Id: devIK320.c,v 1.5 2006-01-18 21:40:30 sluiter Exp $ */
 
 /* DISCLAIMER: This software is provided `as is' and without _any_ kind of
  *             warranty. Use it at your own risk - I won't be responsible
@@ -12,6 +12,9 @@
  * Author: Till Straumann (PTB, 1999)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/01/05 18:39:22  sluiter
+ * Copied bug fixes for "hardware is missing" from CVS R3_13_branch.
+ *
  * Revision 1.3  2004/05/12 01:14:46  rivers
  * Syntax changes for 3.14.6
  *
@@ -127,7 +130,7 @@ typedef struct DevIK320MbboRec_
 
 IK320FunctionDescRec devDirMenu[][2]= {
     {   { FUNC_DIR_X1_POS,          "Pos"},
-	{ FUNC_DIR_X1_NEG,          "Neg"},
+        { FUNC_DIR_X1_NEG,          "Neg"},
     },
     {   { FUNC_DIR_X2_POS,          "Pos"},
         { FUNC_DIR_X2_NEG,          "Neg"},
@@ -146,22 +149,22 @@ IK320FunctionDescRec devX3ModeMenu[]={
 
 IK320FunctionDescRec devFunctMenu[][5]= {
     {   { FUNC_NONE,    "Idle"},
-	{ FUNC_POST,    "POST"},
-	{ FUNC_GRP_TRIG,"Group Trigger"},
-	{ FUNC_REF_X1,  "Reference X1"},
-	{ FUNC_REF_BOTH,"Reference X1/X2"}, 
+        { FUNC_POST,    "POST"},
+        { FUNC_GRP_TRIG,"Group Trigger"},
+        { FUNC_REF_X1,  "Reference X1"},
+        { FUNC_REF_BOTH,"Reference X1/X2"}, 
     },
     {   { FUNC_NONE,    "Idle"},
-	{ FUNC_POST,    "POST"},
-	{ FUNC_GRP_TRIG,"Group Trigger"},
-	{ FUNC_REF_X2,  "Reference X2"},
-	{ FUNC_REF_BOTH,"Reference X1/X2"}, 
+        { FUNC_POST,    "POST"},
+        { FUNC_GRP_TRIG,"Group Trigger"},
+        { FUNC_REF_X2,  "Reference X2"},
+        { FUNC_REF_BOTH,"Reference X1/X2"}, 
     },
     {   { FUNC_NONE,    "Idle"},
-	{ FUNC_POST,    "POST"},
-	{ FUNC_GRP_TRIG,"Group Trigger"},
-	{ FUNC_REF_BOTH,"Reference X1/X2"}, 
-	{ 0,            0},
+        { FUNC_POST,    "POST"},
+        { FUNC_GRP_TRIG,"Group Trigger"},
+        { FUNC_REF_BOTH,"Reference X1/X2"}, 
+        { 0,            0},
     },
 };
 
@@ -393,53 +396,51 @@ epicsExportAddress(dset, devIK320Parm);
  */
 STATIC aiRecord* ik320GroupStatic[MAX_IK320_GROUPS];
 
-STATIC void
-ik320GroupChanged(int unregister, int groupNr)
+STATIC void ik320GroupChanged(int unregister, int groupNr)
 {
     aiRecord        *prec = ik320GroupStatic[groupNr];
     DevIK320GroupAi grp;
 
     if (!prec)
-	return;
+        return;
     grp = (DevIK320GroupAi)(prec->dpvt);
 
     semTake(grp->mutex,WAIT_FOREVER);
     grp->value *= grp->nAxes;
     if (unregister)
-	grp->nAxes--;
+        grp->nAxes--;
     else
-	grp->nAxes++;
+        grp->nAxes++;
     /* adjust mean value */
     if (grp->nAxes>0)
     {
-	grp->value/=grp->nAxes; 
-	if (grp->nIrqs>=grp->nAxes)
-	    ik320GroupPost(grp);
+        grp->value/=grp->nAxes; 
+        if (grp->nIrqs>=grp->nAxes)
+            ik320GroupPost(grp);
     }
     else
     {
-	grp->value=0;
-	grp->valid=0;
+        grp->value=0;
+        grp->valid=0;
     }
     semGive(grp->mutex);
     DM(2,"ik320GroupChanged() 1 axis %s group %i, now %i members\n",
        unregister ? "left" : "joined", groupNr, grp->nAxes);
 }
 
-STATIC void
-ik320GroupAddValue(int groupNr, double value, long status)
+STATIC void k320GroupAddValue(int groupNr, double value, long status)
 {
     aiRecord        *prec = ik320GroupStatic[groupNr];
     DevIK320GroupAi grp;
     if (!prec)
-	return;
+        return;
     grp=(DevIK320GroupAi)(prec->dpvt);
     semTake(grp->mutex,WAIT_FOREVER);
     grp->value += value/grp->nAxes;
     if (status)
-	grp->status = READ_ALARM;
+        grp->status = READ_ALARM;
     if (++grp->nIrqs>=grp->nAxes)
-	ik320GroupPost(grp);
+        ik320GroupPost(grp);
     semGive(grp->mutex);
 }
 
@@ -448,32 +449,31 @@ STATIC long ik320InitGroupAi(int after)
     int i;
     if (after)
     {
-	/* records are set up. Now we have to find out
-	 * how many axes belong to each group we manage.
-	 */
-	for (i=0; i<MAX_IK320_GROUPS; i++)
-	{
-	    aiRecord *prec = ik320GroupStatic[i];
-	    if (prec)
-	    {
-		((DevIK320GroupAi)(prec->dpvt))->nAxes=drvIK320getNGroupListeners(i);
-		DM(4,"ik320InitGroupAi(): group %i has %i listeners\n", i,
-		   ((DevIK320GroupAi)(prec->dpvt))->nAxes);
-	    }
-	}
+        /* records are set up. Now we have to find out
+         * how many axes belong to each group we manage.
+         */
+        for (i=0; i<MAX_IK320_GROUPS; i++)
+        {
+            aiRecord *prec = ik320GroupStatic[i];
+            if (prec)
+            {
+                ((DevIK320GroupAi)(prec->dpvt))->nAxes=drvIK320getNGroupListeners(i);
+                DM(4,"ik320InitGroupAi(): group %i has %i listeners\n", i,
+                   ((DevIK320GroupAi)(prec->dpvt))->nAxes);
+            }
+        }
     }
     else
     {
-	/* clear the group table */
-	for (i=0; i<MAX_IK320_GROUPS; i++)
-	    ik320GroupStatic[i]=0;
+        /* clear the group table */
+        for (i=0; i<MAX_IK320_GROUPS; i++)
+            ik320GroupStatic[i]=0;
     }
-    return (OK);
+    return(OK);
 }
 
 
-STATIC long
-ik320InitGroupAiRec(aiRecord *prec)
+STATIC long ik320InitGroupAiRec(aiRecord *prec)
 {
     DevIK320GroupAi devState;
     long            status=S_dev_noMemory;
@@ -481,18 +481,18 @@ ik320InitGroupAiRec(aiRecord *prec)
     int grpNr;
     /* check the link type; must be VME_IO */
     if (VME_IO != prec->inp.type)
-	return (S_dev_badBus);
+        return(S_dev_badBus);
 
     /* get the group number */
     grpNr=prec->inp.value.vmeio.card;
     if (0 > grpNr || MAX_IK320_GROUPS <= grpNr)
-	return (S_drvIK320_invalidParm);
+        return(S_drvIK320_invalidParm);
 
     if (!(prec->dpvt=devState=(DevIK320GroupAi)malloc(sizeof(DevIK320GroupAiRec))) )
-	goto cleanup;
+        goto cleanup;
 
     if (!(devState->mutex=semMCreate(SEM_Q_FIFO)))
-	goto cleanup;
+        goto cleanup;
 
     devState->nAxes=0;
     devState->nIrqs=0;
@@ -504,13 +504,13 @@ ik320InitGroupAiRec(aiRecord *prec)
 
     DM(4,"ik320InitGroupAiRec(): initialized group nr %i\n",grpNr);
 
-    return (OK);
+    return(OK);
 
 cleanup:
     if (devState)
     {
-	if (devState->mutex) semDelete(devState->mutex);
-	free(devState);
+        if (devState->mutex) semDelete(devState->mutex);
+        free(devState);
     }
     prec->pact=TRUE;
     return(status);
@@ -530,45 +530,45 @@ STATIC long ik320ReadGroupAi(aiRecord *prec)
     DM(2,"ik320ReadGroupAi(): entering...");
     if (!grp->valid && !prec->pact)
     {
-	/* issue group trigger
-	 * if there are no axes in this group, there will never be
-	 * an answer!
-	 */
-	DM(2,"issueing group %i trigger..",grp->nr);
-	switch (drvIK320GroupTrigger(grp->nr))
-	{
-	case S_drvIK320_cardBusy:
-	    DM(2,"failed! (cardBusy)");
-	    recGblSetSevr(prec,WRITE_ALARM,INVALID_ALARM);
-	    break;
+        /* issue group trigger
+         * if there are no axes in this group, there will never be
+         * an answer!
+         */
+        DM(2,"issueing group %i trigger..",grp->nr);
+        switch (drvIK320GroupTrigger(grp->nr))
+        {
+        case S_drvIK320_cardBusy:
+            DM(2,"failed! (cardBusy)");
+            recGblSetSevr(prec,WRITE_ALARM,INVALID_ALARM);
+            break;
 
-	case OK:
-	    DM(2,"OK!");
-	    break;
+        case OK:
+            DM(2,"OK!");
+            break;
 
-	default:
-	    assert(0); /* never get here */
-	    break;
-	}
+        default:
+            assert(0); /* never get here */
+            break;
+        }
     }
     else
     {
-	/* completion phase; this is due to a GroupPost()
-	 */
-	semTake(grp->mutex,WAIT_FOREVER);
-	prec->val = grp->lvalue;
-	grp->valid = 0;
-	if (grp->status)
-	{
-	    recGblSetSevr(prec,grp->status,INVALID_ALARM);
-	    grp->status = NO_ALARM;
-	}
-	semGive(grp->mutex);
-	DM(2,"completion phase; new (raw) value %g\n",prec->val);
-	aiCvtDouble(prec);
+        /* completion phase; this is due to a GroupPost()
+         */
+        semTake(grp->mutex,WAIT_FOREVER);
+        prec->val = grp->lvalue;
+        grp->valid = 0;
+        if (grp->status)
+        {
+            recGblSetSevr(prec,grp->status,INVALID_ALARM);
+            grp->status = NO_ALARM;
+        }
+        semGive(grp->mutex);
+        DM(2,"completion phase; new (raw) value %g\n",prec->val);
+        aiCvtDouble(prec);
     }
     DM(2,"\n");
-    return(2);	/* did conversion on our own */
+    return(2);  /* did conversion on our own */
 }
 
 STATIC void ik320GroupPost(DevIK320GroupAi grp)
@@ -591,51 +591,48 @@ STATIC void ik320GroupPost(DevIK320GroupAi grp)
  * utility routine to connect to a driver structure given an output link
  */
 
-STATIC long
-ik320Connect(struct link *link, short *axis, IK320Driver *drv)
+STATIC long ik320Connect(struct link *link, short *axis, IK320Driver *drv)
 {
     int             sw1,sw2,irqLevel;
     int             aval;
 
     /* check the link type; must be VME_IO */
     if (VME_IO != link->type)
-	return (S_dev_badBus);
+        return(S_dev_badBus);
 
     sw1 = link->value.vmeio.card;
     sw2 = sw1 & 0xff;
     sw1 = (sw1>>8) & 0xff;
     irqLevel = link->value.vmeio.signal;
     if (    irqLevel<1 || irqLevel > 7
-	    ||  1!=sscanf(link->value.vmeio.parm,"%i",&aval)
-	    ||  1>aval || 3<aval )
+            ||  1!=sscanf(link->value.vmeio.parm,"%i",&aval)
+            ||  1>aval || 3<aval )
     {
-	return (S_drvIK320_invalidParm);
+        return(S_drvIK320_invalidParm);
     }
     if (axis)
-	*axis = (short) aval;
-    return (drvIK320Connect(sw1,sw2,irqLevel,drv));
+        *axis = (short) aval;
+    return(drvIK320Connect(sw1,sw2,irqLevel,drv));
 }
 
-STATIC long
-ik320InitFunct(mbboRecord *prec)
+STATIC long ik320InitFunct(mbboRecord *prec)
 {
-    return (ik320InitMbbo(prec, devFunctMenu, NUM_ELS(devFunctMenu[0]), 1));
+    return(ik320InitMbbo(prec, devFunctMenu, NUM_ELS(devFunctMenu[0]), 1));
 }
 
-STATIC long
-ik320InitDir(mbboRecord *prec)
+STATIC long ik320InitDir(mbboRecord *prec)
 {
     long rval = ik320InitMbbo(prec, devDirMenu, NUM_ELS(devDirMenu[0]), 1);
     if (OK == rval)
     {
-	if (!prec->pini)
-	{
-	    DevIK320Mbbo tmp = (DevIK320Mbbo)(prec->dpvt);
-	    if (tmp->drv == NULL)
-		return(ERROR);
-	    /* get value from the card */
-	    prec->rval = drvIK320CARD(tmp->drv)->direction[tmp->axis - 1];
-	}
+        if (!prec->pini)
+        {
+            DevIK320Mbbo tmp = (DevIK320Mbbo)(prec->dpvt);
+            if (tmp->drv == NULL)
+                return(ERROR);
+            /* get value from the card */
+            prec->rval = drvIK320CARD(tmp->drv)->direction[tmp->axis - 1];
+        }
     }
     return(rval);
 }
@@ -645,19 +642,19 @@ STATIC long ik320InitModeX3(mbboRecord *prec)
     long rval = ik320InitMbbo(prec, devX3ModeMenu, NUM_ELS(devX3ModeMenu), 0);
     if (OK == rval)
     {
-	if (!prec->pini)
-	{
-	    if (prec->dpvt == NULL)
-		rval = ERROR;
-	    else /* get value from the card */
-		prec->rval = drvIK320CARD(((DevIK320Mbbo)(prec->dpvt))->drv)->modeX3;
-	}
+        if (!prec->pini)
+        {
+            if (prec->dpvt == NULL)
+                rval = ERROR;
+            else /* get value from the card */
+                prec->rval = drvIK320CARD(((DevIK320Mbbo)(prec->dpvt))->drv)->modeX3;
+        }
     }
     return(rval);
 }
 
-STATIC long
-ik320InitMbbo(mbboRecord *prec, IK320FunctionDescRec *menu, int nels, int multiDim)
+STATIC long ik320InitMbbo(mbboRecord *prec, IK320FunctionDescRec *menu,
+                          int nels, int multiDim)
 {
     long            status;
     int             i;
@@ -669,12 +666,12 @@ ik320InitMbbo(mbboRecord *prec, IK320FunctionDescRec *menu, int nels, int multiD
     DM(1,"devIK320InitFunct() entering\n");
     if (! (devState=(DevIK320Mbbo)malloc(sizeof(DevIK320MbboRec))) )
     {
-	status = S_dev_noMemory;
-	goto cleanup;
+        status = S_dev_noMemory;
+        goto cleanup;
     }
 
     if ((status=ik320Connect(&prec->out,&devState->axis,&devState->drv)))
-	goto cleanup;
+        goto cleanup;
 
     idx = multiDim ? (devState->axis-1)*nels : 0;
 
@@ -683,30 +680,29 @@ ik320InitMbbo(mbboRecord *prec, IK320FunctionDescRec *menu, int nels, int multiD
 
     for (i=0; i< nels && menu[idx+i].name; i++)
     {
-	if (*nameptr == '\0' )
-	{ /* dont override settings */
-	    strcpy(nameptr,menu[idx+i].name);
-	    *valptr=i;
-	}
-	valptr++;
-	nameptr+=sizeof(prec->zrst);
+        if (*nameptr == '\0' )
+        { /* dont override settings */
+            strcpy(nameptr,menu[idx+i].name);
+            *valptr=i;
+        }
+        valptr++;
+        nameptr+=sizeof(prec->zrst);
     }
 
     devState->menu = menu+idx;
     devState->nMenu = nels;
     prec->dpvt=devState;
 
-    return (OK);
+    return(OK);
 
 cleanup:
     prec->pact=TRUE;
     if (devState)
-	free(devState);
-    return (status);
+        free(devState);
+    return(status);
 }
 
-STATIC long
-ik320WriteFunct(mbboRecord *prec)
+STATIC long ik320WriteFunct(mbboRecord *prec)
 {
     int             cmd;
     DevIK320Mbbo    devState=(DevIK320Mbbo)prec->dpvt;
@@ -719,93 +715,91 @@ ik320WriteFunct(mbboRecord *prec)
     /* check if value is in valid range */
     if (prec->val >= NUM_ELS(devFunctMenu[0]) || 0==devFunctMenu[idx][prec->val].name)
     {
-	status = S_drvIK320_invalidParm;
-	goto cleanup;
+        status = S_drvIK320_invalidParm;
+        goto cleanup;
     }
 
     if (!prec->pact)
     { /* first time we are called */
-	switch (cmd=devFunctMenu[idx][prec->val].code)
-	{
+        switch (cmd=devFunctMenu[idx][prec->val].code)
+        {
 
-	default:    /* should never get here */
-	    status = S_drvIK320_invalidParm;
-	    goto cleanup;
+        default:    /* should never get here */
+            status = S_drvIK320_invalidParm;
+            goto cleanup;
 
-	case FUNC_NONE:
-	    status = OK;
-	    goto cleanup;
+        case FUNC_NONE:
+            status = OK;
+            goto cleanup;
 
-	case FUNC_GRP_TRIG:
-	    status = drvIK320Request(devState->drv,0 /* synchrouous request */, cmd, 0);
-	    goto cleanup;
+        case FUNC_GRP_TRIG:
+            status = drvIK320Request(devState->drv,0 /* synchrouous request */, cmd, 0);
+            goto cleanup;
 
-	case FUNC_POST:	    /* fall through */
-	case FUNC_REF_X1:
-	case FUNC_REF_X2:
-	case FUNC_REF_BOTH:
-	case FUNC_PRE_X1:
-	case FUNC_PRE_X2:
-	case FUNC_PRE_X3:
-	    status = drvIK320Request(devState->drv,(dbCommon*)prec,cmd,0);
+        case FUNC_POST:     /* fall through */
+        case FUNC_REF_X1:
+        case FUNC_REF_X2:
+        case FUNC_REF_BOTH:
+        case FUNC_PRE_X1:
+        case FUNC_PRE_X2:
+        case FUNC_PRE_X3:
+            status = drvIK320Request(devState->drv,(dbCommon*)prec,cmd,0);
 
-	    if (OK==status)
-	    { /* request was handled synchronously */
-		DM(1,"ik320WriteFunct() sync request (only one phase)...\n");
-		if (card->irqStatus&0xff)
-		{
-		    status=ERROR;
-		    epicsPrintf("devIK320Funct(): error irqStatus %x\n",card->irqStatus);
-		}
-		drvIK320Finish(devState->drv);
-		goto cleanup;
-	    }
+            if (OK==status)
+            { /* request was handled synchronously */
+                DM(1,"ik320WriteFunct() sync request (only one phase)...\n");
+                if (card->irqStatus&0xff)
+                {
+                    status=ERROR;
+                    epicsPrintf("devIK320Funct(): error irqStatus %x\n",card->irqStatus);
+                }
+                drvIK320Finish(devState->drv);
+                goto cleanup;
+            }
 
-	    if (S_drvIK320_asyncStarted == status)
-	    { /* ok, wait for completion */
-		DM(1,"ik320WriteFunct() sent request (1st phase)...\n");
-		prec->rbv = prec->val;
-		/* send out monitors to val, because record support will do this only
-		 * at the end of processing.
-		 */
-		db_post_events(prec,&prec->val,DBE_VALUE);
-		prec->mlst=prec->val;
-		return (OK);
-	    }
-	    DM(1,"ik320WriteFunct() sending request (1st phase) failed...\n");
+            if (S_drvIK320_asyncStarted == status)
+            { /* ok, wait for completion */
+                DM(1,"ik320WriteFunct() sent request (1st phase)...\n");
+                prec->rbv = prec->val;
+                /* send out monitors to val, because record support will do this only
+                 * at the end of processing.
+                 */
+                db_post_events(prec,&prec->val,DBE_VALUE);
+                prec->mlst=prec->val;
+                return(OK);
+            }
+            DM(1,"ik320WriteFunct() sending request (1st phase) failed...\n");
 
-	    /* something failed; return status */
-	    goto cleanup;
-	}
+            /* something failed; return status */
+            goto cleanup;
+        }
     }
     else
-    {		 /* completion phase */
-	DM(1,"ik320WriteFunct() completion phase (irq status 0x%x)...\n",card->irqStatus);
+    {        /* completion phase */
+        DM(1,"ik320WriteFunct() completion phase (irq status 0x%x)...\n",card->irqStatus);
 
-	switch ((card->irqStatus>>8)&0xff)
-	{
-	case FUNC_POST:
-	case FUNC_REF_X1:
-	case FUNC_REF_X2:
-	    if ( 0 == (card->irqStatus & 0xff))
-	    {
-		status = OK;
-	    }
-	    break;
+        switch ((card->irqStatus>>8)&0xff)
+        {
+        case FUNC_POST:
+        case FUNC_REF_X1:
+        case FUNC_REF_X2:
+            if ( 0 == (card->irqStatus & 0xff))
+                status = OK;
+            break;
 
-	case 0x10: /* vme preset */
-	    if (devState->axis == (int)(card->irqStatus & 0xff)) status = OK;
-	    break;
+        case 0x10: /* vme preset */
+            if (devState->axis == (int)(card->irqStatus & 0xff)) status = OK;
+            break;
 
-	default:
-	    break;
-	}
-	if (status)
-	{
-	    epicsPrintf("devIK320Funct(): error irqStatus %x\n",card->irqStatus);
-	}
+        default:
+            break;
+        }
+        if (status)
+        {
+            epicsPrintf("devIK320Funct(): error irqStatus %x\n",card->irqStatus);
+        }
 
-	drvIK320Finish(devState->drv);
+        drvIK320Finish(devState->drv);
     }
 
 cleanup:
@@ -813,12 +807,12 @@ cleanup:
     prec->val = 0;
     if (status)
     {
-	prec->val = prec->mlst;
-	recGblRecordError(status,prec,"ik320WriteFunct()");
-	recGblSetSevr(prec, WRITE_ALARM,
-		      (S_drvIK320_cardBusy==status) ? MINOR_ALARM : INVALID_ALARM);
+        prec->val = prec->mlst;
+        recGblRecordError(status,prec,"ik320WriteFunct()");
+        recGblSetSevr(prec, WRITE_ALARM,
+                      (S_drvIK320_cardBusy==status) ? MINOR_ALARM : INVALID_ALARM);
     }
-    return (OK);
+    return(OK);
 }
 
 /*
@@ -832,8 +826,7 @@ ik320IRQStatus(unsigned short irqStatus, int cmd)
 }
 */
 
-STATIC long
-ik320WriteMbboSync(mbboRecord *prec)
+STATIC long ik320WriteMbboSync(mbboRecord *prec)
 {
     int             cmd;
     DevIK320Mbbo    devState=(DevIK320Mbbo)prec->dpvt;
@@ -844,61 +837,62 @@ ik320WriteMbboSync(mbboRecord *prec)
     /* check if value is in valid range */
     if ( prec->val >= devState->nMenu || 0 == devState->menu[prec->val].name )
     {
-	status = S_drvIK320_invalidParm;
-	goto cleanup;
+        status = S_drvIK320_invalidParm;
+        goto cleanup;
     }
 
     cmd = devState->menu[prec->val].code;
 
     if (prec->pact || FUNC_NONE == cmd)
-	return (OK);
+        return(OK);
 
-    status = drvIK320Request(devState->drv,0 /* sync request */,cmd,0 /* no parameter */);
+    status = drvIK320Request(devState->drv,
+                             0     /* sync request */,
+                             cmd,0 /* no parameter */);
 
     if (OK==status)
     { /* request was handled synchronously */
-	IK320Card       card = drvIK320CARD(devState->drv);
-	DM(1,"ik320WriteMbboSync() sync request (irq status 0x%x)...\n",card->irqStatus);
-	if (card->irqStatus & 0xff)
-	{
-	    status = ERROR;
-	    epicsPrintf("devIK320Dir(): error irqStatus %x\n",card->irqStatus);
-	}
-	drvIK320Finish(devState->drv);
+        IK320Card       card = drvIK320CARD(devState->drv);
+        DM(1,"ik320WriteMbboSync() sync request (irq status 0x%x)...\n",card->irqStatus);
+        if (card->irqStatus & 0xff)
+        {
+            status = ERROR;
+            epicsPrintf("devIK320Dir(): error irqStatus %x\n",card->irqStatus);
+        }
+        drvIK320Finish(devState->drv);
     }
     else
     {
-	DM(1,"ik320WriteMbboSync() sending request (synchronous) failed...\n");
+        DM(1,"ik320WriteMbboSync() sending request (synchronous) failed...\n");
     }
 
 cleanup:
     if (status)
     {
-	prec->val = prec->mlst;
-	recGblRecordError(status,prec,"ik320WriteMbboSync()");
-	epicsPrintf("status = %lx",status);
-	recGblSetSevr(prec,
-		      WRITE_ALARM,
-		      (S_drvIK320_cardBusy==status) ? MINOR_ALARM : INVALID_ALARM);
+        prec->val = prec->mlst;
+        recGblRecordError(status,prec,"ik320WriteMbboSync()");
+        epicsPrintf("status = %lx",status);
+        recGblSetSevr(prec,
+                      WRITE_ALARM,
+                      (S_drvIK320_cardBusy==status) ? MINOR_ALARM : INVALID_ALARM);
     }
-    return (OK);
+    return(OK);
 }
 
-STATIC long
-ik320InitAiRec(aiRecord *prec)
+STATIC long ik320InitAiRec(aiRecord *prec)
 {
     long            status;
     DevIK320Ai      devState=0;
 
     DM(1,"devIK320InitAiRec() entering\n");
-    if (!(devState = (DevIK320Ai) malloc(sizeof(DevIK320AiRec))) )
+    if (!(devState = (DevIK320Ai) malloc(sizeof(DevIK320AiRec))))
     {
-	status = S_dev_noMemory;
-	goto cleanup;
+        status = S_dev_noMemory;
+        goto cleanup;
     }
 
     if ((status=ik320Connect(&prec->inp,&devState->axis,&devState->drv)))
-	goto cleanup;
+        goto cleanup;
 
     prec->dpvt=devState;
 
@@ -909,17 +903,16 @@ ik320InitAiRec(aiRecord *prec)
 cleanup:
     prec->pact=TRUE;
     if (devState)
-	free(devState);
+        free(devState);
     return(status);
 }
 
-STATIC long
-get_ioint_info(int cmd, dbCommon *prec, IOSCANPVT *ppvt)
+STATIC long get_ioint_info(int cmd, dbCommon *prec, IOSCANPVT *ppvt)
 {
-    DevIK320Ai devState = (DevIK320Ai)prec->dpvt; 
+    DevIK320Ai devState = (DevIK320Ai)prec->dpvt;
 
     if (devState == NULL)
-	return(ERROR);
+        return(ERROR);
 
     /* tell the driver we switched on/off io event scanning
      * NOTE: no interrupt must occur until the caller of get_iont_info
@@ -931,13 +924,13 @@ get_ioint_info(int cmd, dbCommon *prec, IOSCANPVT *ppvt)
     *ppvt = devState->scanPvt;
 
     if (devState->drv == NULL)
-	return(ERROR);
+        return(ERROR);
 
     if (drvIK320RegisterIOScan( devState->drv, cmd ? 0 : & devState->scanPvt,
-				devState->axis))
+                                devState->axis))
     {
-	/* card is busy */
-	return(ERROR);
+        /* card is busy */
+        return(ERROR);
     }
     ik320GroupChanged(cmd,drvIK320GroupNr(devState->drv));
 
@@ -946,8 +939,7 @@ get_ioint_info(int cmd, dbCommon *prec, IOSCANPVT *ppvt)
     return(OK);
 }
 
-STATIC long
-ik320ReadAiFinish(aiRecord *prec)
+STATIC long ik320ReadAiFinish(aiRecord *prec)
 {
     DevIK320Ai      devState=(DevIK320Ai)prec->dpvt;
     IK320Card       card = drvIK320CARD(devState->drv);
@@ -960,43 +952,42 @@ ik320ReadAiFinish(aiRecord *prec)
 
     if (((card->irqStatus>>8)&0xff)==devState->axis)
     {
-	/* common channel has no status */
-	astat = (idx>1 ? ASTAT_RUNNING : card->X[idx].status & ASTAT_MASK);
-	if ( (astat & ~ASTAT_COMPENS) == ASTAT_RUNNING )
-	{ /* everything ok */
-	    status = OK;
-	    rval   = (double) card->X[idx].count;
-	    rval   *= (1<<card->interpBits);
-	    rval   += (double) (card->X[idx].interpol >> (16 - card->interpBits));
-	    DM(4,"rval = %g",rval);
-	    devState->value = prec->val = rval;
-	    /* do conversion on the (double) value; the original aiRecord
-	     * does conversion only on the (long) rval field :-( :-( :-(
-	     */
-	    aiCvtDouble(prec);
-	}
-	else if (astat & ASTAT_NO_SIGNAL)
-	    status = S_drvIK320_noSignal;
-	else if ( ! (astat & ASTAT_RUNNING))
-	    status = S_drvIK320_needsRef;
-	else
-	{
-	    status = S_drvIK320_HWreadError;
-	    epicsPrintf("ik320ReadAiFinish(): axis status %x\n",card->X[idx].status);
-	}
-	card->X[idx].xfer = 0; /* clear marker */
+        /* common channel has no status */
+        astat = (idx>1 ? ASTAT_RUNNING : card->X[idx].status & ASTAT_MASK);
+        if ( (astat & ~ASTAT_COMPENS) == ASTAT_RUNNING )
+        { /* everything ok */
+            status = OK;
+            rval   = (double) card->X[idx].count;
+            rval   *= (1<<card->interpBits);
+            rval   += (double) (card->X[idx].interpol >> (16 - card->interpBits));
+            DM(4,"rval = %g",rval);
+            devState->value = prec->val = rval;
+            /* do conversion on the (double) value; the original aiRecord
+             * does conversion only on the (long) rval field :-( :-( :-(
+             */
+            aiCvtDouble(prec);
+        }
+        else if (astat & ASTAT_NO_SIGNAL)
+            status = S_drvIK320_noSignal;
+        else if ( ! (astat & ASTAT_RUNNING))
+            status = S_drvIK320_needsRef;
+        else
+        {
+            status = S_drvIK320_HWreadError;
+            epicsPrintf("ik320ReadAiFinish(): axis status %x\n",card->X[idx].status);
+        }
+        card->X[idx].xfer = 0; /* clear marker */
     }
     else
     {
-	epicsPrintf("ik320ReadAiFinish(): error irqStatus %x\n",card->irqStatus);
+        epicsPrintf("ik320ReadAiFinish(): error irqStatus %x\n",card->irqStatus);
     }
 
     drvIK320Finish(devState->drv);
-    return (status);
+    return(status);
 }
 
-STATIC long
-ik320ReadAi(aiRecord *prec)
+STATIC long ik320ReadAi(aiRecord *prec)
 {
     DevIK320Ai      devState=(DevIK320Ai)prec->dpvt;
     IK320Card       card = drvIK320CARD(devState->drv);
@@ -1008,54 +999,54 @@ ik320ReadAi(aiRecord *prec)
     if (0 == card->X[devState->axis-1].xfer)
     { /* no value present, trigger the card */
 
-	switch (devState->axis)
-	{
-	case 1:
-	    cmd=FUNC_READ_X1;
-	    break;
-	case 2:
-	    cmd=FUNC_READ_X2;
-	    break;
-	case 3:
-	    cmd=FUNC_READ_ALL;
-	    break; /* should set parms to get only IRQ for X3 */
-	default:
-	    status = S_drvIK320_invalidParm;
-	    goto cleanup;
-	}
+        switch (devState->axis)
+        {
+        case 1:
+            cmd=FUNC_READ_X1;
+            break;
+        case 2:
+            cmd=FUNC_READ_X2;
+            break;
+        case 3:
+            cmd=FUNC_READ_ALL;
+            break; /* should set parms to get only IRQ for X3 */
+        default:
+            status = S_drvIK320_invalidParm;
+            goto cleanup;
+        }
 
-	status = drvIK320Request(devState->drv,(dbCommon*)prec,cmd,0);
-	if (OK==status)
-	{ /* ok, request was handled synchronously */
-	    DM(1,"ik320ReadAi() sync request (1 phase only)...\n");
-	    status = ik320ReadAiFinish(prec);   
-	    goto cleanup;
-	}
+        status = drvIK320Request(devState->drv,(dbCommon*)prec,cmd,0);
+        if (OK==status)
+        { /* ok, request was handled synchronously */
+            DM(1,"ik320ReadAi() sync request (1 phase only)...\n");
+            status = ik320ReadAiFinish(prec);   
+            goto cleanup;
+        }
 
-	if (S_drvIK320_asyncStarted == status)
-	{ /* ok, wait for completion */
-	    DM(1,"ik320ReadAi() sent request (1st phase)...\n");
-	    status = OK;
-	    goto cleanup;
-	}
-	DM(1,"ik320ReadAi() sending request (1st phase) failed...\n");
+        if (S_drvIK320_asyncStarted == status)
+        { /* ok, wait for completion */
+            DM(1,"ik320ReadAi() sent request (1st phase)...\n");
+            status = OK;
+            goto cleanup;
+        }
+        DM(1,"ik320ReadAi() sending request (1st phase) failed...\n");
 
-	/* something failed; return status */
-	goto cleanup;
+        /* something failed; return status */
+        goto cleanup;
     }
     else
-    {		 /* completion phase */
-	status=ik320ReadAiFinish(prec);
-	if (! prec->pact)
-	{
-	    /* if a value could be read, but this is not
-	     * the completion phase of async processing, this means that
-	     * somebody else triggered the card, i.e. the group must be
-	     * notified.
-	     */
-	    /* send the unconverted value to the group */
-	    ik320GroupAddValue(drvIK320GroupNr(devState->drv), devState->value, status);
-	}
+    {        /* completion phase */
+        status=ik320ReadAiFinish(prec);
+        if (! prec->pact)
+        {
+            /* if a value could be read, but this is not
+             * the completion phase of async processing, this means that
+             * somebody else triggered the card, i.e. the group must be
+             * notified.
+             */
+            /* send the unconverted value to the group */
+            ik320GroupAddValue(drvIK320GroupNr(devState->drv), devState->value, status);
+        }
     }
 
 cleanup:
@@ -1063,20 +1054,19 @@ cleanup:
 
     if (status)
     {
-	recGblRecordError(status,prec,"ik320ReadAi()");
-	recGblSetSevr(prec, READ_ALARM,
-		      (S_drvIK320_cardBusy==status) ? MINOR_ALARM : INVALID_ALARM);
+        recGblRecordError(status,prec,"ik320ReadAi()");
+        recGblSetSevr(prec, READ_ALARM,
+                      (S_drvIK320_cardBusy==status) ? MINOR_ALARM : INVALID_ALARM);
     }
-    return(2);	/* no conversion; we did it on our own */
+    return(2);  /* no conversion; we did it on our own */
 }
 
 STATIC long ik320InitParm(stringoutRecord *prec)
 {
-    long rval = ik320Connect(&prec->out,
-			     (short*)0 /* no axis info needed */,
-			     (IK320Driver*)&prec->dpvt);
+    long rval = ik320Connect(&prec->out, (short*)0 /* no axis info needed */,
+                             (IK320Driver*)&prec->dpvt);
     if (rval)
-	prec->pact = TRUE;
+        prec->pact = TRUE;
     return(rval);
 }
 
@@ -1090,51 +1080,49 @@ STATIC long ik320InitParm(stringoutRecord *prec)
  * 
  * pstr is adjusted to point to the trailing space or 'NULL' char.
  */
-STATIC long
-ik320scan(char **chpt)
+STATIC long ik320scan(char **chpt)
 {
     int  i;
     long rval=0;
     long ch;
     if (*(*chpt)++ != 'P' )
-	return(-1);
+        return(-1);
     for (i=0; i<2; i++)
     {
-	ch=(long)(*(*chpt)++) - '0';
-	if (ch < 0 || ch > 9)
-	    return(-1);
-	rval = 10 * rval + ch;
+        ch=(long)(*(*chpt)++) - '0';
+        if (ch < 0 || ch > 9)
+            return(-1);
+        rval = 10 * rval + ch;
     }
     switch (*(*chpt)++)
     {
     case 0:
     case ':':
     case ' ':
-	return(10*rval); /* done, no '.x' */
+        return(10*rval); /* done, no '.x' */
     case '.':
-	break;		/* continue scanning */
+        break;      /* continue scanning */
     default:
-	return(-1);	/* oops */
+        return(-1); /* oops */
     }
 
     ch = (long)(*(*chpt)++) - '0';
     if ( ch < 0 || ch > 9 )
-	return(-1);
+        return(-1);
     rval = 10 * rval + ch;
 
     switch (**chpt)
     {
     case 0:
     case ' ':
-	return(rval);
+        return(rval);
     default:
-	return(-1);
+        return(-1);
     }
     return(-1);
 }
 
-STATIC long
-ik320WriteParm(stringoutRecord *prec)
+STATIC long ik320WriteParm(stringoutRecord *prec)
 {
     char *chpt = prec->val;
     IK320Driver drv=(IK320Driver)prec->dpvt;
@@ -1143,11 +1131,11 @@ ik320WriteParm(stringoutRecord *prec)
 /* a memory region to store arbitrarily typed parameter values */
     union ValUnion_
     {
-	char            c;
-	short           s;
-	long            l;
-	double          d;
-	IK320ValueRec   v;
+        char            c;
+        short           s;
+        long            l;
+        double          d;
+        IK320ValueRec   v;
     } rVal, wVal;
 
     IK320ParmRec parm;
@@ -1155,39 +1143,39 @@ ik320WriteParm(stringoutRecord *prec)
     char *fmt;
 
     IK320Parm entry = (IK320Parm) bsearch(  (void*)ik320scan(&chpt),
-					    parmTable,
-					    sizeof(parmTable)/sizeof(parmTable[0]),
-					    sizeof(IK320ParmRec),
-					    ik320ParmCompare);
+                                            parmTable,
+                                            sizeof(parmTable)/sizeof(parmTable[0]),
+                                            sizeof(IK320ParmRec),
+                                            ik320ParmCompare);
 
     if ( NULL == entry )
     { /* parameter table entry not found */
-	/* invalid `val' */
-	strncpy(prec->oval,prec->val,sizeof(prec->val));
-	sprintf(prec->val,"??");
-	return (0);
+        /* invalid `val' */
+        strncpy(prec->oval,prec->val,sizeof(prec->val));
+        sprintf(prec->val,"??");
+        return(0);
     }
 
     /* get the correct format string for this parameter */
     switch ( entry->type )
     {
     case byte:
-	fmt="%c";
-	break;
+        fmt="%c";
+        break;
     case shrt:
-	fmt="%hi";
-	break;
+        fmt="%hi";
+        break;
     case wrd:
-	fmt="%i";
-	break;
+        fmt="%i";
+        break;
     case six:
-	fmt="%lf";
-	break;
+        fmt="%lf";
+        break;
     default:
-	epicsPrintf("ik320WriteParm: unknown parameter size!\n");
-	strncpy(prec->oval,prec->val,sizeof(prec->val));
-	sprintf(prec->val,"error");
-	return(0);
+        epicsPrintf("ik320WriteParm: unknown parameter size!\n");
+        strncpy(prec->oval,prec->val,sizeof(prec->val));
+        sprintf(prec->val,"error");
+        return(0);
     }
 
     /* copy the parameter description to the 'parm' struct */
@@ -1202,72 +1190,72 @@ ik320WriteParm(stringoutRecord *prec)
     /* check if they want to read or set the parameter */
     if (0 < (written=sscanf(chpt, fmt, &wVal)))
     {
-	/* (synchronously) write the parameter */
-	if (drvIK320Request(drv, 0, FUNC_SET_PARMS, &parm))
-	{
-	    recGblSetSevr(prec,WRITE_ALARM,MAJOR_ALARM);
-	    written = 0;
-	}
-	else
-	{
-	    /* write succeeded; release the driver */
-	    drvIK320Finish(drv);    
-	} 
+        /* (synchronously) write the parameter */
+        if (drvIK320Request(drv, 0, FUNC_SET_PARMS, &parm))
+        {
+            recGblSetSevr(prec,WRITE_ALARM,MAJOR_ALARM);
+            written = 0;
+        }
+        else
+        {
+            /* write succeeded; release the driver */
+            drvIK320Finish(drv);    
+        } 
     }
     /* now try to read back */
     parm.from = (char*)&rVal;
     if (drvIK320Request(drv, 0, FUNC_GET_PARMS, &parm))
     {
-	strncpy(prec->oval,prec->val,sizeof(prec->val));
-	sprintf(chpt,": read error");
-	recGblSetSevr(prec,READ_ALARM,INVALID_ALARM);
+        strncpy(prec->oval,prec->val,sizeof(prec->val));
+        sprintf(chpt,": read error");
+        recGblSetSevr(prec,READ_ALARM,INVALID_ALARM);
     }
     else
     {
-	unsigned long rv=0,wv=0;
-	/* release the driver */
-	drvIK320Finish(drv);
-	switch (parm.type)
-	{
-	case byte:
-	    rv =  rVal.c;
-	    wv =  wVal.c;
-	    break;
-	case shrt:
-	    rv =  rVal.s;
-	    wv =  wVal.s;
-	    break;
-	case wrd:
-	    rv =  rVal.l;
-	    wv =  wVal.l;
-	    break;
-	case six:
-	    break;
-	}
+        unsigned long rv=0,wv=0;
+        /* release the driver */
+        drvIK320Finish(drv);
+        switch (parm.type)
+        {
+        case byte:
+            rv =  rVal.c;
+            wv =  wVal.c;
+            break;
+        case shrt:
+            rv =  rVal.s;
+            wv =  wVal.s;
+            break;
+        case wrd:
+            rv =  rVal.l;
+            wv =  wVal.l;
+            break;
+        case six:
+            break;
+        }
 
-	/* compare the read back value */
-	if (written)
-	{
-	    if (parm.type == six)
-	    {
-		if (rVal.d != wVal.d)
-		    written=0;
-	    }
-	    else
-	    {
-		if (rv != wv)
-		    written=0;
-	    }
-	}
+        /* compare the read back value */
+        if (written)
+        {
+            if (parm.type == six)
+            {
+                if (rVal.d != wVal.d)
+                    written=0;
+            }
+            else
+            {
+                if (rv != wv)
+                    written=0;
+            }
+        }
 
-	if ( ! written )
-	{ /* print read back value */
-	    strncpy(prec->oval,prec->val,sizeof(prec->val));
-	    if (parm.type == six)
-		sprintf(chpt,": %f",rVal.d);
-	    else
-		sprintf(chpt,": %lu",rv);
-	}
+        if ( ! written )
+        { /* print read back value */
+            strncpy(prec->oval,prec->val,sizeof(prec->val));
+            if (parm.type == six)
+                sprintf(chpt,": %f",rVal.d);
+            else
+                sprintf(chpt,": %lu",rv);
+        }
     }
 
     return(0);
