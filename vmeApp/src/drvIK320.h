@@ -1,4 +1,4 @@
-/* $Id: drvIK320.h,v 1.1.1.1 2001-07-03 20:05:28 sluiter Exp $ */
+/* $Id: drvIK320.h,v 1.2 2006-01-18 21:38:08 sluiter Exp $ */
 #ifndef DRV_IK320_H
 #define DRV_IK320_H
 
@@ -14,6 +14,9 @@
  * Author: Till Straumann (PTB, 1999) 
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  2001/07/03 20:05:28  sluiter
+ * Creating
+ *
  * Revision 1.9  1999/05/05 16:25:16  strauman
  *  - added doc: README
  *
@@ -64,17 +67,17 @@ typedef struct dbCommonRec *dbCommon;
 #endif
 
 /* error codes */
-#define M_drvIK320					( 1033<<16 )	
+#define M_drvIK320			( 1033<<16 )	
 #define S_drvIK320_cardBusy 		( M_drvIK320 | 1 ) /* IK320 card busy */						/* 1 */
 #define S_drvIK320_invalidFunc		( M_drvIK320 | 2 ) /* IK320 invalid VME function call */		/* 2 */
 #define S_drvIK320_asyncStarted		( M_drvIK320 | 3 ) /* IK320 asynchronous processing started */	/* 0 */
 #define S_drvIK320_invalidParm		( M_drvIK320 | 4 ) /* IK320 invalid parameter */				/* 2 */
 #define S_drvIK320_HWreadError		( M_drvIK320 | 5 ) /* IK320 hardware read error */				/* 3 */
-#define S_drvIK320_needsRef			( M_drvIK320 | 6 ) /* IK320 reference not set */				/* 3 */
-#define S_drvIK320_noSignal			( M_drvIK320 | 7 ) /* IK320 signal level too low */				/* 3 */
+#define S_drvIK320_needsRef		( M_drvIK320 | 6 ) /* IK320 reference not set */				/* 3 */
+#define S_drvIK320_noSignal		( M_drvIK320 | 7 ) /* IK320 signal level too low */				/* 3 */
 #define S_drvIK320_maskedChannel	( M_drvIK320 | 8 ) /* IK320 channel is deactivated */			/* 3 */
 #define S_drvIK320_needsPOST		( M_drvIK320 | 9 ) /* IK320 needs POST */						/* 3 */
-#define S_drvIK320_timeout			( M_drvIK320 | 10 )/* IK320 command timeout */					/* 3 */
+#define S_drvIK320_timeout		( M_drvIK320 | 10 )/* IK320 command timeout */					/* 3 */
 
 
 /* hw error codes */
@@ -87,8 +90,8 @@ typedef struct dbCommonRec *dbCommon;
 #define DIR_INVERSE	1
 #define MODE_LIN	1
 #define MODE_ANG	2
-#define IRQ_MASK_X1		((unsigned char)(1<<0))
-#define IRQ_MASK_X2		((unsigned char)(1<<1))
+#define IRQ_MASK_X1	((unsigned char)(1<<0))
+#define IRQ_MASK_X2	((unsigned char)(1<<1))
 #define IRQ_MASK_EXTERN ((unsigned char)(1<<4))
 #define IRQ_MASK_INVALID ((unsigned char)(0xff))
 #define MODE_X3_SUM  1
@@ -105,23 +108,27 @@ typedef struct dbCommonRec *dbCommon;
  * The driver function calls
  */
 
-#define FUNC_NONE		0
-#define FUNC_ABORT		0
+#define FUNC_NONE   0
+#define FUNC_ABORT  0
 
 #define FUNC_READ_X1	1	
 #define FUNC_READ_X2	2	
 #define FUNC_READ_ALL	3	
-#define FUNC_PRE_X1		4
-#define FUNC_PRE_X2		5
-#define FUNC_PRE_X3		6
-#define FUNC_POST		7
-#define FUNC_REF_X1		8
-#define FUNC_REF_X2		9
+#define FUNC_PRE_X1	4
+#define FUNC_PRE_X2	5
+#define FUNC_PRE_X3	6
+#define FUNC_POST	7
+#define FUNC_REF_X1	8
+#define FUNC_REF_X2	9
 #define FUNC_SET_PARMS	0xa	
 #define FUNC_COMP_X1	0xb	
 #define FUNC_COMP_X2	0xc	
 
 #define FUNC_REF_BOTH	0x18
+
+#define FUNC_NOREF1	0x19
+#define FUNC_NOREF2	0x1A
+#define FUNC_NOREF12	0x1B
 
 #define FUNC_GRP_TRIG	0x0b00
 
@@ -131,16 +138,16 @@ typedef struct dbCommonRec *dbCommon;
  *		 i.e. the individual axes cannot be read.
  */
 #define FUNC_MODE_X3_DISABLE	0x10000 
-#define FUNC_MODE_X3_SUM		(0x10000 | MODE_X3_SUM )
-#define FUNC_MODE_X3_DIFF 		(0x10000 | MODE_X3_DIFF )
-#define FUNC_MODE_X3_MEAN		(0x10000 | MODE_X3_MEAN )
+#define FUNC_MODE_X3_SUM	(0x10000 | MODE_X3_SUM )
+#define FUNC_MODE_X3_DIFF 	(0x10000 | MODE_X3_DIFF )
+#define FUNC_MODE_X3_MEAN	(0x10000 | MODE_X3_MEAN )
 /* set the direction flag */
-#define FUNC_DIR_X1_POS			0x20000
-#define FUNC_DIR_X1_NEG			0x20001
-#define FUNC_DIR_X2_POS			0x20100
-#define FUNC_DIR_X2_NEG			0x20101
+#define FUNC_DIR_X1_POS		0x20000
+#define FUNC_DIR_X1_NEG		0x20001
+#define FUNC_DIR_X2_POS		0x20100
+#define FUNC_DIR_X2_NEG		0x20101
 /* get a parameter (lock driver) */
-#define FUNC_GET_PARMS			0x3000a
+#define FUNC_GET_PARMS		0x3000a
 
 
 /*
@@ -158,8 +165,8 @@ typedef struct dbCommonRec *dbCommon;
 /* IK320 has 48-bit registers */
 
 typedef struct IK320ValueRec_ {
-	long			count		__attribute__ ((packed));
-	unsigned short	interpol	__attribute__ ((packed));
+	long	       count	__attribute__ ((packed));
+	unsigned short interpol __attribute__ ((packed));
 } IK320ValueRec, *IK320Value;
 
 /* Type of individual IK320 parameters */
@@ -187,65 +194,65 @@ typedef enum {
  * value is converted to a double and divided by 2^(16-interpBits). 
  */
 typedef struct IK320ParmRec_ {
-	char			*from;
-	short			offset;
-	IK320Type		type;
+	char		*from;
+	short		offset;
+	IK320Type	type;
 } IK320ParmRec, *IK320Parm;
 
 typedef struct IK320DataRec_ {
-	long			count		__attribute__ ((packed));
-	unsigned short	interpol	__attribute__ ((packed));
-	unsigned char	status		__attribute__ ((packed));
-	unsigned char	xfer		__attribute__ ((packed));
+	long		count	 __attribute__ ((packed));
+	unsigned short	interpol __attribute__ ((packed));
+	unsigned char	status	 __attribute__ ((packed));
+	unsigned char	xfer	 __attribute__ ((packed));
 } IK320DataRec, *IK320Data;
 
 /* dual port ram memory map layout */
 
 typedef struct IK320CardRec_ {
-	IK320DataRec 	X[3]			__attribute__ ((packed));
-	unsigned short	irqStatus		__attribute__ ((packed));
-	unsigned short	CRC				__attribute__ ((packed));
-	unsigned short	actualCRC		__attribute__ ((packed));
-	unsigned long	CRC1			__attribute__ ((packed));
-	unsigned long	actualCRC1		__attribute__ ((packed));
-	unsigned long	CRC2			__attribute__ ((packed));
-	unsigned long	actualCRC2		__attribute__ ((packed));
-	unsigned short	hwVersion		__attribute__ ((packed));
-	char			swVersion[12]	__attribute__ ((packed));
-	char			sysVar[2]		__attribute__ ((packed)); /* for internal use only */
+	IK320DataRec 	X[3]		__attribute__ ((packed));
+	unsigned short	irqStatus	__attribute__ ((packed));
+	unsigned short	CRC		__attribute__ ((packed));
+	unsigned short	actualCRC	__attribute__ ((packed));
+	unsigned long	CRC1		__attribute__ ((packed));
+	unsigned long	actualCRC1	__attribute__ ((packed));
+	unsigned long	CRC2		__attribute__ ((packed));
+	unsigned long	actualCRC2	__attribute__ ((packed));
+	unsigned short	hwVersion	__attribute__ ((packed));
+	char		swVersion[12]	__attribute__ ((packed));
+	char		sysVar[2]	__attribute__ ((packed)); /* for internal use only */
 	IK320ValueRec	actPreset[3]	__attribute__ ((packed));
-	unsigned char	free[0xA8]		__attribute__ ((packed));
-	short  			X1I				__attribute__ ((packed));
-	short  			X1Q				__attribute__ ((packed));
-	short  			X2I				__attribute__ ((packed));
-	short  			X2Q				__attribute__ ((packed));
+	unsigned char	free[0xA8]	__attribute__ ((packed));
+	short  		X1I		__attribute__ ((packed));
+	short  		X1Q		__attribute__ ((packed));
+	short  		X2I		__attribute__ ((packed));
+	short  		X2Q		__attribute__ ((packed));
 	/* Parameter region */
-	unsigned short  function		__attribute__ ((packed));
+	unsigned short  function	__attribute__ ((packed));
 	unsigned char   direction[4]	__attribute__ ((packed)); /* 1 padding byte */
-	unsigned char   linAng[4]		__attribute__ ((packed)); /* 1 padding byte */
-	unsigned short	interpBits		__attribute__ ((packed));
-	unsigned short	deltaRefX1		__attribute__ ((packed));
-	unsigned short	deltaRefX2		__attribute__ ((packed));
-	unsigned long   nPeriods[3]		__attribute__ ((packed));
-	unsigned char   useCompX1		__attribute__ ((packed));
-	unsigned char   useCompX2		__attribute__ ((packed));
-	unsigned long   compStartX1		__attribute__ ((packed));
-	unsigned long   compStartX2		__attribute__ ((packed));
-	unsigned short	nSamplesX1		__attribute__ ((packed));
-	unsigned short	nSamplesX2 		__attribute__ ((packed));
+	unsigned char   linAng[4]	__attribute__ ((packed)); /* 1 padding byte */
+	unsigned short	interpBits	__attribute__ ((packed));
+	unsigned short	deltaRefX1	__attribute__ ((packed));
+	unsigned short	deltaRefX2	__attribute__ ((packed));
+	unsigned long   nPeriods[3]	__attribute__ ((packed));
+	unsigned char   useCompX1	__attribute__ ((packed));
+	unsigned char   useCompX2	__attribute__ ((packed));
+	unsigned long   compStartX1	__attribute__ ((packed));
+	unsigned long   compStartX2	__attribute__ ((packed));
+	unsigned short	nSamplesX1	__attribute__ ((packed));
+	unsigned short	nSamplesX2 	__attribute__ ((packed));
 	unsigned short	sampleWidthX1	__attribute__ ((packed));
 	unsigned short	sampleWidthX2	__attribute__ ((packed));
-	unsigned char   enableIRQ		__attribute__ ((packed));
-	unsigned char   pad				__attribute__ ((packed)); /* 1 padding byte */
-	long			refOffsetX1		__attribute__ ((packed));
-	long			refOffsetX2		__attribute__ ((packed));
-	unsigned char	modeX3			__attribute__ ((packed));
-	unsigned char   pad1			__attribute__ ((packed)); /* 1 padding byte */
-	unsigned char   compDirX1		__attribute__ ((packed));
-	unsigned char   compDirX2		__attribute__ ((packed));
+	unsigned char   enableIRQ	__attribute__ ((packed));
+	unsigned char   pad		__attribute__ ((packed)); /* 1 padding byte */
+	long		refOffsetX1	__attribute__ ((packed));
+	long		refOffsetX2	__attribute__ ((packed));
+	unsigned char	modeX3		__attribute__ ((packed));
+	unsigned char   pad1		__attribute__ ((packed)); /* 1 padding byte */
+	unsigned char   compDirX1	__attribute__ ((packed));
+	unsigned char   compDirX2	__attribute__ ((packed));
 	IK320ValueRec	extPreset[3]	__attribute__ ((packed));
 	IK320ValueRec	vmePreset[3]	__attribute__ ((packed));
-	IK320ValueRec	offset[3]		__attribute__ ((packed));
+	IK320ValueRec	offset[3]	__attribute__ ((packed));
 	unsigned char   extFunctionX1	__attribute__ ((packed));
 	unsigned char   extFunctionX2	__attribute__ ((packed));
 } IK320CardRec, *IK320Card;
@@ -256,12 +263,12 @@ typedef struct IK320CardRec_ {
  *		 as `field'.
  */
 
-#define IK320_FILL_PARM(parm,pfrom,field) { (parm)->from = (char*)(pfrom);\
-									 (parm)->offset = (char*)(&((IK320Card)0)->field) - (char*)0;\
-									 (parm)->type = sizeof( ((IK320Card)0)->field );\
-									 assert(   sizeof( *(pfrom) ) == (parm)->type \
-											|| ((parm)->type == sizeof(IK320ValueRec)\
-												&& sizeof( *(pfrom) ) == sizeof(double))); }
+#define IK320_FILL_PARM(parm,pfrom,field) {(parm)->from = (char*)(pfrom);\
+		       (parm)->offset = (char*)(&((IK320Card)0)->field) - (char*)0;\
+		       (parm)->type = sizeof( ((IK320Card)0)->field );\
+		       assert(   sizeof( *(pfrom) ) == (parm)->type \
+		       || ((parm)->type == sizeof(IK320ValueRec)\
+		       && sizeof( *(pfrom) ) == sizeof(double))); }
 
 typedef struct IK320DriverRec_ *IK320Driver;
 
@@ -271,8 +278,7 @@ typedef struct IK320DriverRec_ *IK320Driver;
  * sw1/sw3 and the specified irqLevel. Return value is the error status.
  */
 
-long
-drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrvRtn);
+long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrvRtn);
 
 /*
  * FOR DEBUGGING PURPOSE ONLY
@@ -283,8 +289,7 @@ drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrvRtn);
  + This is possible at the driver level (EPICS knows little about
  * drivers).
  */
-long
-drvIK320Disconnect(IK320Driver drv);
+long drvIK320Disconnect(IK320Driver drv);
 
 /*
  * call a driver function.
@@ -320,15 +325,13 @@ drvIK320Disconnect(IK320Driver drv);
  *		 `release' the driver/card by calling drvIK320Finish(), so other
  *		 requests may be processed.
  */
-long
-drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm);
+long drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm);
 
 /* this MUST be called after accessing the hardware registers, which
  * may only be done after a successful request completion.
  *
  */
-void
-drvIK320Finish(IK320Driver drv);
+void drvIK320Finish(IK320Driver drv);
 
 /*
  * register a record for IO event scanning. A pointer to IOSCANPVT
@@ -343,8 +346,7 @@ drvIK320Finish(IK320Driver drv);
  */
 
 #ifndef USE_WITHOUT_EPICS
-long
-drvIK320RegisterIOScan(IK320Driver drv, IOSCANPVT *pIOscanPvt, int axis);
+long drvIK320RegisterIOScan(IK320Driver drv, IOSCANPVT *pIOscanPvt, int axis);
 #endif
 
 /*
@@ -355,22 +357,19 @@ drvIK320RegisterIOScan(IK320Driver drv, IOSCANPVT *pIOscanPvt, int axis);
  * card by drvIK320Finish().
  * 
  */
-IK320Card
-drvIK320CARD(IK320Driver drv);
+IK320Card drvIK320CARD(IK320Driver drv);
 
 /*
  * determine the number of axes that have their scanPvt field
  * set and belong to a common group.
  *
  */
-int
-drvIK320getNGroupListeners(int groupNr);
+int drvIK320getNGroupListeners(int groupNr);
 
 /*
  * return the group number of this driver
  */
-int
-drvIK320GroupNr(IK320Driver drv);
+int drvIK320GroupNr(IK320Driver drv);
 
 /*
  * issue a group trigger command;
@@ -378,8 +377,7 @@ drvIK320GroupNr(IK320Driver drv);
  * RETURNS: S_drvIK320_cardBusy if any member of the
  *			group is currently busy.
  */
-long
-drvIK320GroupTrigger(int groupNr);
+long drvIK320GroupTrigger(int groupNr);
 
 /*
  * utility routine to set the number of interpolation bits.
@@ -392,8 +390,7 @@ drvIK320GroupTrigger(int groupNr);
  *
  * RETURNS: error status.
  */
-long
-drvIK320SetInterpBits(IK320Driver drv, int *pnBits);
+long drvIK320SetInterpBits(IK320Driver drv, int *pnBits);
 
 #if 0 /* not implemented */
 /*
@@ -403,11 +400,9 @@ drvIK320SetInterpBits(IK320Driver drv, int *pnBits);
  *
  */
 
-double
-drvIK320Val2Double(IK320Value val);
+double drvIK320Val2Double(IK320Value val);
 
-void
-drvIK320Double2Val(double d, IK320Value val);
+void drvIK320Double2Val(double d, IK320Value val);
 #endif
 
 #endif
