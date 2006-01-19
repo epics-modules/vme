@@ -1,4 +1,4 @@
-/* $Id: drvIK320.c,v 1.4 2006-01-05 18:41:33 sluiter Exp $ */
+/* $Id: drvIK320.c,v 1.5 2006-01-19 14:22:20 sluiter Exp $ */
 
 /* DISCLAIMER: This software is provided `as is' and without _any_ kind of
  *             warranty. Use it at your own risk - I won't be responsible
@@ -12,6 +12,9 @@
  * Author: Till Straumann (PTB, 1999)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/01/05 18:41:33  sluiter
+ * Copied PPC bug fix (devDisconnectInterrupt) from CVS R3_13_branch.
+ *
  * Revision 1.3  2004/05/12 01:11:50  rivers
  * Syntax changes for 3.14.6
  *
@@ -67,6 +70,7 @@
  *	     architecture. Replaced calls to devDisconnectInterrupt() with
  *	     updates to device handler pointer (irqHandler) and a master device
  *	     interrupt handler (IK320IrqMaster).
+ *     01-18-06 rls Default to reading encoder without referencing.
  *
  */
 
@@ -145,6 +149,7 @@ epicsExportAddress(int, drvIK320Debug);
 #endif
 
 
+
 /*
  * forward declarations
  */
@@ -179,24 +184,24 @@ epicsExportAddress(drvet, drvIK320);
 typedef struct IK320DriverRec_
 {
 #ifndef USE_INTLOCK
-    SEM_ID          mutex;	    /* mutex for the busy flag */
+    SEM_ID          mutex;      /* mutex for the busy flag */
 #endif
-    char            busy;	    /* no access to the card while busy */
-    SEM_ID          sync;	    /* sync semaphore for synchronous processing */
-    IK320Card       card;	    /* pointer to hardware registers */
-    unsigned short  *port;	    /* pointer to VMEA16 interrupt address */
-    dbCommon        *record;	    /* EPICS record that issued a request */
-    CALLBACK        procCbk;	    /* callback to process the record */
+    char            busy;       /* no access to the card while busy */
+    SEM_ID          sync;       /* sync semaphore for synchronous processing */
+    IK320Card       card;       /* pointer to hardware registers */
+    unsigned short  *port;      /* pointer to VMEA16 interrupt address */
+    dbCommon        *record;        /* EPICS record that issued a request */
+    CALLBACK        procCbk;        /* callback to process the record */
     int             sw1,sw2,irqLevel;
     IOSCANPVT       *scanPvt[3]; /* records to scan after irq occurs */
-    int             waiting;	    /* waiting for sync flag */
-    unsigned char   savedMask;	    /* storage to temporarily save IRQ mask */
+    int             waiting;        /* waiting for sync flag */
+    unsigned char   savedMask;      /* storage to temporarily save IRQ mask */
     struct IK320DriverRec_ *next;   /* next card in driver linked list */
 } IK320DriverRec;
 
 IK320Card drvIK320CARD(IK320Driver drv)
 {
-    return (drv->card);
+    return(drv->card);
 }
 
 /*
@@ -222,8 +227,7 @@ static char drvIK320LoggerString[256];
 static int drvIK320IrqLogger();
 #endif
 
-long
-drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
+long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
 {
     void *localA24 = 0, *localA16 = 0, *vmeA24;
     IK320Driver rval=0;
@@ -232,66 +236,66 @@ drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
     int         i,needsPOST=1;
 
     if (!pDrv)
-	return (S_drvIK320_invalidParm);
+        return(S_drvIK320_invalidParm);
 
     /* lazy init; we hope that this is not called concurrently
      * by several people.
      */
     if (!allCards.mutex)
-	drvIK320init();
+        drvIK320init();
 
     /* is there already a driver struct for this card ? */
 
     semTake(allCards.mutex,WAIT_FOREVER);
     for (rval = allCards.first; rval; rval=rval->next)
     {
-	if (rval->sw2 == sw2)
-	{
-	    if (rval->sw1 != sw1 || rval->irqLevel!=irqLevel)
-	    {
-		epicsPrintf("drvIK320: other card with same sw2 settings?\n");
-		rval = 0;
-	    }
-	    semGive(allCards.mutex);
-	    *pDrv = rval;
-	    return (OK);
-	}
+        if (rval->sw2 == sw2)
+        {
+            if (rval->sw1 != sw1 || rval->irqLevel!=irqLevel)
+            {
+                epicsPrintf("drvIK320: other card with same sw2 settings?\n");
+                rval = 0;
+            }
+            semGive(allCards.mutex);
+            *pDrv = rval;
+            return(OK);
+        }
     }
 
-    if (!(rval = (IK320Driver) malloc(sizeof(IK320DriverRec))) )
+    if (!(rval = (IK320Driver) malloc(sizeof(IK320DriverRec))))
     {
-	status = S_dev_noMemory;
-	goto cleanup;
+        status = S_dev_noMemory;
+        goto cleanup;
     }
 #ifndef USE_INTLOCK
-    if (!(rval->mutex=semMCreate(SEM_Q_FIFO))  )
+    if (!(rval->mutex=semMCreate(SEM_Q_FIFO)))
     {
-	status = S_dev_noMemory;
-	goto cleanup;
+        status = S_dev_noMemory;
+        goto cleanup;
     }
 #endif
     /* use counting semaphore, so we are able to keep track of
      * pending interrupts.
      */
-    if (!(rval->sync=semCCreate(SEM_Q_FIFO,SEM_EMPTY))  )
+    if (!(rval->sync=semCCreate(SEM_Q_FIFO,SEM_EMPTY)))
     {
-	status = S_dev_noMemory;
-	goto cleanup;
+        status = S_dev_noMemory;
+        goto cleanup;
     }
-    
+
     vmeA24 = A24BASE(sw2);
     status = locationProbe(atVMEA24, (char *) vmeA24);
     if (!PROBE_SUCCESS(status))
     {
-	epicsPrintf("drvIK320Connect(): bus error at address = 0x%08.8x\n", (uint_t) vmeA24);
-	status = S_dev_noMemory;
-	goto cleanup;
+        epicsPrintf("drvIK320Connect(): bus error at address = 0x%08.8x\n", (uint_t) vmeA24);
+        status = S_dev_noMemory;
+        goto cleanup;
     }
 
     if ((status=devRegisterAddress("drvIK320",atVMEA24,(size_t)(A24BASE(sw2)),(size_t)0x4000,(volatile void **)&localA24)))
-	goto cleanup;
+        goto cleanup;
     if ((status=devRegisterAddress("drvIK320",atVMEA16,(size_t)(A16PORT(sw1)),(size_t)0x2,(volatile void **)&localA16)))
-	goto cleanup;
+        goto cleanup;
     /* we don't bother registering the 'group trigger address' (switch1 & 0xe <<8).
      * It is used by several cards of one group and thus overlap occurs (although
      * harmless and intentionally). We just assume everything to be alright and
@@ -303,14 +307,14 @@ drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
 
     /* set the base address for all groups (must be the same for all cards) */
     if (!groupBase)
-	groupBase = (unsigned short*)( (unsigned)rval->port & (unsigned)~0xffff );
+        groupBase = (unsigned short*)( (unsigned)rval->port & (unsigned)~0xffff );
     else
-	assert( (unsigned)groupBase == ((unsigned)rval->port & (unsigned)~0xffff ));
+        assert( (unsigned)groupBase == ((unsigned)rval->port & (unsigned)~0xffff ));
 
     /* could probe the addresses and check for jumper 3 */
     irqHandler = IK320IrqCatcher;
     if ((status=devConnectInterrupt(intVME, sw1, IK320IrqMaster, (void*)rval)))
-	goto cleanup;
+        goto cleanup;
 
     rval->record=0;
     rval->sw1 = sw1;
@@ -321,12 +325,12 @@ drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
     rval->waiting = 0;
     rval->savedMask = IRQ_MASK_INVALID;
     for (i=0; i<3; i++)
-	rval->scanPvt[i]=0;
+        rval->scanPvt[i]=0;
 
 #define crd (rval->card)
     needsPOST = (   crd->CRC != crd->actualCRC
-		    ||  crd->CRC1 != crd->actualCRC1
-		    ||  crd->CRC2 != crd->actualCRC2 );
+                    ||  crd->CRC1 != crd->actualCRC1
+                    ||  crd->CRC2 != crd->actualCRC2 );
     /* maybe the card was just powered up ? */
     /* could set the compVelocities here... if needsPOST */
     /* unknown
@@ -336,77 +340,88 @@ drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
 #undef crd
 
     if ((status = devEnableInterruptLevel(intVME,irqLevel)))
-	goto cleanup;
+        goto cleanup;
     intEnabled = 1;
 
     allCards.first = rval;
 
     if (!needsPOST)
     {
-	/* hmmm... the CRC values seem to be OK. However, if the
-	 * card was reset without removing the power (e.g. by hitting
-	 * the crate's reset button) _nothing_ will work without
-	 * a POST, i.e. the driver will hang!
-	 * We better make sure we get a reply from the card.
-	 */
-	needsPOST = cardQuery(rval);
+        /* hmmm... the CRC values seem to be OK. However, if the
+         * card was reset without removing the power (e.g. by hitting
+         * the crate's reset button) _nothing_ will work without
+         * a POST, i.e. the driver will hang!
+         * We better make sure we get a reply from the card.
+         */
+        needsPOST = cardQuery(rval);
     }
 
     status=devDisableInterruptLevel(intVME,irqLevel);
     intEnabled = 0;
     if (status)
-	goto cleanup;
+        goto cleanup;
 
     /* now install the real irq handler */
     irqHandler = IK320IrqHandler;
 
     /* reenable irqs */
     if ((status=devEnableInterruptLevel(intVME,irqLevel)))
-	goto cleanup;
+        goto cleanup;
     intEnabled = 1;
 
     if (needsPOST)
     {
-	/* we need to do a POST, so initialize the card to defaults */
-	cardInit(rval->card);
-	epicsPrintf("drvIK320: doing POST on 0x%x/0x%x\n",sw1,sw2);
-	status = drvIK320Request(rval,
-				 0 /* do sync request */,
-				 FUNC_POST,
-				 0 /* no parm */);
-	/* release */
-	drvIK320Finish(rval);
-	if (status) goto cleanup;
+        /* we need to do a POST, so initialize the card to defaults */
+        cardInit(rval->card);
+        epicsPrintf("drvIK320: doing POST on 0x%x/0x%x\n",sw1,sw2);
+        status = drvIK320Request(rval,
+                                 0 /* do sync request */,
+                                 FUNC_POST,
+                                 0 /* no parm */);
+        /* release */
+        drvIK320Finish(rval);
+        if (status) goto cleanup;
     }
 
+/*
+    PPC based CPU boards can't handle this?
     epicsPrintf("drvIK320: card at 0x%x/0x%x (version HW: %i SW: %*s) initialized successfully\n",
-		sw1, sw2, rval->card->hwVersion,
-		(int)(sizeof( ((IK320Card)0)->swVersion ) / sizeof( ((IK320Card)0)->swVersion[0] )),
-		rval->card->swVersion); 
+                sw1, sw2, rval->card->hwVersion,
+                (int)(sizeof( ((IK320Card)0)->swVersion ) / sizeof( ((IK320Card)0)->swVersion[0] )),
+                rval->card->swVersion); 
+*/
+
+    /* Default to reading encoder without referencing. */
+    status = drvIK320Request(rval, 0, FUNC_NOREF1, 0);
+    drvIK320Finish(rval);
+    status = drvIK320Request(rval, 0, FUNC_NOREF2, 0);
+    drvIK320Finish(rval);
+    status = drvIK320Request(rval, 0, FUNC_NOREF12,0);
+    drvIK320Finish(rval);
 
     semGive(allCards.mutex);
     *pDrv = rval;
 
-    return (OK);
+    return(OK);
 
-    cleanup:
+cleanup:
     if (intEnabled)
-	devDisableInterruptLevel(intVME,irqLevel);
+        devDisableInterruptLevel(intVME,irqLevel);
     if (irqHandler)
-	devDisconnectInterrupt(intVME,sw1,irqHandler);
+        devDisconnectInterrupt(intVME,sw1,irqHandler);
     if (localA24)
-	devUnregisterAddress(atVMEA24,(size_t)(A24BASE(sw2)),"drvIK320");
+        devUnregisterAddress(atVMEA24,(size_t)(A24BASE(sw2)),"drvIK320");
     if (localA16)
-	devUnregisterAddress(atVMEA16,(size_t)(A16PORT(sw1)),"drvIK320");
+        devUnregisterAddress(atVMEA16,(size_t)(A16PORT(sw1)),"drvIK320");
     if (rval)
     {
 #ifndef USE_INTLOCK
-	if (rval->mutex)
-	    semDelete(rval->mutex);
+        if (rval->mutex)
+            semDelete(rval->mutex);
 #endif
-	if (rval->sync)
-	    semDelete(rval->sync);
-	free(rval);
+        if (rval->sync)
+            semDelete(rval->sync);
+        free(rval);
     }
     semGive(allCards.mutex);
     *pDrv=0;
@@ -425,21 +440,19 @@ drvIK320RegisterIOScan(IK320Driver drv, IOSCANPVT *pScanPvt, int axis)
     semTake(drv->mutex,WAIT_FOREVER);
 #else
     {
-	int key=intLock();
+        int key=intLock();
 #endif
-	if (!(wasBusy=drv->busy) )
-	{
-	    drv->busy=1;
-	}
+        if (!(wasBusy=drv->busy))
+            drv->busy=1;
 #ifndef USE_INTLOCK
-	semGive(drv->mutex);
+        semGive(drv->mutex);
 #else
-	intUnlock(key);
+        intUnlock(key);
     }
 #endif
 
     if (wasBusy)
-	return (S_drvIK320_cardBusy);
+        return(S_drvIK320_cardBusy);
 
     semTake(allCards.mutex,WAIT_FOREVER);
     key = intLock();
@@ -447,7 +460,7 @@ drvIK320RegisterIOScan(IK320Driver drv, IOSCANPVT *pScanPvt, int axis)
     intUnlock(key);
     semGive(allCards.mutex);
 
-    return (OK);
+    return(OK);
 }
 
 long
@@ -456,27 +469,28 @@ drvIK320Disconnect(IK320Driver drv)
     int busy;
 
     if (!drv)
-	return (S_drvIK320_invalidParm);
+        return(S_drvIK320_invalidParm);
 
 #ifndef USE_INTLOCK
     semTake(drv->mutex,WAIT_FOREVER);
 #else
     {
-	int key=intLock();
+        int key=intLock();
 #endif
-	if (!(busy=drv->busy) )
-	{
-	    drv->busy=1;
-	    devDisableInterruptLevel(intVME,drv->irqLevel);
-	}
+        if (!(busy=drv->busy))
+        {
+            drv->busy=1;
+            devDisableInterruptLevel(intVME,drv->irqLevel);
+        }
 #ifndef USE_INTLOCK
-	semGive(drv->mutex);
+        semGive(drv->mutex);
 #else
-	intUnlock(key);
+        intUnlock(key);
     }
 #endif
 
-    if (busy) return (S_drvIK320_cardBusy);
+    if (busy)
+        return (S_drvIK320_cardBusy);
 
 #ifndef USE_INTLOCK
     semTake(drv->mutex,WAIT_FOREVER);
@@ -487,7 +501,7 @@ drvIK320Disconnect(IK320Driver drv)
     devUnregisterAddress(atVMEA24,(size_t)(A24BASE(drv->sw2)),"drvIK320");
     devUnregisterAddress(atVMEA16,(size_t)(A16PORT(drv->sw1)),"drvIK320");
     free(drv);
-    return (0);
+    return(0);
 }
 
 static void
@@ -502,59 +516,59 @@ IK320IrqHandler(void *parm)
     /* check if this is an irq which might request I/O scan handling */
     if (0 < sHi && 4 > sHi && 6 != sLo )
     { /* ok, this is a candidate */
-	if (drv->scanPvt[sHi-1])
-	    scanIoRequest( *drv->scanPvt[sHi-1] ); /* scanned record MUST call drvIK320Finish() */
-	else
-	{
-	    /* it's up to us to clear the marker and the status register */
-	    doClear = 1;
-	}
+        if (drv->scanPvt[sHi-1])
+            scanIoRequest( *drv->scanPvt[sHi-1] ); /* scanned record MUST call drvIK320Finish() */
+        else
+        {
+            /* it's up to us to clear the marker and the status register */
+            doClear = 1;
+        }
     }
     else
     {
-	if (drv->busy <= 1)
-	{
-	    if (drv->record)
-		callbackRequestProcessCallback(&drv->procCbk,priorityHigh,drv->record);
-	    else if (drv->waiting) /* somebody's waiting */
-		semGive(drv->sync); /* semaphore state should still remain empty */
-	    else
-	    { /* UH OH, an IRQ which nobody wants; */
-		error = 1;
-	    }
-	}
-	else
-	{
-	    /* some calls generate more than one interrupt; notification of the caller
-	     * happens only for the last one;
-	     */
-	    doClear=1;
-	}
+        if (drv->busy <= 1)
+        {
+            if (drv->record)
+                callbackRequestProcessCallback(&drv->procCbk,priorityHigh,drv->record);
+            else if (drv->waiting) /* somebody's waiting */
+                semGive(drv->sync); /* semaphore state should still remain empty */
+            else
+            { /* UH OH, an IRQ which nobody wants; */
+                error = 1;
+            }
+        }
+        else
+        {
+            /* some calls generate more than one interrupt; notification of the caller
+             * happens only for the last one;
+             */
+            doClear=1;
+        }
     }
 
 #ifndef NODEBUG
     if (error)
     {
-	sprintf(drvIK320LoggerString,"UNSOLICITED IRQ Status: %x",(int)drv->card->irqStatus);
-	semGive(drvIK320LoggerSem);
+        sprintf(drvIK320LoggerString,"UNSOLICITED IRQ Status: %x",(int)drv->card->irqStatus);
+        semGive(drvIK320LoggerSem);
     }
     else if (drvIK320Debug>=1)
     {
-	sprintf(drvIK320LoggerString,"irqStatus: %x",(int)drv->card->irqStatus);
-	semGive(drvIK320LoggerSem);
+        sprintf(drvIK320LoggerString,"irqStatus: %x",(int)drv->card->irqStatus);
+        semGive(drvIK320LoggerSem);
     }
 #endif
     if (error || doClear)
     {
-	if (0 < sHi && 4 > sHi )
-	    card->X[sHi-1].xfer = 0;
-	card->irqStatus = 0;
-	{
-	    int key = intLock();
-	    if (drv->busy > 0)
-		drv->busy--;
-	    intUnlock(key);
-	}
+        if (0 < sHi && 4 > sHi )
+            card->X[sHi-1].xfer = 0;
+        card->irqStatus = 0;
+        {
+            int key = intLock();
+            if (drv->busy > 0)
+                drv->busy--;
+            intUnlock(key);
+        }
     }
 }
 
@@ -574,7 +588,7 @@ IK320IrqCatcher(void *parm)
 static void IK320IrqMaster(void *parm)
 {
     if (irqHandler != 0)
-	(*irqHandler)(parm);
+        (*irqHandler)(parm);
 }
 
 /*
@@ -599,34 +613,32 @@ static long cardQuery(IK320Driver drv)
     drv->record=0; /* sync request */
     if (drv->card->enableIRQ  & IRQ_MASK_X1)
     {
-	if (drv->card->enableIRQ & IRQ_MASK_X2 )
-	{
-	    if (drv->card->modeX3 != DISABLED)
-	    {
-		drv->card->function = FUNC_READ_ALL;
-		drv->card->X[2].xfer=0;
-	    }
-	    else
-	    {
-		return (ERROR);
-	    }
-	}
-	else
-	{
-	    drv->card->function = FUNC_READ_X2;
-	    drv->card->X[1].xfer=0;
-	}
+        if (drv->card->enableIRQ & IRQ_MASK_X2 )
+        {
+            if (drv->card->modeX3 != DISABLED)
+            {
+                drv->card->function = FUNC_READ_ALL;
+                drv->card->X[2].xfer=0;
+            }
+            else
+                return (ERROR);
+        }
+        else
+        {
+            drv->card->function = FUNC_READ_X2;
+            drv->card->X[1].xfer=0;
+        }
     }
     else
     {
-	drv->card->function = FUNC_READ_X1;
-	drv->card->X[0].xfer=0;
+        drv->card->function = FUNC_READ_X1;
+        drv->card->X[0].xfer=0;
     }
     INTERRUPT(drv);
-    rval = semTake(drv->sync, 1	/* this card is fast */);
+    rval = semTake(drv->sync, 1 /* this card is fast */);
     drvIK320Finish(drv);
     DM(1,"drvIK320: cardQuery status %ld\n",rval);
-    return (rval);
+    return(rval);
 }
 
 #ifndef NODEBUG
@@ -634,13 +646,13 @@ static long cardQuery(IK320Driver drv)
 
 static int
 drvIK320IrqLogger(int a0, int a1, int a2, int a3, int a4,
-		  int a5, int a6, int a7, int a8, int a9)
+                  int a5, int a6, int a7, int a8, int a9)
 {
     printf("drvIK320 starting irq logger...\n");
     while (1)
     {
-	semTake(drvIK320LoggerSem,WAIT_FOREVER);
-	printf("drvIK320 (IRQ logger): %s\n",drvIK320LoggerString);
+        semTake(drvIK320LoggerSem,WAIT_FOREVER);
+        printf("drvIK320 (IRQ logger): %s\n",drvIK320LoggerString);
     }
 }
 
@@ -682,17 +694,17 @@ void pw(IK320Driver drv, int offset, unsigned long data)
 
 void setp(IK320Driver drv)
 {
-    *(drv->port) =1;
+    *(drv->port) = 1;
 }
 
 unsigned short getp(IK320Driver drv)
 {
-    return (*(drv->port));
+    return(*(drv->port));
 }
 
 unsigned short grpTrig(IK320Driver drv)
 {
-    return (*(drv->port - (drv->sw1 & 0x1f)));
+    return(*(drv->port - (drv->sw1 & 0x1f)));
 }
 
 #endif
@@ -707,15 +719,15 @@ cardInit(IK320Card crd)
     long status = OK;
     for (i=0; i<3; i++)
     {
-	crd->direction[i]   = DIR_NORMAL;
-	crd->linAng[i]      = MODE_LIN;
-	/*
-	 * the following are unknown:
-	 *
-	 * crd->nPeriods[i]	=
-	 */
+        crd->direction[i]   = DIR_NORMAL;
+        crd->linAng[i]      = MODE_LIN;
+        /*
+         * the following are unknown:
+         *
+         * crd->nPeriods[i]	=
+         */
     }
-    crd->interpBits         = 12;	/* KG - was 16 */
+    crd->interpBits         = 12;   /* KG - was 16 */
     crd->deltaRefX1         = DISABLED;
     crd->deltaRefX2         = DISABLED;
     crd->useCompX1          = DISABLED;
@@ -736,12 +748,12 @@ cardInit(IK320Card crd)
     /* don't set compVelocity; can only be set after power on */
     for (i=0; i<3; i++)
     {
-	crd->extPreset[i].count = 0;
-	crd->extPreset[i].interpol= 0;
-	crd->vmePreset[i].count = 0;
-	crd->vmePreset[i].interpol= 0;
-	crd->offset[i].count    = 0;
-	crd->offset[i].interpol= 0;
+        crd->extPreset[i].count = 0;
+        crd->extPreset[i].interpol= 0;
+        crd->vmePreset[i].count = 0;
+        crd->vmePreset[i].interpol= 0;
+        crd->offset[i].count    = 0;
+        crd->offset[i].interpol= 0;
     }
     crd->extFunctionX1  = DISABLED;
     crd->extFunctionX2  = DISABLED;
@@ -749,7 +761,7 @@ cardInit(IK320Card crd)
 
     /* reset irq status to enable irqs */
     crd->irqStatus      = 0;
-    return (status);
+    return(status);
 }
 
 
@@ -768,385 +780,382 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
 
     /* if this is a group trigger, switch to special routine */
     if ( FUNC_GRP_TRIG == func )
-	return (drvIK320GroupTrigger(GROUP_NR(drv->sw1)));
+        return(drvIK320GroupTrigger(GROUP_NR(drv->sw1)));
 
     /* check if the card is busy */
 #ifndef USE_INTLOCK
     semTake(drv->mutex,WAIT_FOREVER);
 #else
     {
-	int key=intLock();
+        int key=intLock();
 #endif
-	if ( ! (wasBusy=drv->busy) )
-	    drv->busy = 1;
+        if (!(wasBusy=drv->busy))
+            drv->busy = 1;
 #ifndef USE_INTLOCK
-	semGive(drv->mutex);
+        semGive(drv->mutex);
 #else
-	intUnlock(key);
+        intUnlock(key);
     }
 #endif
 
     if (wasBusy)
     {
-	/* contrary to the docs, the card does't abort a reference search
-	 * command. If this is ever re-enabled, you should think
-	 * about handling pact (race condition if setting it after INTERRUPT)
-	 */
-	switch (func)
-	{
+        /* contrary to the docs, the card does't abort a reference search
+         * command. If this is ever re-enabled, you should think
+         * about handling pact (race condition if setting it after INTERRUPT)
+         */
+        switch (func)
+        {
 #ifdef THIS_DOESNT_WORK
-	case FUNC_ABORT:
-	    drv->card->function = FUNC_ABORT;
-	    INTERRUPT(drv);
-	    /* rest should be done when IRQ comes in */
-	    return (OK);
+        case FUNC_ABORT:
+            drv->card->function = FUNC_ABORT;
+            INTERRUPT(drv);
+            /* rest should be done when IRQ comes in */
+            return(OK);
 #endif
-	default:
-	    return (S_drvIK320_cardBusy);
-	}
+        default:
+            return(S_drvIK320_cardBusy);
+        }
     }
 
     switch (func)
     {
     default:
-	status = S_drvIK320_invalidFunc;
-	break;
+        status = S_drvIK320_invalidFunc;
+        break;
 
-    case FUNC_ABORT:	/* this probably does nothing */
-	status = OK;
-	timeout = 1;
-	break;
+    case FUNC_ABORT:    /* this probably does nothing */
+        status = OK;
+        timeout = 1;
+        break;
 
     case FUNC_READ_ALL:
-	which++; /* fall through */
+        which++; /* fall through */
     case FUNC_READ_X2:
-	which++;
-    case FUNC_READ_X1:	/* is irq of this channel disabled? */
-	last = (2==which ? 0 : which);
-	status = OK;
-	for (axis = which; axis>=last; axis--)
-	{
-	    if ((which != 2 && (card->enableIRQ &
-		(axis ? IRQ_MASK_X2 : IRQ_MASK_X1)))
-		|| (2==which && 0==card->modeX3))
-	    {
-		status = S_drvIK320_maskedChannel;
-		break;
-	    }
-	    if (card->X[axis].xfer)
-	    {
-		epicsPrintf("drvIK320Request(): error -  xfer marker is set for %i\n",
-			    which+1);
-		status = S_drvIK320_xferSetX1 + which;
-	    }
-	}
-	/* FIXME: We're not shure what do if FUNC_READ_ALL. Should we
-	 *		  disable interrupts for X1 and X2 ?
-	 *		  We leave that to the user however because it would imply
-	 *        some overhead, namely one call to FUNC_SET_PARMS in order
-	 *		  to mask the IRQs and another one to reset the mask when
-	 *		  the IRQ for the combined axis comes in.
-	 *		  Therefore, it is the user's responsibility to disable
-	 *		  X1 / X2 irq if he/she doesn't want to see them.
-	 *		  Note that we also provide special calls to set the
-	 *		  combined mode which disable individual irqs.
-	 */
+        which++;
+    case FUNC_READ_X1:  /* is irq of this channel disabled? */
+        last = (2==which ? 0 : which);
+        status = OK;
+        for (axis = which; axis>=last; axis--)
+        {
+            if ((which != 2 && (card->enableIRQ &
+                                (axis ? IRQ_MASK_X2 : IRQ_MASK_X1)))
+                || (2==which && 0==card->modeX3))
+            {
+                status = S_drvIK320_maskedChannel;
+                break;
+            }
+            if (card->X[axis].xfer)
+            {
+                epicsPrintf("drvIK320Request(): error -  xfer marker is set for %i\n",
+                            which+1);
+                status = S_drvIK320_xferSetX1 + which;
+            }
+        }
+        /* FIXME: We're not shure what do if FUNC_READ_ALL. Should we
+         *		  disable interrupts for X1 and X2 ?
+         *		  We leave that to the user however because it would imply
+         *        some overhead, namely one call to FUNC_SET_PARMS in order
+         *		  to mask the IRQs and another one to reset the mask when
+         *		  the IRQ for the combined axis comes in.
+         *		  Therefore, it is the user's responsibility to disable
+         *		  X1 / X2 irq if he/she doesn't want to see them.
+         *		  Note that we also provide special calls to set the
+         *		  combined mode which disable individual irqs.
+         */
 
-	/*
-	 *        IMPORTANT NOTE: in case of an asynchronous FUNC_READ_ALL
-	 *		  X1/X2 irq MUST be disabled because X3's record could be
-	 *		  processed as a result of X1/X2 irq.
-	 */
-	if (which == 2 &&
-	     (card->enableIRQ & (IRQ_MASK_X1 | IRQ_MASK_X2)) != (IRQ_MASK_X1 | IRQ_MASK_X2) )
-	{
-	    status = S_drvIK320_invalidParm;
-	}
-	timeout = 1; /* this should be fast */
-	break;
+        /*
+         *        IMPORTANT NOTE: in case of an asynchronous FUNC_READ_ALL
+         *		  X1/X2 irq MUST be disabled because X3's record could be
+         *		  processed as a result of X1/X2 irq.
+         */
+        if (which == 2 &&
+            (card->enableIRQ & (IRQ_MASK_X1 | IRQ_MASK_X2)) != (IRQ_MASK_X1 | IRQ_MASK_X2) )
+        {
+            status = S_drvIK320_invalidParm;
+        }
+        timeout = 1; /* this should be fast */
+        break;
+
+    case FUNC_NOREF1: 
+    case FUNC_NOREF2: 
+    case FUNC_NOREF12: 
+        status = OK;
+        timeout = sysClkRateGet() * 1;  /* wait for 1 sec. */
+        break;
 
     case FUNC_POST: 
-	status = OK;
-	timeout = sysClkRateGet() * 10;	/* wait for 10 secs */
-	break;
+        status = OK;
+        timeout = sysClkRateGet() * 10; /* wait for 10 secs */
+        break;
 
-	/* set the direction flag;
-	 */
+        /* set the direction flag;
+         */
     case FUNC_DIR_X1_NEG:
-	which--;   /* fall through */
+        which--;   /* fall through */
     case FUNC_DIR_X2_NEG:
-	dir = 1;   /* fall through */
+        dir = 1;   /* fall through */
     case FUNC_DIR_X2_POS:
-	which++;   /* fall through */
+        which++;   /* fall through */
     case FUNC_DIR_X1_POS:
-	card->direction[which] = dir;
-	func = FUNC_SET_PARMS;
-	timeout = 1; /* this should be fast */
-	status = OK;
-	break;
+        card->direction[which] = dir;
+        func = FUNC_SET_PARMS;
+        timeout = 1; /* this should be fast */
+        status = OK;
+        break;
 
     case FUNC_MODE_X3_DISABLE:
-	/* re_enable the individual interrupts */
-	card->enableIRQ &= ~(IRQ_MASK_X1 | IRQ_MASK_X2);
-	card->modeX3 = DISABLED;
-	func = FUNC_SET_PARMS;
-	timeout = 1; /* this should be fast */
-	status = OK;
-	break;
+        /* re_enable the individual interrupts */
+        card->enableIRQ &= ~(IRQ_MASK_X1 | IRQ_MASK_X2);
+        card->modeX3 = DISABLED;
+        func = FUNC_SET_PARMS;
+        timeout = 1; /* this should be fast */
+        status = OK;
+        break;
 
     case FUNC_MODE_X3_SUM:
     case FUNC_MODE_X3_DIFF:
     case FUNC_MODE_X3_MEAN:
-	/* disable individual irqs */
-	card->enableIRQ |= IRQ_MASK_X1 | IRQ_MASK_X2;
-	/* strip off `special' flag */
-	card->modeX3 = func & 0xffff;
-	func = FUNC_SET_PARMS;
-	timeout = 1; /* this should be fast */
-	status = OK;
-	break;
+        /* disable individual irqs */
+        card->enableIRQ |= IRQ_MASK_X1 | IRQ_MASK_X2;
+        /* strip off `special' flag */
+        card->modeX3 = func & 0xffff;
+        func = FUNC_SET_PARMS;
+        timeout = 1; /* this should be fast */
+        status = OK;
+        break;
 
     case FUNC_PRE_X3:
-	which++; /* fall through */
+        which++; /* fall through */
     case FUNC_PRE_X2:
-	which++;
+        which++;
     case FUNC_PRE_X1:
-	if (parm)
-	{
-	    card->vmePreset[which] = *(IK320Value)parm;
-	}
-	else
-	{
-	    card->vmePreset[which].count = 0;
-	    card->vmePreset[which].interpol = 0;
-	}
-	timeout = 1; /* this should be fast */
-	status = OK;
-	break;
+        if (parm)
+            card->vmePreset[which] = *(IK320Value)parm;
+        else
+        {
+            card->vmePreset[which].count = 0;
+            card->vmePreset[which].interpol = 0;
+        }
+        timeout = 1; /* this should be fast */
+        status = OK;
+        break;
 
     case FUNC_SET_PARMS: /* generic set parameter call */
 #define ikparm ((IK320Parm)parm)
 #define dval   (*(double*)ikparm->from)
-	/* copy to the card memory */
-	if ( ! parm )
-	{
-	    status = S_drvIK320_invalidParm;
-	}
-	else
-	{
-	    if (ikparm->type == six)
-	    {
-		/* convert (double) to an IK320ValueRec */
-		IK320ValueRec tmp;
-		tmp.count   = (long) floor( dval / (double)(1<<card->interpBits));
-		ftmp = fmod(dval,(double)(1<<card->interpBits));
-		tmp.interpol = (unsigned short) (NINT(ftmp) << (16 - card->interpBits));
-		memmove((char*)(drv->card) + ikparm->offset,
-			(char*)&tmp,
-			(size_t)ikparm->type);
-	    }
-	    else
-	    {
-		memmove((char*)(drv->card) + ikparm->offset,
-			ikparm->from,
-			(size_t)ikparm->type);
-	    }
-	    timeout = 1;
-	    status = OK;
-	}
+        /* copy to the card memory */
+        if ( ! parm )
+            status = S_drvIK320_invalidParm;
+        else
+        {
+            if (ikparm->type == six)
+            {
+                /* convert (double) to an IK320ValueRec */
+                IK320ValueRec tmp;
+                tmp.count   = (long) floor( dval / (double)(1<<card->interpBits));
+                ftmp = fmod(dval,(double)(1<<card->interpBits));
+                tmp.interpol = (unsigned short) (NINT(ftmp) << (16 - card->interpBits));
+                memmove((char*)(drv->card) + ikparm->offset,
+                        (char*)&tmp,
+                        (size_t)ikparm->type);
+            }
+            else
+            {
+                memmove((char*)(drv->card) + ikparm->offset, ikparm->from,
+                        (size_t)ikparm->type);
+            }
+            timeout = 1;
+            status = OK;
+        }
 #undef dval
 #undef ikparm
-	break;
+        break;
 
     case FUNC_GET_PARMS: /* generic read parameter call */
 #define ikparm ((IK320Parm)parm)
 #define sixval ((IK320Value)((char*)drv->card + ikparm->offset))
-	/* copy to the card memory */
-	if (! parm)
-	{
-	    /* suppose they just want to lock the driver */
-	}
-	else
-	{
-	    if (ikparm->type == six)
-	    {
-		/* convert 48-bit register value to double */
-		double val=sixval->count;
-		val *= (1<<card->interpBits);
-		val += (double) (sixval->interpol >> (16 - card->interpBits));
-		*(double*)ikparm->from = val;
-	    }
-	    else
-	    {
-		memmove(ikparm->from, (char*)(drv->card) + ikparm->offset,
-			(size_t)ikparm->type);
-	    }
-	}
+        /* copy to the card memory */
+        if (! parm)
+        {
+            /* suppose they just want to lock the driver */
+        }
+        else
+        {
+            if (ikparm->type == six)
+            {
+                /* convert 48-bit register value to double */
+                double val=sixval->count;
+                val *= (1<<card->interpBits);
+                val += (double) (sixval->interpol >> (16 - card->interpBits));
+                *(double*)ikparm->from = val;
+            }
+            else
+            {
+                memmove(ikparm->from, (char*)(drv->card) + ikparm->offset,
+                        (size_t)ikparm->type);
+            }
+        }
 #undef sixval
 #undef ikparm
-	return (OK);
+        return(OK);
 
-	/* before allowing a reference run, we test if
-	 * an encoder is there, because the reference run
-	 * can not be aborted.
-	 *
-	 * We do this by trying to read the device and check
-	 * for the 'signal too low' status. Note that for
-	 * sake of simplicity, we do a synchronous read here.
-	 * ( a read takes ~180 us)
-	 */
+        /* before allowing a reference run, we test if
+         * an encoder is there, because the reference run
+         * can not be aborted.
+         *
+         * We do this by trying to read the device and check
+         * for the 'signal too low' status. Note that for
+         * sake of simplicity, we do a synchronous read here.
+         * ( a read takes ~180 us)
+         */
     case FUNC_REF_BOTH:
-	which++; /* fall through */
+        which++; /* fall through */
     case FUNC_REF_X2:
-	which++; /* fall through */
+        which++; /* fall through */
     case FUNC_REF_X1:
-	timeout = WAIT_FOREVER;	/* we cannot know how long this gonna take */
+        timeout = WAIT_FOREVER; /* we cannot know how long this gonna take */
 
-	/* save compensation flag and irq mask */
-	comp1 = card->useCompX1;
-	comp2 = card->useCompX2;
-	irqEnbl = card->enableIRQ;
-	card->useCompX1 = 0;
-	card->useCompX2 = 0;
-	card->enableIRQ &= ~(IRQ_MASK_X1 | IRQ_MASK_X2);
+        /* save compensation flag and irq mask */
+        comp1 = card->useCompX1;
+        comp2 = card->useCompX2;
+        irqEnbl = card->enableIRQ;
+        card->useCompX1 = 0;
+        card->useCompX2 = 0;
+        card->enableIRQ &= ~(IRQ_MASK_X1 | IRQ_MASK_X2);
 
-	drv->record = 0;
-	drv->waiting++;	/* NOTE: we assume ++ to be ATOMIC; increase the counter
-			 *		 _before_ interrupting to prevent race condition.
-			 */
-	/* IK320 doesn't use the new IRQ mask if not notified */
-	card->function = FUNC_SET_PARMS;
-	DM(2,"drvIK320: reference; set irq mask...");
-	card->irqStatus = 0;
-	INTERRUPT(drv);
-	if (semTake(drv->sync,1))
-	{
-	    status = S_drvIK320_timeout;
-	    break;
-	}
-	/* NOTE: IK320 seems to have another firmware bug.
-	 *		 Although the reply to the `set parameters'
-	 *       request came in, the card seems to need some
-	 *       time to get ready again :-( :-( :-(.
-	 *       The card will ignore the next interrupt
-	 *       if it is issued too shortly after getting the
-	 *       reply to FUNC_SET_PARMS.
-	 *       
-	 *       At this point, we just do a taskDelay().
-	 */
-	taskDelay(1);
-	DM(2,"ok\ndrvIK320: reference; trying to read...");
+        drv->record = 0;
+        drv->waiting++; /* NOTE: we assume ++ to be ATOMIC; increase the counter
+                 *		 _before_ interrupting to prevent race condition.
+                 */
+        /* IK320 doesn't use the new IRQ mask if not notified */
+        card->function = FUNC_SET_PARMS;
+        DM(2,"drvIK320: reference; set irq mask...");
+        card->irqStatus = 0;
+        INTERRUPT(drv);
+        if (semTake(drv->sync,1))
+        {
+            status = S_drvIK320_timeout;
+            break;
+        }
+        /* NOTE: IK320 seems to have another firmware bug.
+         *		 Although the reply to the `set parameters'
+         *       request came in, the card seems to need some
+         *       time to get ready again :-( :-( :-(.
+         *       The card will ignore the next interrupt
+         *       if it is issued too shortly after getting the
+         *       reply to FUNC_SET_PARMS.
+         *       
+         *       At this point, we just do a taskDelay().
+         */
+        taskDelay(1);
+        DM(2,"ok\ndrvIK320: reference; trying to read...");
 
-	last = (2==which ? 1 : which);
-	for (axis = (2 == which ? 0 : which), status = OK;
-	    axis<=last && OK==status;
-	    axis++)
-	{
+        last = (2==which ? 1 : which);
+        for (axis = (2 == which ? 0 : which), status = OK;
+            axis<=last && OK==status; axis++)
+        {
 
-	    /* now try to read something */
-	    card->function = (axis ? FUNC_READ_X2 : FUNC_READ_X1);
-	    card->irqStatus = 0;
-	    INTERRUPT(drv);
-	    if (semTake(drv->sync,1))
-	    {
-		status = S_drvIK320_timeout;
-	    }
-	    else
-	    {
-		status = ((card->X[axis].status & ASTAT_NO_SIGNAL) ?
-			  S_drvIK320_noSignal : OK);
-	    }
-	    DM(2,"ok, status %ld...",status);
+            /* now try to read something */
+            card->function = (axis ? FUNC_READ_X2 : FUNC_READ_X1);
+            card->irqStatus = 0;
+            INTERRUPT(drv);
+            if (semTake(drv->sync,1))
+                status = S_drvIK320_timeout;
+            else
+            {
+                status = ((card->X[axis].status & ASTAT_NO_SIGNAL) ?
+                          S_drvIK320_noSignal : OK);
+            }
+            DM(2,"ok, status %ld...",status);
 
-	    card->X[axis].xfer=0;
-	}
-	DM(2,"\ndrvIK320: reference; resetting mask...");
-	/* restore compensation flag and irq mask */
-	card->useCompX1 = comp1;
-	card->useCompX2 = comp2;
-	card->enableIRQ = irqEnbl;
+            card->X[axis].xfer=0;
+        }
+        DM(2,"\ndrvIK320: reference; resetting mask...");
+        /* restore compensation flag and irq mask */
+        card->useCompX1 = comp1;
+        card->useCompX2 = comp2;
+        card->enableIRQ = irqEnbl;
 
-	/* notify the card of changed parameters */
-	card->function = FUNC_SET_PARMS;
-	card->irqStatus = 0;
-	INTERRUPT(drv);
-	if (semTake(drv->sync,1))
-	{
-	    status = S_drvIK320_timeout;
-	}
-	/* See the note above on why we need to do that */
-	taskDelay(1);
-	DM(2,"done\n");
-	drv->waiting--;	/* NOTE: we assume -- to be ATOMIC */
-	card->irqStatus = 0;
-	break;  
+        /* notify the card of changed parameters */
+        card->function = FUNC_SET_PARMS;
+        card->irqStatus = 0;
+        INTERRUPT(drv);
+        if (semTake(drv->sync,1))
+            status = S_drvIK320_timeout;
+        
+        /* See the note above on why we need to do that */
+        taskDelay(1);
+        DM(2,"done\n");
+        drv->waiting--; /* NOTE: we assume -- to be ATOMIC */
+        card->irqStatus = 0;
+        break;  
     }
 
     if (OK==status)
     {
-	drv->card->function=(unsigned short)func;   
-	drv->record = (sync ? 0 : prec);
+        drv->card->function=(unsigned short)func;   
+        drv->record = (sync ? 0 : prec);
 
-	/* set pact before interrupting the card. This MUST be done in order to
-	 * avoid a race condition:
-	 *
-	 * e.g. 'read_ai()' calls drvIK320Request() and then sets pact:
-	 *
-	 * while still in drvIK320Request(), the IRQ may come in and be handled
-	 * dispatching scanning the record for the second time BEFORE pact gets a
-	 * chance to be set!
-	 */
-	if ( drv->record ) drv->record->pact = TRUE;
+        /* set pact before interrupting the card. This MUST be done in order to
+         * avoid a race condition:
+         *
+         * e.g. 'read_ai()' calls drvIK320Request() and then sets pact:
+         *
+         * while still in drvIK320Request(), the IRQ may come in and be handled
+         * dispatching scanning the record for the second time BEFORE pact gets a
+         * chance to be set!
+         */
+        if ( drv->record )
+            drv->record->pact = TRUE;
 
-	/* a reference run for two axes generates two IRQs */
-	if ( FUNC_REF_BOTH == func )
-	{
-	    int key=intLock();
-	    drv->busy++;
-	    intUnlock(key);
-	}
-	/* interrupt the IK320 */
-	drv->waiting++;	/* NOTE: we assume ++ to be ATOMIC; increase the counter
-			 *		 _before_ interrupting to prevent race condition.
-			 */
-	INTERRUPT(drv);
+        /* a reference run for two axes generates two IRQs */
+        if ( FUNC_REF_BOTH == func )
+        {
+            int key=intLock();
+            drv->busy++;
+            intUnlock(key);
+        }
+        /* interrupt the IK320 */
+        drv->waiting++; /* NOTE: we assume ++ to be ATOMIC; increase the counter
+                 *		 _before_ interrupting to prevent race condition.
+                 */
+        INTERRUPT(drv);
 
-	/* if this is a synchronous request, wait for it
-	 * to complete.
-	 */
-	if (sync)
-	{
-	    status = semTake(drv->sync,timeout) ? S_drvIK320_timeout : OK;
-	    /* NOTE: the caller MUST call drvIK320Finish() after
-	     * 		 processing the result in order to release the card
-	     */
-	}
-	else
-	{
-	    status = S_drvIK320_asyncStarted;
-	}
-	drv->waiting--;	/* NOTE: we assume -- to be ATOMIC */
+        /* if this is a synchronous request, wait for it
+         * to complete.
+         */
+        if (sync)
+        {
+            status = semTake(drv->sync,timeout) ? S_drvIK320_timeout : OK;
+            /* NOTE: the caller MUST call drvIK320Finish() after
+             * 		 processing the result in order to release the card
+             */
+        }
+        else
+            status = S_drvIK320_asyncStarted;
+        drv->waiting--; /* NOTE: we assume -- to be ATOMIC */
     }
 
     if (status != OK && status != S_drvIK320_asyncStarted)
     {
-	/* the request could not be sent; there will be no
-	 * interrupt, hence we must reset the busy flag.
-	 */
-	drv->record=0;
+        /* the request could not be sent; there will be no
+         * interrupt, hence we must reset the busy flag.
+         */
+        drv->record=0;
 #ifndef USE_INTLOCK
-	semTake(drv->mutex,WAIT_FOREVER);
-	drv->busy=0;
-	semGive(drv->mutex);
+        semTake(drv->mutex,WAIT_FOREVER);
+        drv->busy=0;
+        semGive(drv->mutex);
 #else
-	{
-	    int key=intLock();
-	    drv->busy=0;
-	    intUnlock(key);
-	}
+        {
+            int key=intLock();
+            drv->busy=0;
+            intUnlock(key);
+        }
 #endif
     }
-    return (status);
+    return(status);
 }
 
 void
@@ -1157,9 +1166,7 @@ drvIK320Finish(IK320Driver drv)
     drv->record = 0;
     /* clear the associated transfer marker (just in case) */
     if ( 0 < axis && 4 > axis)
-    {
-	drv->card->X[axis-1].xfer=0;
-    }
+        drv->card->X[axis-1].xfer=0;
     drv->card->irqStatus=0; /* ready for new interrupt */
 
 #ifndef USE_INTLOCK
@@ -1167,15 +1174,13 @@ drvIK320Finish(IK320Driver drv)
 #else
     { int key=intLock();
 #endif
-	wasBusy = drv->busy;
-	if ( drv->busy > 0 )
-	{
-	    drv->busy--;
-	}
+        wasBusy = drv->busy;
+        if (drv->busy > 0)
+            drv->busy--;
 #ifndef USE_INTLOCK
-	semGive(drv->mutex);
+        semGive(drv->mutex);
 #else
-	intUnlock(key);
+        intUnlock(key);
     }
 #endif
     DM(1,"drvIK320Finish(): busy %i\n", wasBusy);
@@ -1185,7 +1190,7 @@ static long
 drvIK320report()
 {
     epicsPrintf("drvIK320: sorry, report is not implemented yet\n");
-    return (OK);
+    return(OK);
 }
 
 static long
@@ -1199,7 +1204,7 @@ drvIK320init()
     taskSpawn("IK320Logger",130,VX_STDIO,2048,drvIK320IrqLogger,0,0,0,0,0,0,0,0,0,0);
 #endif
 
-    return (OK);
+    return(OK);
 }
 
 /*
@@ -1218,24 +1223,22 @@ drvIK320getNGroupListeners(int groupNr)
     semTake(allCards.mutex,WAIT_FOREVER);
     for (drv=allCards.first; drv; drv=drv->next)
     {
-	int i;
-	if (GROUP_NR(drv->sw1) == groupNr)
-	{
-	    for (i=0; i<3; i++)
-		if (drv->scanPvt[i])
-		{
-		    rval++;
-		}
-	}
+        int i;
+        if (GROUP_NR(drv->sw1) == groupNr)
+        {
+            for (i=0; i<3; i++)
+                if (drv->scanPvt[i])
+                    rval++;
+        }
     }
     semGive(allCards.mutex);
-    return (rval);
+    return(rval);
 }
 
 int
 drvIK320GroupNr(IK320Driver drv)
 {
-    return (GROUP_NR(drv->sw1));
+    return(GROUP_NR(drv->sw1));
 }
 
 /*
@@ -1249,73 +1252,78 @@ markGroupBusy(IK320Driver drv, int groupNr)
     int wasBusy;
 
     /* search next member */
-    while (drv && GROUP_NR(drv->sw1) != groupNr) drv=drv->next;
+    while (drv && GROUP_NR(drv->sw1) != groupNr)
+        drv=drv->next;
 
     if ( drv )
     {
-	/* mark this member of our group busy */
+        /* mark this member of our group busy */
 #ifndef USE_INTLOCK
-	semTake(drv->mutex,WAIT_FOREVER);
+        semTake(drv->mutex,WAIT_FOREVER);
 #else
-	{ int key=intLock();
+        {
+            int key=intLock();
 #endif
-	    if ( !(wasBusy = drv->busy) )
-	    {
-		drv->busy = 2;
-	    }
+            if (!(wasBusy = drv->busy))
+                drv->busy = 2;
 #ifndef USE_INTLOCK
-	    semGive(drv->mutex);
+            semGive(drv->mutex);
 #else
-	    intUnlock(key);
-	}
+            intUnlock(key);
+        }
 #endif
 
-	if (wasBusy) return (S_drvIK320_cardBusy);
+        if (wasBusy)
+            return (S_drvIK320_cardBusy);
 
-	drv->record = 0;
+        drv->record = 0;
 
-	/* if we are not busy, try to mark the next member */
-	if (markGroupBusy(drv->next,groupNr))
-	{
-	    /* failed; reset the busy flag and return */
+        /* if we are not busy, try to mark the next member */
+        if (markGroupBusy(drv->next,groupNr))
+        {
+            /* failed; reset the busy flag and return */
 #ifndef USE_INTLOCK
-	    semTake(drv->mutex,WAIT_FOREVER);
+            semTake(drv->mutex,WAIT_FOREVER);
 #else
-	    { int key=intLock();
+            {
+                int key=intLock();
 #endif
-		drv->busy=0;
+                drv->busy=0;
 #ifndef USE_INTLOCK
-		semGive(drv->mutex);
+                semGive(drv->mutex);
 #else
-		intUnlock(key);
-	    }
+                intUnlock(key);
+            }
 #endif
-	    return (S_drvIK320_cardBusy);
-	}
+            return(S_drvIK320_cardBusy);
+        }
 
-	/* adjust the busy flag so it reflects the number of
-	 * interrupts that are expected.
-	 */
-	wasBusy=2;
-	if (drv->card->enableIRQ & IRQ_MASK_X1)	wasBusy--;
-	if (drv->card->enableIRQ & IRQ_MASK_X2)	wasBusy--;
-	if (wasBusy != drv->busy)
-	{
+        /* adjust the busy flag so it reflects the number of
+         * interrupts that are expected.
+         */
+        wasBusy=2;
+        if (drv->card->enableIRQ & IRQ_MASK_X1)
+            wasBusy--;
+        if (drv->card->enableIRQ & IRQ_MASK_X2)
+            wasBusy--;
+        if (wasBusy != drv->busy)
+        {
 #ifndef USE_INTLOCK
-	    semTake(drv->mutex,WAIT_FOREVER);
+            semTake(drv->mutex,WAIT_FOREVER);
 #else
-	    { int key=intLock();
+            {
+                int key=intLock();
 #endif
-		drv->busy=wasBusy;
+                drv->busy=wasBusy;
 #ifndef USE_INTLOCK
-		semGive(drv->mutex);
+                semGive(drv->mutex);
 #else
-		intUnlock(key);
-	    }
+                intUnlock(key);
+            }
 #endif
-	}
+        }
     }
-    return (OK);
+    return(OK);
 }
 
 
@@ -1333,29 +1341,29 @@ unmarkGroupBusy(int groupNr)
     semTake(allCards.mutex,WAIT_FOREVER);
     for (drv=allCards.first; drv; drv=drv->next)
     {
-	/* member ? */
-	if (GROUP_NR(drv->sw1)==groupNr)
-	{
+        /* member ? */
+        if (GROUP_NR(drv->sw1)==groupNr)
+        {
 #ifndef USE_INTLOCK
-	    semTake(drv->mutex,WAIT_FOREVER);
+            semTake(drv->mutex,WAIT_FOREVER);
 #else
-	    {
-		int key=intLock();
+            {
+                int key=intLock();
 #endif
-		wasBusy=drv->busy; drv->busy=0;
+                wasBusy=drv->busy; drv->busy=0;
 #ifndef USE_INTLOCK
-		semGive(drv->mutex);
+                semGive(drv->mutex);
 #else
-		intUnlock(key);
-	    }
+                intUnlock(key);
+            }
 #endif
-	    /*
-	     * the busy flag might be reset by somebody calling drvIK320Finish
-	     * before we get here.
-	     *
-	     * assert(wasBusy);
-	     */
-	}
+            /*
+             * the busy flag might be reset by somebody calling drvIK320Finish
+             * before we get here.
+             *
+             * assert(wasBusy);
+             */
+        }
     }
     semGive(allCards.mutex);
 }
@@ -1372,7 +1380,7 @@ drvIK320GroupTrigger(int groupNr)
     long rval;
 
     if (0>groupNr || MAX_IK320_GROUPS <= groupNr)
-	return (S_drvIK320_invalidParm);
+        return(S_drvIK320_invalidParm);
 
     semTake(allCards.mutex,WAIT_FOREVER);
     rval = markGroupBusy(allCards.first,groupNr);
@@ -1380,16 +1388,16 @@ drvIK320GroupTrigger(int groupNr)
 
     if ( OK == rval )
     { /* nobody is busy */
-	/* force the compiler to generate code */
-	rval = (long)((*(groupBase + (groupNr<<12))) & (unsigned short)(groupNr & 0xf0));
+        /* force the compiler to generate code */
+        rval = (long)((*(groupBase + (groupNr<<12))) & (unsigned short)(groupNr & 0xf0));
 #if 0
-	unmarkGroupBusy(groupNr);
-	/* nobody probably should talk to the card until 
-	 * the group completes. There's no protection however.
-	 */
+        unmarkGroupBusy(groupNr);
+        /* nobody probably should talk to the card until 
+         * the group completes. There's no protection however.
+         */
 #endif
     }
-    return (rval);
+    return(rval);
 }
 
 long
@@ -1405,16 +1413,16 @@ drvIK320SetInterpBits(IK320Driver drv, int *pnBits)
     /* do a synchronous request and supply the IK320Parm structure pointer */
     if (OK == (rval = drvIK320Request(drv,0,FUNC_SET_PARMS,&parm)) )
     {
-	/*
-	 * if the parameter was out of range, IK320 set it to a default value
-	 * which we write back.
-	 */
-	if ( from_bits != drv->card->interpBits )
-	{
-	    *pnBits = (int)from_bits;
-	    rval = S_drvIK320_invalidParm;
-	}
-	drvIK320Finish(drv);
+        /*
+         * if the parameter was out of range, IK320 set it to a default value
+         * which we write back.
+         */
+        if ( from_bits != drv->card->interpBits )
+        {
+            *pnBits = (int)from_bits;
+            rval = S_drvIK320_invalidParm;
+        }
+        drvIK320Finish(drv);
     }
-    return (rval);
+    return(rval);
 }
