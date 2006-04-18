@@ -1,4 +1,4 @@
-/* $Id: drvIK320.c,v 1.5 2006-01-19 14:22:20 sluiter Exp $ */
+/* $Id: drvIK320.c,v 1.6 2006-04-18 18:39:28 sluiter Exp $ */
 
 /* DISCLAIMER: This software is provided `as is' and without _any_ kind of
  *             warranty. Use it at your own risk - I won't be responsible
@@ -12,6 +12,10 @@
  * Author: Till Straumann (PTB, 1999)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/01/19 14:22:20  sluiter
+ * - Read encoder without referencing.
+ * - Reformatted.
+ *
  * Revision 1.4  2006/01/05 18:41:33  sluiter
  * Copied PPC bug fix (devDisconnectInterrupt) from CVS R3_13_branch.
  *
@@ -71,10 +75,11 @@
  *	     updates to device handler pointer (irqHandler) and a master device
  *	     interrupt handler (IK320IrqMaster).
  *     01-18-06 rls Default to reading encoder without referencing.
+ *     04-13-06 rls taskDelay(1)'s and semTake(**, 1)'s with delay of 1 tick do
+ *                  not work; changed to 4ms.
  *
  */
 
-#include <vxWorks.h>
 #include <tyLib.h>
 #include <stdioLib.h>
 #include <setjmp.h>
@@ -95,8 +100,10 @@
 #include <dbAccess.h>
 #include <callback.h>
 #include <epicsExport.h>
+#include <epicsThread.h>
 
 #include "drvIK320.h"
+#include "drvIK320ErrStat.h"
 
 /* Define for return test on locationProbe() */
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
@@ -216,7 +223,7 @@ static struct
 
 static unsigned short *groupBase = 0;
 static void (*irqHandler)() = 0;
-
+static int shortdelay = 0;
 
 #ifndef NODEBUG
 static SEM_ID
@@ -287,7 +294,7 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
     status = locationProbe(atVMEA24, (char *) vmeA24);
     if (!PROBE_SUCCESS(status))
     {
-        epicsPrintf("drvIK320Connect(): bus error at address = 0x%08.8x\n", (uint_t) vmeA24);
+        epicsPrintf("drvIK320Connect(): bus error at address = 0x%X\n", (epicsUInt32) vmeA24);
         status = S_dev_noMemory;
         goto cleanup;
     }
@@ -1033,7 +1040,7 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
         DM(2,"drvIK320: reference; set irq mask...");
         card->irqStatus = 0;
         INTERRUPT(drv);
-        if (semTake(drv->sync,1))
+        if (semTake(drv->sync, shortdelay))
         {
             status = S_drvIK320_timeout;
             break;
@@ -1048,7 +1055,7 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
          *       
          *       At this point, we just do a taskDelay().
          */
-        taskDelay(1);
+        taskDelay(shortdelay);
         DM(2,"ok\ndrvIK320: reference; trying to read...");
 
         last = (2==which ? 1 : which);
@@ -1060,7 +1067,7 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
             card->function = (axis ? FUNC_READ_X2 : FUNC_READ_X1);
             card->irqStatus = 0;
             INTERRUPT(drv);
-            if (semTake(drv->sync,1))
+            if (semTake(drv->sync, shortdelay))
                 status = S_drvIK320_timeout;
             else
             {
@@ -1081,11 +1088,11 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
         card->function = FUNC_SET_PARMS;
         card->irqStatus = 0;
         INTERRUPT(drv);
-        if (semTake(drv->sync,1))
+        if (semTake(drv->sync, shortdelay))
             status = S_drvIK320_timeout;
         
         /* See the note above on why we need to do that */
-        taskDelay(1);
+        taskDelay(shortdelay);
         DM(2,"done\n");
         drv->waiting--; /* NOTE: we assume -- to be ATOMIC */
         card->irqStatus = 0;
@@ -1196,6 +1203,8 @@ drvIK320report()
 static long
 drvIK320init()
 {
+    double quantum;
+
     assert(allCards.mutex=semMCreate(SEM_Q_FIFO));
     allCards.first=0;
 #ifndef NODEBUG
@@ -1203,6 +1212,14 @@ drvIK320init()
     drvIK320LoggerString[0] = 0;
     taskSpawn("IK320Logger",130,VX_STDIO,2048,drvIK320IrqLogger,0,0,0,0,0,0,0,0,0,0);
 #endif
+
+    drvIK320RegErrStr();    /* Initialize IK320 error status messages. */
+
+    /* Initialize "shortdelay" to >= 5ms. */
+    quantum = epicsThreadSleepQuantum();
+    shortdelay = (int) (0.005 / quantum);
+    if (shortdelay < 2) /* Insure shortdelay > 2 OS system ticks. */
+        shortdelay = 2;
 
     return(OK);
 }
