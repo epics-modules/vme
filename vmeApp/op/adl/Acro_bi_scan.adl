@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen6/BCDA1/epics/3.13.0/lab/bcdaApp/op/adl/Acro_bi_scan.adl"
-	version=020303
+	name="/APSshare/epics/synApps_cvs/support/vme/vmeApp/op/adl/Acro_bi_scan.adl"
+	version=030004
 }
 display {
 	object {
@@ -95,7 +95,7 @@ display {
 		height=223
 	}
 	control {
-		chan="$(P)$(A):bi_$(ch).SCAN"
+		chan="$(P)9440:$(A):bi_$(ch).SCAN"
 		clr=14
 		bclr=4
 	}
