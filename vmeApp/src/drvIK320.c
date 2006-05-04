@@ -1,4 +1,4 @@
-/* $Id: drvIK320.c,v 1.6 2006-04-18 18:39:28 sluiter Exp $ */
+/* $Id: drvIK320.c,v 1.7 2006-05-04 18:56:12 sluiter Exp $ */
 
 /* DISCLAIMER: This software is provided `as is' and without _any_ kind of
  *             warranty. Use it at your own risk - I won't be responsible
@@ -12,6 +12,10 @@
  * Author: Till Straumann (PTB, 1999)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/04/18 18:39:28  sluiter
+ * taskDelay(1)'s and semTake(**, 1)'s with delay of 1 tick do
+ * not work (especially with PPC's); changed to 4ms.
+ *
  * Revision 1.5  2006/01/19 14:22:20  sluiter
  * - Read encoder without referencing.
  * - Reformatted.
@@ -69,14 +73,16 @@
  *
  * 2.1 01/05/03 rls
  *           - Bug fix from CVS R3_13_branch not copied to main trunk.
- *	     - PowerPC bug fix. For EPICS R3.13.5 and above,
- *	     devDisconnectInterrupt() always returns an error for the PPC
- *	     architecture. Replaced calls to devDisconnectInterrupt() with
- *	     updates to device handler pointer (irqHandler) and a master device
- *	     interrupt handler (IK320IrqMaster).
+ *           - PowerPC bug fix. For EPICS R3.13.5 and above,
+ *             devDisconnectInterrupt() always returns an error for the PPC
+ *             architecture. Replaced calls to devDisconnectInterrupt() with
+ *             updates to device handler pointer (irqHandler) and a master device
+ *             interrupt handler (IK320IrqMaster).
  *     01-18-06 rls Default to reading encoder without referencing.
  *     04-13-06 rls taskDelay(1)'s and semTake(**, 1)'s with delay of 1 tick do
  *                  not work; changed to 4ms.
+ *     05-03-06 rls - Missed semTake(**, 1) in carQuery().
+ *                  - Implemented drvIK320report().
  *
  */
 
@@ -387,23 +393,22 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
                                  0 /* no parm */);
         /* release */
         drvIK320Finish(rval);
-        if (status) goto cleanup;
+        if (status)
+            goto cleanup;
     }
-
-/*
-    PPC based CPU boards can't handle this?
-    epicsPrintf("drvIK320: card at 0x%x/0x%x (version HW: %i SW: %*s) initialized successfully\n",
-                sw1, sw2, rval->card->hwVersion,
-                (int)(sizeof( ((IK320Card)0)->swVersion ) / sizeof( ((IK320Card)0)->swVersion[0] )),
-                rval->card->swVersion); 
-*/
 
     /* Default to reading encoder without referencing. */
     status = drvIK320Request(rval, 0, FUNC_NOREF1, 0);
+    if (status)
+        goto cleanup;
     drvIK320Finish(rval);
     status = drvIK320Request(rval, 0, FUNC_NOREF2, 0);
+    if (status)
+        goto cleanup;
     drvIK320Finish(rval);
     status = drvIK320Request(rval, 0, FUNC_NOREF12,0);
+    if (status)
+        goto cleanup;
     drvIK320Finish(rval);
 
     semGive(allCards.mutex);
@@ -642,7 +647,7 @@ static long cardQuery(IK320Driver drv)
         drv->card->X[0].xfer=0;
     }
     INTERRUPT(drv);
-    rval = semTake(drv->sync, 1 /* this card is fast */);
+    rval = semTake(drv->sync, shortdelay);
     drvIK320Finish(drv);
     DM(1,"drvIK320: cardQuery status %ld\n",rval);
     return(rval);
@@ -1193,10 +1198,25 @@ drvIK320Finish(IK320Driver drv)
     DM(1,"drvIK320Finish(): busy %i\n", wasBusy);
 }
 
-static long
-drvIK320report()
+static long drvIK320report()
 {
-    epicsPrintf("drvIK320: sorry, report is not implemented yet\n");
+    IK320Driver drv;
+    int itera;
+
+    if (allCards.first == NULL)
+        printf("    No Heidenhain IK320 controllers configured.\n");
+    else
+    {
+        for (itera = 0, drv = allCards.first; drv; itera++, drv = drv->next)
+        {
+            char id[13];
+
+            strncpy(id, drv->card->swVersion, 12);
+            printf("    Heidenhain IK320 card #%d @ 0x%X, id: %s \n", itera,
+                   (epicsUInt32) drv->card, id);
+        }
+    }
+
     return(OK);
 }
 
