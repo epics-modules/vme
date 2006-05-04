@@ -14,22 +14,17 @@ record(mbbo,"$(P)IK320:$(sw2)$(axis)function")
 
 Here is an example of IK320card.db being loaded in the startup command file:
 
-dbLoadRecords ("stdApp/Db/IK320card.db","P=kag:,sw2=card0:,axis=1,switches=4134
-4,irq=3")
+dbLoadRecords("$(VME)/vmeApp/Db/IK320card.db","P=kag:,sw2=card0:,axis=1,
+              switches=41344,irq=3")
 
 The substitutions that need a little more explanation are $(switches) and
 $(irq).
 
 ::: switches :::
-switches is derived by simply taking the decimal value of the switches and
-applying the formula: (256 * sw1) + sw2.  It is assumed here that you already
-read your manual and you know what the dip switch settings should be.  As an
-example, here's how my numbers were derived:
+The "switches=" argument is derived by taking the hexadecimal value of the S1/S2
+switch banks and converting it to decimal (a switch in the off portion is a 1).
 
-A16 addr = $A000
-A24 addr = $C00000
-
-therefore,
+Therefore,
 
 Switch sw1        |          Switch sw2
 -----------       |         ------------
@@ -40,7 +35,22 @@ returning to more familiar notation (MSB on left), we have:
 
 1010 0001         |          1000 0000
 = A   1           |            8   0
-= 161             |             128
+
+0xA180 = 41344, hence "switches=41344" in the above dbLoadRecords() call.
+
+The IK320 occupies space in both the A16 and A24 VMEbus address spaces.  The
+formula for determining the address space based on the switch settings are as
+follows;
+
+A24 base address = 0x00C0 0000 + (0x4000 * S2)
+
+In this example, since S2 = 0x80,
+A24 base address = 0x00C0 0000 + (0x4000 * 0x80) = 0xE0 0000
+
+A16 base address = (S1 & 0xE0) * 0x100
+
+In this example, since S1 = 0xA1,
+A16 base address = (0xA1 & 0xE0) * 0x100 = 0xA0 * 0x100 = 0xA000
 
 ::: irq :::
 irq should be the irq level set by the jumpers J1 and J2 on the IK320 board.
