@@ -2,7 +2,7 @@
 /* quick and dirty sequence program to load Bunch Clock generator 
 until I get time to change the device support */
 
-program getFillPat
+program getFillPat ("unit=dummy")
 
 /* defines */
 #define NOTINJECTING 0
@@ -13,6 +13,7 @@ program getFillPat
 
 
 /* compile options flags */
+option +r;
  
 /* Process Variables */
 
@@ -70,20 +71,20 @@ monitor srInjectStatus;
 %% int getFilledBucketsLDebug = 0;
 
 int i;
-int running = 0;
+int running;
 
 ss getFillPattern {
 
         state init {
                 when (pvConnectCount() == pvChannelCount()) {
-%%	                strcpy(message, "Waiting");
+	                strcpy(message, "Waiting");
                         pvPut(message);
 			running = 1;
 		}state waitCommand
 
                 when(delay(2.0)) {
 			running = 0;
-%%	                strcpy(message, "CA Error");
+	                strcpy(message, "CA Error");
                         pvPut(message);
                 } state init
         }
@@ -95,19 +96,19 @@ ss getFillPattern {
                 when(clearMessage == 1) {
                         clearMessage = 0;
                         pvPut(clearMessage);
-%%                      strcpy(message, "Message Cleared");
+                        strcpy(message, "Message Cleared");
                         pvPut(message);
                 } state waitCommand 
 		when(loadPat == 1) {
 			loadPat = 0;
 			pvPut(loadPat);
-%%			strcpy(message, "Loading Pattern");
+			strcpy(message, "Loading Pattern");
 			pvPut(message);
 			clearAll = 1;
 			pvPut(clearAll);	/* clear the pattern */
 			pvGet(NumBuckets);
 %%                        if(getFilledBucketsDebug) {	
-%%				printf("NumBuckets = %d\n", NumBuckets);
+				printf("NumBuckets = %d\n", NumBuckets);
 %%			}
 			/* get the pattern */
 			pvGet(LocalCopy);
@@ -115,7 +116,7 @@ ss getFillPattern {
 				setBucket = LocalCopy[i];
 				pvPut(setBucket);
 %%				if(getFilledBucketsDebug) {
-%%					printf("%d\t%d\n", i,  LocalCopy[i]);
+					printf("%d\t%d\n", i,  LocalCopy[i]);
 %%				}
 			}	
 			/* update waveforms */
@@ -123,7 +124,7 @@ ss getFillPattern {
 			pvPut(BCGPattern);
 			BCGBucketList = 1;
 			pvPut(BCGBucketList);
-%%			strcpy(message, "Pattern Loaded");
+			strcpy(message, "Pattern Loaded");
 			pvPut(message);
 		} state waitCommand
 	} 
