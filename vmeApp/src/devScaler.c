@@ -94,19 +94,9 @@ extern int logMsg(char *fmt, ...);
 #define Debug(l,FMT,V) ;
 #else
 #define STATIC
-#ifdef __GNUC__
-#define Debug(l,f,v...) { if(l<=devScalerDebug) \
-		{printf("%s(%d):",__FILE__,__LINE__); printf(f ,## v); }}
-#else
-#ifdef __SUNPRO_CC
-#define Debug(l,...) { if(l<=devScalerDebug) \
-		{printf("%s(%d):",__FILE__,__LINE__); printf(__VA_ARGS__); }}
-#else
 #define Debug(l,FMT,V) {  if(l <= devScalerDebug) \
 			{ printf("%s(%d):",__FILE__,__LINE__); \
 			  printf(FMT,V); } }
-#endif
-#endif
 #endif
 volatile int devScalerDebug=0;
 
@@ -266,7 +256,7 @@ STATIC void scalerISR(int card)
 	volatile char *addr;
 	uint16 value;	
 
-	if (devScalerDebug >= 5) logMsg("scalerISR: entry\n");
+	Debug(5, "%s", "scalerISR: entry\n");
 	if ((card+1) > scaler_total_cards) return;
 
 	addr = scaler_state[card]->localAddr;
@@ -407,7 +397,7 @@ STATIC long scaler_init(int after)
 		epicsPrintf ("scaler_init: rebootHookAdd() failed\n"); 
 #endif
 
-	Debug(3,"scaler_init: scalers initialized\n");
+	Debug(3, "%s", "scaler_init: scalers initialized\n");
 	return(0);
 }
 

@@ -69,12 +69,6 @@
 #include        <vmeRecord.h>
 #undef GEN_SIZE_OFFSET
 
-
-#ifdef NODEBUG
-#define Debug(l,f,v...) ;
-#else
-#define Debug(l,f,v...) { if(l<=vmeRecordDebug) printf(f,## v); }
-#endif
 volatile int vmeRecordDebug = 0;
 
 
@@ -248,8 +242,10 @@ static long doVmeIo(pvme)
          }
          data_array[i] = value;
          status_array[i] = status;
-         Debug(1, "vmeRecord: VX_READ, vme_ptr=%p, value=0x%x, status=0x%x\n", 
+         if (vmeRecordDebug >= 1) {
+            printf("vmeRecord: VX_READ, vme_ptr=%p, value=0x%x, status=0x%x\n", 
                    vme_ptr, value, status);
+         }
          vme_ptr += pvme->ainc;
       }
    } else {               /* VX_WRITE */
@@ -265,8 +261,10 @@ static long doVmeIo(pvme)
                  status = vxMemProbe( vme_ptr, VX_WRITE, 4, (char *) &value);
                  break;
          }
-         Debug(1, "vmeRecord: VX_WRITE, vme_ptr=%p, value=0x%x, status=0x%x\n", 
+         if (vmeRecordDebug >= 1) {
+            printf("vmeRecord: VX_WRITE, vme_ptr=%p, value=0x%x, status=0x%x\n", 
                    vme_ptr, data_array[i], status);
+         }
          vme_ptr += pvme->ainc;
          status_array[i] = status;
       }

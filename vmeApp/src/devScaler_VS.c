@@ -87,21 +87,15 @@ extern int logMsg(char *fmt, ...);
 #ifdef NODEBUG
 #define STATIC static
 #define Debug(l,FMT,V) ;
+#define Debug2(l,FMT,V1, V2) ;
 #else
 #define STATIC
-#ifdef __GNUC__
-#define Debug(l,f,v...) { if(l<=devScaler_VSDebug) \
-		{printf("%s(%d):",__FILE__,__LINE__); printf(f ,## v); }}
-#else
-#ifdef __SUNPRO_CC
-#define Debug(l,...) { if(l<=devScaler_VSDebug) \
-		{printf("%s(%d):",__FILE__,__LINE__); printf(__VA_ARGS__); }}
-#else
 #define Debug(l,FMT,V) {  if(l <= devScaler_VSDebug) \
 			{ printf("%s(%d):",__FILE__,__LINE__); \
 			  printf(FMT,V); } }
-#endif
-#endif
+#define Debug2(l,FMT,V1,V2) {  if(l <= devScaler_VSDebug) \
+		  	   { printf("%s(%d):",__FILE__,__LINE__); \
+			     printf(FMT,V1,V2); } }
 #endif
 volatile int devScaler_VSDebug=0;
 volatile int devScaler_VS_check_trig=1;
@@ -273,7 +267,7 @@ static void writeReg16(volatile char *a16, int offset, uint16 value)
 	out_be16((volatile void*)(a16+offset), value);
 #else
 	volatile uint16 *reg;
-	Debug(16,"devScalerVS:writeReg16: writing 0x%04x to offset 0x%04x\n", value, offset);
+	Debug2(16,"devScalerVS:writeReg16: writing 0x%04x to offset 0x%04x\n", value, offset);
     reg = (volatile uint16 *)(a16+offset);
     *reg = value;
 #endif
@@ -289,7 +283,7 @@ static uint16 readReg16(volatile char *a16, int offset)
 
     reg = (volatile uint16 *)(a16+offset);
     value = *reg;
-	Debug(15,"devScalerVS:readReg16: read 0x%04x from offset 0x%04x\n", value, offset);
+	Debug2(15,"devScalerVS:readReg16: read 0x%04x from offset 0x%04x\n", value, offset);
     return(value);
 #endif
 }
@@ -301,7 +295,7 @@ static void writeReg32(volatile char *a32, int offset,uint32 value)
 #else
 	volatile uint32 *reg;
 
-	Debug(16,"devScalerVS:writeReg32: writing 0x%08x to offset 0x%04x\n", value, offset);
+	Debug2(16,"devScalerVS:writeReg32: writing 0x%08x to offset 0x%04x\n", value, offset);
     reg = (volatile uint32 *)(a32+offset);
     *reg = value;
 #endif
@@ -319,7 +313,7 @@ static uint32 readReg32(volatile char *a32, int offset)
 
     reg = (volatile uint32 *)(a32+offset);
     value = *reg;
-	Debug(17,"devScalerVS:readReg32: read 0x%08x from offset 0x%04x\n", value, offset);
+	Debug2(17,"devScalerVS:readReg32: read 0x%08x from offset 0x%04x\n", value, offset);
     return(value);
 #endif
 }
@@ -330,7 +324,7 @@ static uint32 readReg32(volatile char *a32, int offset)
 STATIC void scalerEndOfGateISR(int card)
 {
 #ifdef vxWorks
-	if (devScaler_VSDebug >= 5) logMsg("scalerEndOfGateISR: entry\n");
+	Debug(5, "%s", "scalerEndOfGateISR: entry\n");
 #endif
 	if (card >= scalerVS_total_cards) {
 		return;
@@ -471,7 +465,7 @@ STATIC long scalerVS_init(int after)
     if (rebootHookAdd(scalerVS_shutdown) < 0)
 		epicsPrintf ("scalerVS_init: rebootHookAdd() failed\n");
 #endif
-	Debug(3,"scalerVS_init: scalers initialized\n");
+	Debug(3,"%s", "scalerVS_init: scalers initialized\n");
 	return(0);
 }
 
@@ -555,13 +549,13 @@ STATIC long scalerVS_read(int card, long *val)
 	for (i=0, offset=READ_XFER_REG_OFFSET; i < scalerVS_state[card]->num_channels; i++, offset+=4) {
 		val[i] = readReg32(addr,offset);
 		if (i==0) {
-			Debug(11,"scalerVS_read: ...(chan %d = %ld)\n", i, val[i]);
+			Debug2(11,"scalerVS_read: ...(chan %d = %ld)\n", i, val[i]);
 		} else {
-			Debug(20,"scalerVS_read: ...(chan %d = %ld)\n", i, val[i]);
+			Debug2(20,"scalerVS_read: ...(chan %d = %ld)\n", i, val[i]);
 		}
 	}
 
-	Debug(10,"scalerVS_read: status=0x%x; irq vector=0x%x\n",
+	Debug2(10,"scalerVS_read: status=0x%x; irq vector=0x%x\n",
 		readReg16(scalerVS_state[card]->localAddr,STATUS_OFFSET),
 		readReg16(addr,IRQ_3_GATE_VECTOR_OFFSET)&0xff);
 
@@ -595,8 +589,10 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 	unsigned short gate_freq_ix;
 	double gate_time, gate_freq, gate_periods;
 
-	if (devScaler_VSDebug >= 5)
+	if (devScaler_VSDebug >= 5) {
+		printf("%s(%d):",__FILE__,__LINE__);
 		printf("scalerVS_write_preset: card %d, signal %d, val %ld\n", card, signal, val);
+	}
 
 	if (card >= scalerVS_total_cards) return(ERROR);
 	if (signal >= MAX_SCALER_CHANNELS) return(ERROR);
@@ -633,9 +629,11 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 	do {
 		gate_freq = gate_freq_table[gate_freq_ix];
 		gate_periods =  gate_time * gate_freq;
-		if (devScaler_VSDebug >= 10)
+		if (devScaler_VSDebug >= 10) {
+		        printf("%s(%d):",__FILE__,__LINE__);
 			printf("scalerVS_write_preset: try f=%.0f, n=%.0f, ix=%d\n",
 				gate_freq, gate_periods, gate_freq_ix);	
+		}
 	} while ((gate_periods > 65536) && (++gate_freq_ix < GATE_FREQ_TABLE_LENGTH));
 
 	if ((gate_periods < 4) && (gate_freq_ix == 0)) {
@@ -669,7 +667,7 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 	pscal->pr1 = gate_periods;
 	pscal->freq = gate_freq_table[gate_freq_ix];
 
-	Debug(10,"scalerVS_write_preset: gate_periods=%f, gate_freq=%f\n",
+	Debug2(10,"scalerVS_write_preset: gate_periods=%f, gate_freq=%f\n",
 		gate_periods, gate_freq);
 
 	return(0);
@@ -688,8 +686,7 @@ STATIC long scalerVS_arm(int card, int val)
 	volatile uint16 u16;
 	int i, j, retry, read_again, numBad, numGood;
 
-	if (devScaler_VSDebug >= 1)
-		printf("scalerVS_arm: card %d, val %d\n", card, val);
+	Debug2(1, "scalerVS_arm: card %d, val %d\n", card, val);
 
 	if (card >= scalerVS_total_cards) return(ERROR);
 	addr = scalerVS_state[card]->localAddr;
@@ -769,7 +766,7 @@ STATIC long scalerVS_arm(int card, int val)
 			writeReg16(addr, TRIG_GATE_OFFSET, 1); /* any write triggers gate */
 		}
 
-		Debug(5,"scalerVS_arm: gate open; SR=0x%x; irq vector=%d\n",
+		Debug2(5,"scalerVS_arm: gate open; SR=0x%x; irq vector=%d\n",
 			readReg16(addr, STATUS_OFFSET),
 			(int)readReg16(addr,IRQ_3_GATE_VECTOR_OFFSET) & 0x00ff);
 
