@@ -22,7 +22,7 @@ OSI  by S. Kate Feng 3/03
 
 Modification Log:
 -----------------
- 6/26/93	tmm     Lecroy scaler
+ 6/26/93    tmm     Lecroy scaler
  1/16/95    tmm     v1.0 Joerger scaler
  6/11/96    tmm     v1.1 fixed test distinguishing VSC16 and VSC8
  6/28/96    tmm     v1.2 use vsc_num_cards instead of MAX_SCALER_CARDS
@@ -32,17 +32,20 @@ Modification Log:
  3/03/97    tmm     v1.6 add reboot hook (disable interrupts & reset)
  4/24/98    tmm     v1.7 use callbackRequest instead of scanIoReq
  3/20/03    skf     OSI
-10/22/03	tmm		v1.8 Removed 3.13 compatibility; scalerWdTimerQ moved
-					to scaler record
- 7/07/04	tmm		v1.9 Some code cleanup, debug, and cosmetic changes.
- 					Don't declare vistory before devReadProbe.	
+10/22/03    tmm     v1.8 Removed 3.13 compatibility; scalerWdTimerQ moved
+                    to scaler record
+ 7/07/04    tmm     v1.9 Some code cleanup, debug, and cosmetic changes.
+10/26/06    mlr     v1.10 Changed dset interface functions to use precord not card.
+                    CALLBACK pointer passed in init_record.
+                    dpvt now holds card number.  callback structures are now in
+                    rpvt, not dpvt.
 *******************************************************************************/
-/* version 1.9 */
+/* version 1.10 */
 
-#include        <epicsVersion.h>
+#include	<epicsVersion.h>
 
 #ifdef HAS_IOOPS_H
-#include        <basicIoOps.h>
+#include	<basicIoOps.h>
 #endif
 
 typedef unsigned int uint32;
@@ -123,13 +126,13 @@ STATIC long	vsc_InterruptVector = 0;
 /* device-support entry table */
 STATIC long scaler_report(int level);
 STATIC long scaler_init(int after);
-STATIC long scaler_init_record(struct scalerRecord *psr);
+STATIC long scaler_init_record(struct scalerRecord *psr, CALLBACK *pcallback);
 #define scaler_get_ioint_info NULL
-STATIC long scaler_reset(int card);
-STATIC long scaler_read(int card, long *val);
-STATIC long scaler_write_preset(int card, int signal, long val);
-STATIC long scaler_arm(int card, int val);
-STATIC long scaler_done(int card);
+STATIC long scaler_reset(scalerRecord *psr);
+STATIC long scaler_read(scalerRecord *psr, long *val);
+STATIC long scaler_write_preset(scalerRecord *psr, int signal, long val);
+STATIC long scaler_arm(scalerRecord *psr, int val);
+STATIC long scaler_done(scalerRecord *psr);
 
 SCALERDSET devScaler = {
 	7, 
@@ -156,8 +159,14 @@ STATIC struct scaler_state {
 	IOSCANPVT ioscanpvt;
 	int done;
 	int preset[MAX_SCALER_CHANNELS];
+	scalerRecord *psr;
 	CALLBACK *pcallback;
 };
+
+typedef struct {
+	int card;
+} devScalerPvt;
+
 STATIC struct scaler_state **scaler_state = 0;
 
 /**************************************************
@@ -191,20 +200,20 @@ STATIC int scaler_shutdown()
 {
 	int i;
 	for (i=0; i<scaler_total_cards; i++) {
-		if (scaler_reset(i) <0) return(ERROR);
+		if (scaler_reset(scaler_state[i]->psr) <0) return(ERROR);
 	}
-        return(0);
+	return(0);
 }
 
 static void writeReg16(volatile char *a16, int offset,uint16 value)
 {
 #ifdef HAS_IOOPS_H
-   out_be16((volatile void*)(a16+offset), value);
+	out_be16((volatile void*)(a16+offset), value);
 #else
-   volatile uint16 *reg;
+	volatile uint16 *reg;
 
-    reg = (volatile uint16 *)(a16+offset);
-    *reg = value;
+	reg = (volatile uint16 *)(a16+offset);
+	*reg = value;
 #endif
 }
 
@@ -213,24 +222,24 @@ static uint16 readReg16(volatile char *a16, int offset)
 #ifdef HAS_IOOPS_H
 	return in_be16((volatile void*)(a16+offset));
 #else
-    volatile uint16 *reg;
-    uint16 value;
+	volatile uint16 *reg;
+	uint16 value;
 
-    reg = (volatile uint16 *)(a16+offset);
-    value = *reg;
-    return(value);
+	reg = (volatile uint16 *)(a16+offset);
+	value = *reg;
+	return(value);
 #endif
 }
 
 static void writeReg32(volatile char *a32, int offset,uint32 value)
 {
 #ifdef HAS_IOOPS_H
-   out_be32((volatile void*)(a32+offset), value);
+	out_be32((volatile void*)(a32+offset), value);
 #else
-   volatile uint32 *reg;
+	volatile uint32 *reg;
 
-    reg = (volatile uint32 *)(a32+offset);
-    *reg = value;
+	reg = (volatile uint32 *)(a32+offset);
+	*reg = value;
 #endif
 }
 
@@ -239,12 +248,12 @@ static uint32 readReg32(volatile char *a32, int offset)
 #ifdef HAS_IOOPS_H
 	return in_be32((volatile void*)(a32+offset));
 #else
-    volatile uint32 *reg;
-    uint32 value;
+	volatile uint32 *reg;
+	uint32 value;
 
-    reg = (volatile uint32 *)(a32+offset);
-    value = *reg;
-    return(value);
+	reg = (volatile uint32 *)(a32+offset);
+	value = *reg;
+	return(value);
 #endif
 }
 
@@ -262,10 +271,10 @@ STATIC void scalerISR(int card)
 	addr = scaler_state[card]->localAddr;
 	/* disable interrupts during processing */
 	value = readReg16(addr, IRQ_LEVEL_ENABLE_OFFSET) & 0x7f;
-        writeReg16(addr, IRQ_LEVEL_ENABLE_OFFSET, value);
+	writeReg16(addr, IRQ_LEVEL_ENABLE_OFFSET, value);
 
 	/* clear interrupt */
-        writeReg16(addr,IRQ_RESET_OFFSET, 0);
+	writeReg16(addr,IRQ_RESET_OFFSET, 0);
 
 	/* tell record support the hardware is done counting */
 	scaler_state[card]->done = 1;
@@ -275,7 +284,7 @@ STATIC void scalerISR(int card)
 
 	/* enable interrupts */
 	value = readReg16(addr, IRQ_LEVEL_ENABLE_OFFSET) | 0x80;
-        writeReg16(addr, IRQ_LEVEL_ENABLE_OFFSET, value);
+	writeReg16(addr, IRQ_LEVEL_ENABLE_OFFSET, value);
 
 	return;
 }
@@ -335,7 +344,7 @@ STATIC long scaler_init(int after)
 
 	/* allocate scaler_state structures, array of pointers */
 	if (scaler_state == NULL) {
-    	scaler_state = (struct scaler_state **)
+	scaler_state = (struct scaler_state **)
 				calloc(1, vsc_num_cards * sizeof(struct scaler_state *));
 
 		scaler_total_cards=0;
@@ -404,13 +413,17 @@ STATIC long scaler_init(int after)
 /***************************************************
 * scaler_init_record()
 ****************************************************/
-STATIC long scaler_init_record(struct scalerRecord *psr)
+STATIC long scaler_init_record(struct scalerRecord *psr, CALLBACK *pcallback)
 {
 	int card = psr->out.value.vmeio.card;
 	int status;
-	CALLBACK *pcallbacks;
+	devScalerPvt *dpvt;
 
 	Debug(5,"scaler_init_record: card %d\n", card);
+	dpvt = (devScalerPvt *)calloc(1, sizeof(devScalerPvt));
+	dpvt->card = card;
+	psr->dpvt = dpvt;
+	scaler_state[card]->psr = psr;
 
 	/* out must be an VME_IO */
 	switch (psr->out.type)
@@ -440,8 +453,7 @@ STATIC long scaler_init_record(struct scalerRecord *psr)
 	psr->nch = scaler_state[card]->num_channels;
 
 	/* setup interrupt handler */
-	pcallbacks = (CALLBACK *)psr->dpvt;
-	scaler_state[card]->pcallback = (CALLBACK *)&(pcallbacks[3]);
+	scaler_state[card]->pcallback = pcallback;
 	status = scalerISRSetup(card);
 
 	return(0);
@@ -451,11 +463,13 @@ STATIC long scaler_init_record(struct scalerRecord *psr)
 /***************************************************
 * scaler_reset()
 ****************************************************/
-STATIC long scaler_reset(int card)
+STATIC long scaler_reset(scalerRecord *psr)
 {
 	volatile char *addr;
 	int i;
 	uint16 value;
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
 
 	Debug(5,"scaler_reset: card %d\n", card);
 	if ((card+1) > scaler_total_cards) return(ERROR);
@@ -464,10 +478,10 @@ STATIC long scaler_reset(int card)
 
 	/* disable interrupt */
 	value = readReg16(addr, IRQ_LEVEL_ENABLE_OFFSET) & 0x7f;
-        writeReg16(addr, IRQ_LEVEL_ENABLE_OFFSET, value);
+	writeReg16(addr, IRQ_LEVEL_ENABLE_OFFSET, value);
 
 	/* reset board */
-        writeReg16(addr,RESET_OFFSET, 0);
+	writeReg16(addr,RESET_OFFSET, 0);
 
 	/* zero local copy of scaler presets */
 	for (i=0; i<MAX_SCALER_CHANNELS; i++) {
@@ -484,8 +498,10 @@ STATIC long scaler_reset(int card)
 * scaler_read()
 * return pointer to array of scaler values (on the card)
 ****************************************************/
-STATIC long scaler_read(int card, long *val)
+STATIC long scaler_read(scalerRecord *psr, long *val)
 {
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
 	long preset;
 	volatile char *addr= scaler_state[card]->localAddr;
 	int i, offset;
@@ -510,8 +526,10 @@ STATIC long scaler_read(int card, long *val)
 /***************************************************
 * scaler_write_preset()
 ****************************************************/
-STATIC long scaler_write_preset(int card, int signal, long val)
+STATIC long scaler_write_preset(scalerRecord *psr, int signal, long val)
 {
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
 	volatile char *addr= scaler_state[card]->localAddr;
 	short mask;
 	int offset= PRESET_0_OFFSET+signal*4;
@@ -548,8 +566,10 @@ STATIC long scaler_write_preset(int card, int signal, long val)
 * to ARM input, and GATE input permits, the scaler will
 * actually start counting.
 ****************************************************/
-STATIC long scaler_arm(int card, int val)
+STATIC long scaler_arm(scalerRecord *psr, int val)
 {
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
 	volatile char *addr=scaler_state[card]->localAddr;
 	short ctrl_data;
 	uint16  value;
@@ -587,8 +607,10 @@ STATIC long scaler_arm(int card, int val)
 /***************************************************
 * scaler_done()
 ****************************************************/
-STATIC long scaler_done(int card)
+STATIC long scaler_done(scalerRecord *psr)
 {
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
 	if ((card+1) > scaler_total_cards) return(ERROR);
 
 	if (scaler_state[card]->done) {
