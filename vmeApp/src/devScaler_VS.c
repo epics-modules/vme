@@ -29,8 +29,12 @@ Modification Log:
                     scalerVS_regShow() check card arg.  Changed
                     devScaler_VS_trig_retries to 10000 and added
                     devScaler_VS_trig_retry_report.		
+10/26/06    tmm     v1.3 Changed dset interface functions to use precord not card.
+                    CALLBACK pointer passed in init_record.
+                    dpvt now holds card number.  callback structures are now in
+                    rpvt, not dpvt.
 *******************************************************************************/
-#define VERSION 1.2
+#define VERSION 1.3
 
 #ifdef HAS_IOOPS_H
 #include        <basicIoOps.h>
@@ -182,13 +186,13 @@ STATIC int vs_InterruptLevel = 5;
 /* device-support entry table */
 STATIC long scalerVS_report(int level);
 STATIC long scalerVS_init(int after);
-STATIC long scalerVS_init_record(scalerRecord *pscal);
+STATIC long scalerVS_init_record(scalerRecord *psr, CALLBACK *pcallback);
 #define scalerVS_get_ioint_info NULL
-STATIC long scalerVS_reset(int card);
-STATIC long scalerVS_read(int card, long *val);
-STATIC long scalerVS_write_preset(int card, int signal, long val);
-STATIC long scalerVS_arm(int card, int val);
-STATIC long scalerVS_done(int card);
+STATIC long scalerVS_reset(scalerRecord *psr);
+STATIC long scalerVS_read(scalerRecord *psr, long *val);
+STATIC long scalerVS_write_preset(scalerRecord *psr, int signal, long val);
+STATIC long scalerVS_arm(scalerRecord *psr, int val);
+STATIC long scalerVS_done(scalerRecord *psr);
 void scalerVS_Setup(int num_cards, int addrs, int vector, int intlevel);
 void scalerVS_show(int card, int level);
 void scalerVS_regShow(int card, int level);
@@ -219,9 +223,14 @@ STATIC struct scalerVS_state {
 	int preset[MAX_SCALER_CHANNELS];
 	int gate_periods;
 	int gate_freq_ix;
+	scalerRecord *psr;
 	CALLBACK *pcallback;
 };
 STATIC struct scalerVS_state **scalerVS_state = 0;
+
+typedef struct {
+	int card;
+} devScalerPvt;
 
 /**************************************************
 * scalerVS_report()
@@ -255,7 +264,7 @@ STATIC int scalerVS_shutdown()
 {
 	int i;
 	for (i=0; i<scalerVS_total_cards; i++) {
-		scalerVS_reset(i);
+		scalerVS_reset(scalerVS_state[i]->psr);
 	}
 	return(0);
 }
@@ -472,41 +481,45 @@ STATIC long scalerVS_init(int after)
 /***************************************************
 * scalerVS_init_record()
 ****************************************************/
-STATIC long scalerVS_init_record(struct scalerRecord *pscal)
+STATIC long scalerVS_init_record(scalerRecord *psr, CALLBACK *pcallback)
 {
-	int card = pscal->out.value.vmeio.card;
+	int card = psr->out.value.vmeio.card;
 	int status;
-	CALLBACK *pcallbacks;
+	devScalerPvt *dpvt;
+
+	dpvt = (devScalerPvt *)calloc(1, sizeof(devScalerPvt));
+	dpvt->card = card;
+	psr->dpvt = dpvt;
+	scalerVS_state[card]->psr = psr;
 
 	/* out must be an VME_IO */
-	switch (pscal->out.type) {
+	switch (psr->out.type) {
 	case (VME_IO) : break;
 	default:
-		recGblRecordError(S_dev_badBus,(void *)pscal,
+		recGblRecordError(S_dev_badBus,(void *)psr,
 			"devScaler_VS (init_record) Illegal OUT Bus Type");
 		return(S_dev_badBus);
 	}
 
 	Debug(5,"scalerVS_init_record: card %d\n", card);
 	if (!scalerVS_state[card]->card_exists) {
-		recGblRecordError(S_dev_badCard,(void *)pscal,
+		recGblRecordError(S_dev_badCard,(void *)psr,
 		    "devScaler_VS (init_record) card does not exist!");
 		return(S_dev_badCard);
     }
 
 	if (scalerVS_state[card]->card_in_use) {
-		recGblRecordError(S_dev_badSignal,(void *)pscal,
+		recGblRecordError(S_dev_badSignal,(void *)psr,
 		    "devScaler_VS (init_record) card already in use!");
 		return(S_dev_badSignal);
     }
 	scalerVS_state[card]->card_in_use = 1;
-	pscal->nch = scalerVS_state[card]->num_channels;
+	psr->nch = scalerVS_state[card]->num_channels;
 	/* set hardware-done flag */
 	scalerVS_state[card]->done = 1;
 
 	/* setup interrupt handler */
-	pcallbacks = (CALLBACK *)pscal->dpvt;
-	scalerVS_state[card]->pcallback = (CALLBACK *)&(pcallbacks[3]);
+	scalerVS_state[card]->pcallback = pcallback;
 	status = scalerEndOfGateISRSetup(card);
 
 	return(0);
@@ -516,8 +529,11 @@ STATIC long scalerVS_init_record(struct scalerRecord *pscal)
 /***************************************************
 * scalerVS_reset()
 ****************************************************/
-STATIC long scalerVS_reset(int card)
+STATIC long scalerVS_reset(scalerRecord *psr)
 {
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
+
 	Debug(5,"scalerVS_reset: card %d\n", card);
 	if (card >= scalerVS_total_cards) return(ERROR);
 
@@ -534,8 +550,10 @@ STATIC long scalerVS_reset(int card)
 * scalerVS_read()
 * return pointer to array of scaler values (on the card)
 ****************************************************/
-STATIC long scalerVS_read(int card, long *val)
+STATIC long scalerVS_read(scalerRecord *psr, long *val)
 {
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
 	volatile char *addr;
 	int i, offset;
 
@@ -580,9 +598,10 @@ int gate_freq_bits[GATE_FREQ_TABLE_LENGTH] = {
 * get called once for each channel, but we do all the real work on the first call.
 * From then on, we just make sure the presets are zero, and fix them if they aren't.
 ****************************************************/
-STATIC long scalerVS_write_preset(int card, int signal, long val)
+STATIC long scalerVS_write_preset(scalerRecord *psr, int signal, long val)
 {
-    scalerRecord *pscal;
+ 	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
 	epicsInt32 *ppreset;
 	unsigned short *pgate;
 	volatile char *addr;
@@ -598,27 +617,27 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 	if (signal >= MAX_SCALER_CHANNELS) return(ERROR);
 
 	addr = scalerVS_state[card]->localAddr;
-	callbackGetUser(pscal, scalerVS_state[card]->pcallback);
+	callbackGetUser(psr, scalerVS_state[card]->pcallback);
 
 	if (signal > 0) {
 		if (val != 0) {
-			ppreset = &(pscal->pr1);
+			ppreset = &(psr->pr1);
 			ppreset[signal] = 0;
-			db_post_events(pscal,&(ppreset[signal]),DBE_VALUE);
-			pgate = &(pscal->g1);
+			db_post_events(psr,&(ppreset[signal]),DBE_VALUE);
+			pgate = &(psr->g1);
 			pgate[signal] = 0;
-			db_post_events(pscal,&(pgate[signal]),DBE_VALUE);
+			db_post_events(psr,&(pgate[signal]),DBE_VALUE);
 		}
 		return(0);
 	}
 
-	if (pscal->g1 != 1) {
-		pscal->g1 = 1;
-		db_post_events(pscal,&(pscal->g1),DBE_VALUE);
+	if (psr->g1 != 1) {
+		psr->g1 = 1;
+		db_post_events(psr,&(psr->g1),DBE_VALUE);
 	}
 
 	/*** set count time ***/
-	gate_time = val / pscal->freq;
+	gate_time = val / psr->freq;
 	/*
 	 * find largest gate-clock frequency that will allow us to specify the
 	 * requested count time with the 16-bit gate-preset register.  Note that
@@ -664,8 +683,8 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 	scalerVS_state[card]->gate_freq_ix = gate_freq_ix;
 
 	/* tell record what preset and clock rate we're using  */
-	pscal->pr1 = gate_periods;
-	pscal->freq = gate_freq_table[gate_freq_ix];
+	psr->pr1 = gate_periods;
+	psr->freq = gate_freq_table[gate_freq_ix];
 
 	Debug2(10,"scalerVS_write_preset: gate_periods=%f, gate_freq=%f\n",
 		gate_periods, gate_freq);
@@ -679,9 +698,10 @@ STATIC long scalerVS_write_preset(int card, int signal, long val)
 * to ARM input, and GATE permits, the scaler will
 * actually start counting.
 ****************************************************/
-STATIC long scalerVS_arm(int card, int val)
+STATIC long scalerVS_arm(scalerRecord *psr, int val)
 {
-    scalerRecord *pscal;
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
 	volatile char *addr;
 	volatile uint16 u16;
 	int i, j, retry, read_again, numBad, numGood;
@@ -690,7 +710,7 @@ STATIC long scalerVS_arm(int card, int val)
 
 	if (card >= scalerVS_total_cards) return(ERROR);
 	addr = scalerVS_state[card]->localAddr;
-	callbackGetUser(pscal, scalerVS_state[card]->pcallback);
+	callbackGetUser(psr, scalerVS_state[card]->pcallback);
 
 	/* disable end-of-gate interrupt */
 	u16 = readReg16(addr,IRQ_SETUP_OFFSET);
@@ -796,8 +816,11 @@ STATIC long scalerVS_arm(int card, int val)
 * On the first call to this function after the scaler stops counting, we return 1.
 * else, return 0.
 ****************************************************/
-STATIC long scalerVS_done(int card)
+STATIC long scalerVS_done(scalerRecord *psr)
 {
+	devScalerPvt *dpvt = psr->dpvt;
+	int card = dpvt->card;
+
 	if (card >= scalerVS_total_cards) return(ERROR);
 
 	if (scalerVS_state[card]->done) {
