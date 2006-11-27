@@ -119,6 +119,7 @@ grecord(calc,"$(P)$(S)_calc8") {
 	field(PREC,"3")
 }
 grecord(scaler,"$(P)$(S)") {
+	field(DTYP,"Joerger VSC8/16")
 	field(PRIO,"HIGH")
 	field(FLNK,"$(P)$(S)_cts1.PROC  PP MS")
 	field(FREQ,"10000000")
