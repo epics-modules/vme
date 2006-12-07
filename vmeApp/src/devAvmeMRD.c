@@ -1556,7 +1556,7 @@ static UCHAR   init = FALSE;
    scanIoInit( &rMRD__info.ioscanpvt );
 
    /* Connect with interrupt mechanism */
-   sts = devConnectInterrupt( intVME, vector, mrd__isr, &rMRD__info );
+   sts = devConnectInterrupt( intVME, vector, (void (*)())mrd__isr, &rMRD__info );
    if( sts )
    {
       memset( &rMRD__info, 0, MRD__S_INFO );
