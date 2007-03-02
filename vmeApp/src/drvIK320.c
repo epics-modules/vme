@@ -1,4 +1,4 @@
-/* $Id: drvIK320.c,v 1.7 2006-05-04 18:56:12 sluiter Exp $ */
+/* $Id: drvIK320.c,v 1.8 2007-03-02 20:33:42 sluiter Exp $ */
 
 /* DISCLAIMER: This software is provided `as is' and without _any_ kind of
  *             warranty. Use it at your own risk - I won't be responsible
@@ -12,6 +12,10 @@
  * Author: Till Straumann (PTB, 1999)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/05/04 18:56:12  sluiter
+ * - Missed semTake(**, 1) in carQuery().
+ * - Implemented drvIK320report().
+ *
  * Revision 1.6  2006/04/18 18:39:28  sluiter
  * taskDelay(1)'s and semTake(**, 1)'s with delay of 1 tick do
  * not work (especially with PPC's); changed to 4ms.
@@ -83,6 +87,14 @@
  *                  not work; changed to 4ms.
  *     05-03-06 rls - Missed semTake(**, 1) in carQuery().
  *                  - Implemented drvIK320report().
+ * 10-23-06 rls - Set board failure indicator (IK320brdfail) on if "cleanup"
+ *                exit taken.  This prevents later calls to drvIK320Connect()
+ *                from trying to connect to the failed board.  Also, for PPC
+ *                based CPU boards where devDisconnectInterrupt() does nothing,
+ *                it prevents the interrupt handler from being called with
+ *                argument (parm) that has been free'd.
+ *              - retry "read encoder without referencing" commands on timeout.
+ *
  *
  */
 
@@ -230,6 +242,7 @@ static struct
 static unsigned short *groupBase = 0;
 static void (*irqHandler)() = 0;
 static int shortdelay = 0;
+static int IK320brdfail = 0;
 
 #ifndef NODEBUG
 static SEM_ID
@@ -246,7 +259,13 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
     IK320Driver rval=0;
     int         intEnabled=0;
     long        status;
-    int         i,needsPOST=1;
+    int         i, needsPOST=1, retry;
+
+    if (IK320brdfail != 0)
+    {
+        errPrintf(-1,__FILE__,__LINE__, "IK320 board failure.\n");
+        return(ERROR);
+    }
 
     if (!pDrv)
         return(S_drvIK320_invalidParm);
@@ -397,16 +416,40 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
             goto cleanup;
     }
 
-    /* Default to reading encoder without referencing. */
+    /* Send commands to read encoder without referencing. */
+    retry = 0;
+    do
+    {
     status = drvIK320Request(rval, 0, FUNC_NOREF1, 0);
+        if (status == S_drvIK320_timeout)
+            errPrintf(-1,__FILE__,__LINE__,
+                      "timeout on FUNC_NOREF1 retry# = %d.\n", retry);
+    } while (++retry < 4 && status != OK);
     if (status)
         goto cleanup;
     drvIK320Finish(rval);
+
+    retry = 0;
+    do
+    {
     status = drvIK320Request(rval, 0, FUNC_NOREF2, 0);
+        if (status == S_drvIK320_timeout)
+            errPrintf(-1,__FILE__,__LINE__,
+                      "timeout on FUNC_NOREF2 retry# = %d.\n", retry);
+    } while (++retry < 4 && status != OK);
     if (status)
         goto cleanup;
     drvIK320Finish(rval);
+
+
+    retry = 0;
+    do
+    {
     status = drvIK320Request(rval, 0, FUNC_NOREF12,0);
+        if (status == S_drvIK320_timeout)
+            errPrintf(-1,__FILE__,__LINE__,
+                      "timeout on FUNC_NOREF12 retry# = %d.\n", retry);
+    } while (++retry < 4 && status != OK);    
     if (status)
         goto cleanup;
     drvIK320Finish(rval);
@@ -437,6 +480,7 @@ cleanup:
     }
     semGive(allCards.mutex);
     *pDrv=0;
+    IK320brdfail = 1;
     return(status);
 }
 
@@ -1139,7 +1183,13 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
          */
         if (sync)
         {
-            status = semTake(drv->sync,timeout) ? S_drvIK320_timeout : OK;
+            status = semTake(drv->sync,timeout);
+            if (status != OK)
+            {
+                status = S_drvIK320_timeout;
+                errPrintf(-1,__FILE__,__LINE__,"Timeout!\n");
+            }
+
             /* NOTE: the caller MUST call drvIK320Finish() after
              * 		 processing the result in order to release the card
              */
