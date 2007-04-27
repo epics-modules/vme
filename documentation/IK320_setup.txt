@@ -54,7 +54,13 @@ A16 base address = (0xA1 & 0xE0) * 0x100 = 0xA0 * 0x100 = 0xA000
 
 ::: irq :::
 irq should be the irq level set by the jumpers J1 and J2 on the IK320 board.
-According to the manual, these levels *must* be the same.
+According to the manual, these levels *must* be the same.  Typically we leave
+these set to the factory default of 3.
+
+::: J3 :::
+Most VME CPU's do not support the ADO cycle.  Therefore, it is recommended that
+J3 be jumpered, generating a DTACK, per page 14 of the IK320 manual.  For a group 
+of IK320 boards, _one_ of the boards should have J3 jumpered.  
 
 
 *** IK320group.db ***
