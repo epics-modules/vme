@@ -43,7 +43,7 @@
       avme9440_int_level   - Indicates interrupt level.
       avme9440_link_count  - Indicates number of cards.
 
-   The method BunchClkGenConfigure is called from the startup script to specify
+   The method devAvme9440Config is called from the startup script to specify
    the number of cards, base address, and interrupt vector. It must be called
    prior to iocInit(). Below is the calling sequence:
 
