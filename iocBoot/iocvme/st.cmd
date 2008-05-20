@@ -60,9 +60,6 @@ dbLoadRecords("$(VME)/stdApp/Db/vme.db", "P=vme:,Q=vme1")
 # example: devHP10895LaserAxisConfig(ncards,a16base)
 #devHPLaserAxisConfig(2,0x1000)
 
-# Acromag general purpose Digital I/O
-#dbLoadRecords("$(VME)/stdApp/Db/Acromag_16IO.db", "P=vme:, A=1")
-
 # Acromag AVME9440
 #####################################################
 # devAvme9440Config(ncards,a16base,intvec)
@@ -71,10 +68,9 @@ dbLoadRecords("$(VME)/stdApp/Db/vme.db", "P=vme:,Q=vme1")
 #    intvec  = interrupt vector
 # For example:
 #    devAvme9440Config(1, 0x0400, 0x78)
-#####################################################
-# Configure the AVME9440 module
+#
 #devAvme9440Config(1, 0x400, 0x78 )
-#dbLoadRecords("$(VME)/stdApp/Db/Acromag_9440.db","C=0,S=0")
+#dbLoadRecords("$(VME)/vmeApp/Db/Acromag_16IO.db","P=vme:,A=1,C=0")
 
 # Bunch Clock Generator (BCG) board (BCG 100)
 #####################################################
