@@ -15,20 +15,6 @@ sysCplusEnable=1
 ### Load custom EPICS software from user tree and from share
 ld < vme.munch
 
-routerInit
-# talk to local IP's
-localMessageRouterStart(0)
-# talk to IP's on satellite processor
-# (must agree with tcpMessageRouterServerStart in st_proc1.cmd)
-# for IP modules on stand-alone mpf server board
-#tcpMessageRouterClientStart(1, 9900, Remote_IP, 1500, 40)
-
-
-# This IOC configures the MPF server code locally
-#cd startup
-#< st_mpfserver.cmd
-#cd topbin
-
 cd startup
 ################################################################################
 # Tell EPICS all about the record types, device-support modules, drivers,
@@ -96,12 +82,6 @@ dbLoadRecords("$(VME)/stdApp/Db/vme.db", "P=vme:,Q=vme1")
 #  Configure the MSL MRD 100 module.....
 #devAvmeMRDConfig(0xA0000200, 0xA0, 5)             
 #dbLoadRecords("../../vmeApp/Db/msl_mrd100.db","C=0,S=01,ID1=00,ID2=00us")
-
-### Bit Bus configuration
-# BBConfig(Link, LinkType, BaseAddr, IrqVector, IrqLevel)
-# Link: ?
-# LinkType: 0:hosed; 1:xycom; 2:pep
-#BBConfig(3,1,0x2400,0xac,5)
 
 
 ###############################################################################
