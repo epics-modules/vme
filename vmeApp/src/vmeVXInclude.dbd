@@ -1,3 +1,0 @@
-include "base.dbd"
-include "stdSupport.dbd"
-include "vmeVXSupport.dbd"
