@@ -662,80 +662,80 @@ void VSCSetup(int num_cards,	/* maximum number of cards in crate */
 }
 
 /* debugging function */
-void scaler_show(int card)
+void VSCscaler_show(int card)
 {
 	volatile char *addr = scaler_state[card]->localAddr;
 	int i, j, offset;
 
 	if (vsc_num_cards == 0) {
-		printf("scaler_show: No Joerger VSC cards\n");
+		printf("VSCscaler_show: No Joerger VSC cards\n");
 		return;
 	}
 
-	printf("scaler_show: card %d %s\n", card, scaler_state[card]->card_exists ? "exists" : "not found");
+	printf("VSCscaler_show: card %d %s\n", card, scaler_state[card]->card_exists ? "exists" : "not found");
 	if (!scaler_state[card]->card_exists) return;
-	printf("scaler_show: ctrl reg = 0x%x\n", readReg16(addr,CTRL_OFFSET) &0xf);
-	printf("scaler_show: dir reg = 0x%x\n",readReg16(addr,DIRECTION_OFFSET) );
-	printf("scaler_show: irq vector = 0x%x\n",readReg16(addr,STATUS_ID_OFFSET) &0xff);
-	printf("scaler_show: irq level/enable = 0x%x\n",readReg16(addr,IRQ_LEVEL_ENABLE_OFFSET) &0xff);
-	printf("scaler_show: irq mask reg = 0x%x\n", readReg16(addr,IRQ_MASK_OFFSET));
-	printf("scaler_show: module type = 0x%x\n",readReg16(addr,MODULE_TYPE_OFFSET) &0xff);
+	printf("VSCscaler_show: ctrl reg = 0x%x\n", readReg16(addr,CTRL_OFFSET) &0xf);
+	printf("VSCscaler_show: dir reg = 0x%x\n",readReg16(addr,DIRECTION_OFFSET) );
+	printf("VSCscaler_show: irq vector = 0x%x\n",readReg16(addr,STATUS_ID_OFFSET) &0xff);
+	printf("VSCscaler_show: irq level/enable = 0x%x\n",readReg16(addr,IRQ_LEVEL_ENABLE_OFFSET) &0xff);
+	printf("VSCscaler_show: irq mask reg = 0x%x\n", readReg16(addr,IRQ_MASK_OFFSET));
+	printf("VSCscaler_show: module type = 0x%x\n",readReg16(addr,MODULE_TYPE_OFFSET) &0xff);
 	offset = DATA_0_OFFSET;
 	for (i=0; i<scaler_state[card]->num_channels; i++, offset+=4 ) {
-		printf("    scaler_show: channel %d counts = %d\n", i,readReg32(addr,offset) );
+		printf("    VSCscaler_show: channel %d counts = %d\n", i,readReg32(addr,offset) );
 	}
-	printf("scaler_show: scaler_state[card]->done = %d\n", scaler_state[card]->done);
+	printf("VSCscaler_show: scaler_state[card]->done = %d\n", scaler_state[card]->done);
 }
 
 /* debugging function */
-void scaler_debug(int card, int numReads, int waitLoops)
+void VSCscaler_debug(int card, int numReads, int waitLoops)
 {
 	volatile char *addr = scaler_state[card]->localAddr;
 	int i, j, offset;
 
 	if (vsc_num_cards == 0) {
-		printf("scaler_debug: No Joerger VSC cards\n");
+		printf("VSCscaler_debug: No Joerger VSC cards\n");
 		return;
 	}
 
-	printf("scaler_debug: card %d %s\n", card, scaler_state[card]->card_exists ? "exists" : "not found");
+	printf("VSCscaler_debug: card %d %s\n", card, scaler_state[card]->card_exists ? "exists" : "not found");
 	if (!scaler_state[card]->card_exists) return;
 	for (i=0; i<numReads; i++) {
-		printf("scaler_debug: ctrl reg = 0x%x\n", readReg16(addr,CTRL_OFFSET) &0xf);
+		printf("VSCscaler_debug: ctrl reg = 0x%x\n", readReg16(addr,CTRL_OFFSET) &0xf);
 		for (j=0; j<waitLoops; j++);
 	}
 	for (i=0; i<numReads; i++) {
-		printf("scaler_debug: dir reg = 0x%x\n",readReg16(addr,DIRECTION_OFFSET) );
+		printf("VSCscaler_debug: dir reg = 0x%x\n",readReg16(addr,DIRECTION_OFFSET) );
 		for (j=0; j<waitLoops; j++);
 	}
 	for (i=0; i<numReads; i++) {
-		printf("scaler_debug: irq vector = 0x%x\n",readReg16(addr,STATUS_ID_OFFSET) &0xff);
+		printf("VSCscaler_debug: irq vector = 0x%x\n",readReg16(addr,STATUS_ID_OFFSET) &0xff);
 		for (j=0; j<waitLoops; j++);
 	}
 	for (i=0; i<numReads; i++) {
-		printf("scaler_debug: irq level/enable = 0x%x\n",readReg16(addr,IRQ_LEVEL_ENABLE_OFFSET) &0xff);
+		printf("VSCscaler_debug: irq level/enable = 0x%x\n",readReg16(addr,IRQ_LEVEL_ENABLE_OFFSET) &0xff);
 		for (j=0; j<waitLoops; j++);
 	}
 	for (i=0; i<numReads; i++) {
-		printf("scaler_debug: irq mask reg = 0x%x\n", readReg16(addr,IRQ_MASK_OFFSET));
+		printf("VSCscaler_debug: irq mask reg = 0x%x\n", readReg16(addr,IRQ_MASK_OFFSET));
 		for (j=0; j<waitLoops; j++);
 	}
 	for (i=0; i<numReads; i++) {
-		printf("scaler_debug: rev. ser# reg = 0x%x\n", readReg16(addr,REV_SERIAL_NO_OFFSET));
+		printf("VSCscaler_debug: rev. ser# reg = 0x%x\n", readReg16(addr,REV_SERIAL_NO_OFFSET));
 		for (j=0; j<waitLoops; j++);
 	}
 	for (i=0; i<numReads; i++) {
-		printf("scaler_debug: module type = 0x%x\n",readReg16(addr,MODULE_TYPE_OFFSET) &0xff);
+		printf("VSCscaler_debug: module type = 0x%x\n",readReg16(addr,MODULE_TYPE_OFFSET) &0xff);
 		for (j=0; j<waitLoops; j++);
 	}
 	for (i=0; i<numReads; i++) {
-		printf("scaler_debug: manuf. ID = 0x%x\n",readReg16(addr,MANUFACTURER_ID_OFFSET) &0xff);
+		printf("VSCscaler_debug: manuf. ID = 0x%x\n",readReg16(addr,MANUFACTURER_ID_OFFSET) &0xff);
 		for (j=0; j<waitLoops; j++);
 	}
 	offset = DATA_0_OFFSET;
 	for (i=0; i<2; i++, offset+=4 ) {
 		for (j=0; j<numReads; j++) {
-			printf("    scaler_debug: channel %d counts = %d\n", i,readReg32(addr,offset) );
+			printf("    VSCscaler_debug: channel %d counts = %d\n", i,readReg32(addr,offset) );
 		}
 	}
 	/* Note reading from PRESET_0_OFFSET reads and clears data at DATA_0_OFFSET */
