@@ -45,6 +45,7 @@
 #include	<dbAccess.h>
 #include    <recSup.h>
 #include    <recGbl.h>
+#include    <errlog.h>
 #include	<devSup.h>
 #include	<special.h>
 #include	<aoRecord.h>

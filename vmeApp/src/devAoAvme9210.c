@@ -33,6 +33,7 @@
 #include	"dbAccess.h"
 #include        "recGbl.h"
 #include        "alarm.h"
+#include        "errlog.h"
 #include	"devSup.h"
 #include	"special.h"
 #include	"module_types.h"
