@@ -74,6 +74,7 @@ extern int logMsg(char *fmt, ...);
 #include	<epicsTimer.h>
 #include	<epicsThread.h>
 #include	<epicsExport.h>
+#include	<errlog.h>
 #include	<devLib.h>
 #include	<alarm.h>
 #include	<dbDefs.h>
@@ -665,7 +666,7 @@ void VSCSetup(int num_cards,	/* maximum number of cards in crate */
 void VSCscaler_show(int card)
 {
 	volatile char *addr = scaler_state[card]->localAddr;
-	int i, j, offset;
+	int i, offset;
 
 	if (vsc_num_cards == 0) {
 		printf("VSCscaler_show: No Joerger VSC cards\n");
