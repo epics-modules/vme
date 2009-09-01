@@ -526,7 +526,7 @@ STATIC long init_mbbo_record(struct mbboRecord *p)
 			p->shft = (signal & 0xf);
 			p->mask <<= p->shft;
 			if (devHPLaserAxisDebug >= 5)
-				printf("devHPLaserAxis: mask = 0x%lx\n", p->mask);
+				printf("devHPLaserAxis: mask = 0x%x\n", p->mask);
 		}
 		break;
 
