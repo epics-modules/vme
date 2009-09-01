@@ -66,6 +66,7 @@ extern int logMsg(char *fmt, ...);
 #include	<epicsTimer.h>
 #include	<epicsThread.h>
 #include	<epicsExport.h>
+#include	<errlog.h>
 #include	<devLib.h>
 #include	<alarm.h>
 #include	<dbDefs.h>
@@ -297,6 +298,7 @@ static uint16 readReg16(volatile char *a16, int offset)
 #endif
 }
 
+/*
 static void writeReg32(volatile char *a32, int offset,uint32 value)
 {
 #ifdef HAS_IOOPS_H
@@ -309,7 +311,7 @@ static void writeReg32(volatile char *a32, int offset,uint32 value)
     *reg = value;
 #endif
 }
-
+*/
 
 
 static uint32 readReg32(volatile char *a32, int offset)
