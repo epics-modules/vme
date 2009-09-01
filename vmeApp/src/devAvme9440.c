@@ -183,7 +183,7 @@ static ioCard cards[NOCARDS];
 static long init(int);
 static long checkLink(short);
 static long devAvme9440Report();
-static void avme9440_isr(ioCard*);
+static void avme9440_isr(void*);
 static long write_card(short,ULONG,ULONG);
 static long read_card(short,ULONG,USHORT*,int);
 
@@ -457,7 +457,7 @@ volatile avme9440* p;
       /* Remember base address */
       cards[card].card = p;
 
-      if( devConnectInterrupt( intVME, (vecBase + card), avme9440_isr, &cards[card] ) )
+      if( devConnectInterruptVME((vecBase + card), avme9440_isr, &cards[card] ) )
       {
          printf( "devAvme9440: Interrupt connect failed for card %d\n", card );
       }
@@ -476,8 +476,9 @@ volatile avme9440* p;
  * Interrupt service routine
  *
  ***************************************************************************/
-static void avme9440_isr( ioCard* pc )
+static void avme9440_isr( void *parg )
 {
+ioCard *pc = (ioCard*) parg;
 unsigned int chanNum;
 volatile avme9440* p          = pc->card;
 volatile UCHAR intStatusLocal = p->intStatus;
