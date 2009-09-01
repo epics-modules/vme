@@ -61,7 +61,7 @@ volatile int devAoVMI4116Debug = 0;
 static long init_record(aoRecord *pao);
 static long write_ao(aoRecord *pao);
 static long special_linconv(aoRecord *pao, int after);
-static long vmi4116_io_report(short level);
+static long vmi4116_io_report(int level);
 static long	vmi4116_init();
 
 typedef struct {
@@ -142,7 +142,7 @@ static long vmi4116_init()
 	return OK;
 }
 
-static long vmi4116_io_report(short level)
+static long vmi4116_io_report(int level)
 {
 	register int i;
 
