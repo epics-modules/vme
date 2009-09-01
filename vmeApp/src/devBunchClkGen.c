@@ -472,14 +472,14 @@ ULONG    status;
  *   write/readback  selected bits in reg
  *
  ***************************************************************************/
-static long drvWriteReadBit(
-                              short card,     /* card number */
-                              short signal,   /* signal == register # */
-                              USHORT mask,    /* mask */
-                              USHORT value,   /* value to write */
-                              USHORT shift,   /* num to left shift */
-                              USHORT* prbval  /* place to put readback */
-                           )
+/* static long drvWriteReadBit( */
+/*                              short card,*/    /* card number */
+/*                              short signal,*/   /* signal == register # */
+/*                              USHORT mask,*/    /* mask */
+/*                              USHORT value,*/   /* value to write */
+/*                              USHORT shift,*/   /* num to left shift */
+/*                              USHORT* prbval*/  /* place to put readback */
+/*                           )
 {
 USHORT   val;
 ULONG    status;
@@ -499,7 +499,7 @@ ULONG    status;
 
    return( OK );
 
-} /* drvWriteReadBit() */
+} */ /* drvWriteReadBit() */
 
 
 /******************************************************************************
@@ -1288,7 +1288,7 @@ struct PvtBi*  ptr;
 
    if( *devDebug )
    {
-      printf( "devBiBunchClkGen(readBi): card = %d, signal = %d, raw read value = 0x%lx\n", pvmeio->card, ptr->signal,  pbi->rval );
+      printf( "devBiBunchClkGen(readBi): card = %d, signal = %d, raw read value = 0x%x\n", pvmeio->card, ptr->signal,  pbi->rval );
    }
 
    return( 0 );
@@ -1344,7 +1344,7 @@ struct PvtBo*  ptr;
 
    if( *devDebug )
    {
-      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBoBunchClkGen: card = %d sig = %d  PARM = %s mask = %ld", pvmeio->card, pvmeio->signal,  pvmeio->parm, pbo->mask );
+      errPrintf( NO_ERR_RPT, __FILE__, __LINE__, "devBoBunchClkGen: card = %d sig = %d  PARM = %s mask = %d", pvmeio->card, pvmeio->signal,  pvmeio->parm, pbo->mask );
    }
 
    if( (pbo->dpvt = malloc(sizeof( struct PvtBo)) ) == NULL )
@@ -1455,7 +1455,7 @@ struct PvtBo*  ptr;
 
    if( *devDebug )
    {
-      printf( "devBoBunchClkGen(writeBo): card = %d, signal = %d, write value = 0x%lx\n", pvmeio->card, ptr->signal,  pbo->rval );
+      printf( "devBoBunchClkGen(writeBo): card = %d, signal = %d, write value = 0x%x\n", pvmeio->card, ptr->signal,  pbo->rval );
    }
 
    return( 0 );
