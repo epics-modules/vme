@@ -5,10 +5,10 @@
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
 #If using the sequencer, point SNCSEQ at its top directory:
-SUPPORT=/home/oxygen/MOONEY/epics/synApps/support
-SNCSEQ=/home/oxygen/MOONEY/epics/synApps/support/seq/2-0-12
+SUPPORT=/corvette/home/epics/devel
+SNCSEQ=/corvette/home/epics/devel/seq/2-0-12
 # Vme provides device support for the scaler record
-STD=/home/oxygen/MOONEY/epics/synApps/support/std
+STD=/corvette/home/epics/devel/std/2-7
 
 # The following modules are not needed to build the vme module, but vme
 # still does have a dependence on them.  For example, vme might provide a
@@ -19,7 +19,7 @@ STD=/home/oxygen/MOONEY/epics/synApps/support/std
 #ASYN=/home/oxygen/MOONEY/epics/synApps/support/asyn
 
 # EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=/home/oxygen/MOONEY/epics/base-3.14.10
+EPICS_BASE=/corvette/usr/local/epics/base-3.14.11
 
 #Capfast users may need the following definitions
 #CAPFAST_TEMPLATES=
