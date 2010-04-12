@@ -427,6 +427,10 @@ STATIC long scaler_init_record(struct scalerRecord *psr, CALLBACK *pcallback)
 	dpvt = (devScalerPvt *)calloc(1, sizeof(devScalerPvt));
 	dpvt->card = card;
 	psr->dpvt = dpvt;
+	if (scaler_state == NULL) {
+		recGblRecordError(S_dev_noDevSup,(void *)psr, "");
+		return(S_dev_noDevSup);
+	}
 	scaler_state[card]->psr = psr;
 
 	/* out must be an VME_IO */
