@@ -140,7 +140,7 @@ ss autoLoad {
 %%				}
 			} state NoBeam
 		}
-		state NoBeam{
+		state NoBeam {
 			when((running != 1) || (autoLoad != 1)) {
 %%				if(getFilledBucketsLDebug) {
 %%					printf("autoLoad: State idle\n");
@@ -148,14 +148,17 @@ ss autoLoad {
 			} state idle
 			when((srInjectStatus ==  NOTINJECTING) &&
 				(srBeamStatus) == STOREDBEAM) {
-				delay(1.0);  /* 1 sec delay */
+			} state LoadPatternAfterDelay
+		}
+		state LoadPatternAfterDelay {
+			when(delay(1.0)) {
 				loadPat = 1;
 				pvPut(loadPat);
 %%				if(getFilledBucketsLDebug) {
 %%				   printf("autoLoad: State Pattern Loaded\n");
 %%				}
 			} state PatternLoaded
-		}
+		} 
 		state PatternLoaded {
 		        when((running != 1) || (autoLoad != 1)) {
 %%				if(getFilledBucketsLDebug) {
