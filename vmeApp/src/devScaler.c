@@ -169,24 +169,31 @@ typedef struct {
 
 STATIC struct scaler_state **scaler_state = 0;
 
+static uint16 readReg16(volatile char *a16, int offset);
+
 /**************************************************
 * scaler_report()
 ***************************************************/
 STATIC long scaler_report(int level)
 {
 	int card;
+	volatile char *addr;
+	uint16 term=0;
 
 	if ((vsc_num_cards <=0) || (scaler_state[0]->card_exists == 0)) {
 		printf("    No Joerger VSCxx scaler cards found.\n");
 	} else {
 		for (card = 0; card < vsc_num_cards; card++) {
 			if (scaler_state[card] && scaler_state[card]->card_exists) {
-				printf("    Joerger VSC%-2d card %d @ %p, id: %d %s\n",
+				addr = scaler_state[card]->localAddr;
+				term = readReg16(addr,MODULE_TYPE_OFFSET);
+				printf("    Joerger VSC%-2d card %d @ %p, id: %d %s inputs:%s\n",
 					scaler_state[card]->num_channels,
 					card, 
 					scaler_state[card]->localAddr, 
 					(unsigned int) scaler_state[card]->ident,
-					scaler_state[card]->card_in_use ? "(in use)": "(NOT in use)");
+					scaler_state[card]->card_in_use ? "(in use)": "(NOT in use),
+					(term==16) ? "TTL" : (term==17) ? "NIM" : (term==18) ? "ECL" : "?");
 			}
 		}
 	}
