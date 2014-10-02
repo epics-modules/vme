@@ -319,7 +319,7 @@ STATIC int scalerISRSetup(int card)
 	}
 
 	/* get interrupt level from hardware, and enable that level in EPICS */
-	intLevel = readReg16(addr,IRQ_LEVEL_ENABLE_OFFSET) & 3;
+	intLevel = readReg16(addr,IRQ_LEVEL_ENABLE_OFFSET) & 5 /*3*/;
 	Debug(5, "scalerISRSetup: Interrupt level %d\n", intLevel);
 	status = devEnableInterruptLevel(intVME, intLevel);
 	if (!RTN_SUCCESS(status)) {
