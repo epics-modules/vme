@@ -1,0 +1,28 @@
+# ### MSL_MRD100.iocsh ###
+
+#- ###################################################
+#- PREFIX         - IOC Prefix
+#- INSTANCE       - Instance Prefix
+#- ADDRESS        - Base card address 
+#- INT_VEC        - Interrupt Vector
+#- VME            - Location of vme module
+#- INT_LVL        - Optional: Interrupt Level
+#-                  Default: 5
+#-
+#- CARD           - Optional: Card Number
+#-                  Default: 0
+#-
+#- ###################################################
+
+# Machine Status Link (MSL) board (MRD 100)
+#####################################################
+# devAvmeMRDConfig( base, vector, level )
+#    base   = base address of card
+#    vector = interrupt vector
+#    level  = interrupt level
+# For Example
+#    devAvmeMRDConfig(0xA0000200, 0xA0, 5)
+#####################################################
+#  Configure the MSL MRD 100 module.....
+devAvmeMRDConfig($(ADDRESS), $(INT_VEC), $(INT_LVL=5))
+dbLoadRecords("$(VME)/vmeApp/Db/msl_mrd100.db","C=$(CARD=0),S=$(INSTANCE),ID1=$(INSTANCE),ID2=$(INSTANCE)us")

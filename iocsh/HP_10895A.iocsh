@@ -1,0 +1,25 @@
+# ### HP_10895A.iocsh ###
+
+#- ###################################################
+#- PREFIX         - IOC Prefix
+#- INSTANCE       - Instance Prefix
+#- VME            - Location of vme module
+#- MAX_CARDS      - Optional: Total number of cards to configure
+#-                  Default: 1
+#-
+#- ADDRESS        - Optional: First card address 
+#-                  (not optional for first call of this script)
+#-
+#- CARD           - Optional: Card Number
+#-                  Default: 0
+#-
+#- ###################################################
+
+#- hardware configuration
+#- example: devHP10895LaserAxisConfig(ncards,a16base)
+$(HP_10895A_INIT_COMPLETE="") devHPLaserAxisConfig($(MAX_CARDS=1), $(ADDRESS))
+
+#- Hewlett-Packard 10895A Laser Axis (interferometer)
+dbLoadRecords("$(VME)/vmeApp/Db/HPLaserAxis.db", "P=$(PREFIX),Q=$(INSTANCE), C=$(CARD=0)")
+
+epicsEnvSet("HP_10895A_INIT_COMPLETE", "#")
