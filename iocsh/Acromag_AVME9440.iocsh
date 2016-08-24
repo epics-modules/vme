@@ -1,0 +1,28 @@
+# ### Acromag_AVME9440.iocsh ###
+
+#- ###################################################
+#- PREFIX         - IOC Prefix
+#- INSTANCE       - Instance Prefix
+#- VME            - Location of vme module
+#- MAX_CARDS      - Optional: Total number of cards to configure
+#-                  Default: 1
+#-
+#- ADDRESS        - Optional: First card address 
+#-                  (not optional for first call of this script)
+#- 
+#- INT_VEC        - Optional: Interrupt Vector
+#-                  (not optional for first call of this script)
+#-
+#- CARD           - Optional: Card Number
+#-                  Default: 0
+#-
+#- ###################################################
+
+#- Acromag AVME9440 setup parameters:
+#- devAvem9440Config (ncards,a16base,intvecbase)
+$(AVME9440_INIT_COMPLETE="") devAvme9440Config($(MAX_CARDS=1), $(ADDRESS), $(INT_VEC))
+
+#- Acromag general purpose Digital I/O
+dbLoadRecords("$(VME)/vmeApp/Db/Acromag_16IO.db", "P=$(PREFIX), A=$(INSTANCE), C=$(CARD=0)")
+
+epicsEnvSet("AVME9440_INIT_COMPLETE", "#")

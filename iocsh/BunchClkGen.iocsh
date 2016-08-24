@@ -1,0 +1,21 @@
+# ### BunchClkGen.iocsh ###
+
+#- ###################################################
+#- PREFIX         - IOC Prefix
+#- INSTANCE       - Instance Prefix
+#- ADDRESS        - Card Address
+#- VME            - Location of vme module
+#- CARD           - Optional: Card Number
+#-                  Default: 0
+#- ###################################################
+
+
+#- Bunch-clock generator
+dbLoadRecords("$(VME)/vmeApp/Db/BunchClkGen.db", "UNIT=$(PREFIX)$(INSTANCE),C=$(CARD=0)")
+
+#- hardware configuration
+#- example: BunchClkGenConfigure(intCard, unsigned long CardAddress)
+BunchClkGenConfigure($(CARD=0), $(ADDRESS))
+
+#- sequence program
+doAfterIocInit("seq &getFillPat, 'unit=$(PREFIX)$(INSTANCE)'")
