@@ -681,7 +681,7 @@ static const iocshArg VSCArg0 = {"num_card",  iocshArgInt};
 static const iocshArg VSCArg1 = {"addrs",     iocshArgInt};
 static const iocshArg VSCArg2 = {"vector",    iocshArgInt};
 
-static const iocshArg* const VSCArgs[5] = {&VSCArg0, &VSCArg1, &VSCArg2};
+static const iocshArg* const VSCArgs[3] = {&VSCArg0, &VSCArg1, &VSCArg2};
 
 static const iocshFuncDef VSCFuncDef = {"VSCSetup", 3, VSCArgs};
 
