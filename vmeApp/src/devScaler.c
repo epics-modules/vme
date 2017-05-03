@@ -673,3 +673,25 @@ void scaler_show(int card)
 	}
 	printf("scaler_show: scaler_state[card]->done = %d\n", scaler_state[card]->done);
 }
+
+/* Epics iocsh bindings */
+
+static const iocshArg VSCArg0 = {"num_card",  iocshArgInt};
+static const iocshArg VSCArg1 = {"addrs",     iocshArgInt};
+static const iocshArg VSCArg2 = {"vector",    iocshArgInt};
+
+static const iocshArg* const VSCArgs[5] = {&VSCArg0, &VSCArg1, &VSCArg2};
+
+static const iocshFuncDef VSCFuncDef = {"VSCSetup", 3, VSCArgs};
+
+static void VSCCallFunc(const iocshArgBuf* args)
+{
+	VSCSetup(args[0].ival, (void*) args[1].ival, (unsigned) args[2].ival);
+}
+
+void VSCRegistrar(void)
+{
+	iocshRegister(&VSCFuncDef, &VSCCallFunc);
+}
+
+epicsExportRegistrar(VSCRegistrar);

@@ -78,5 +78,6 @@ driver(drvIK320)
 # Acromag 9210
 driver(drvAvme9210)
 
+registrar(VSCRegistrar)
 registrar(vmeTest_Register)
 registrar(devHPLaserAxis_Register)
