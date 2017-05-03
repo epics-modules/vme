@@ -71,6 +71,7 @@ extern int logMsg(char *fmt, ...);
 #include	<string.h>
 #include	<math.h>
 
+#include    <iocsh.h>
 #include	<epicsTimer.h>
 #include	<epicsThread.h>
 #include	<epicsExport.h>
