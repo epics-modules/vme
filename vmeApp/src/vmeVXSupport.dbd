@@ -79,5 +79,6 @@ driver(drvIK320)
 driver(drvAvme9210)
 
 registrar(VSCRegistrar)
+registrar(AVME9440Registrar)
 registrar(vmeTest_Register)
 registrar(devHPLaserAxis_Register)

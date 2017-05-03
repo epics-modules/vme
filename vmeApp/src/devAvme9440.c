@@ -90,7 +90,7 @@
 #include <recGbl.h>
 #include <epicsPrint.h>
 #include <epicsExport.h>
-
+#include <iocsh.h>
 
 /* EPICS record processing related include files */
 #include <dbScan.h>
@@ -1067,3 +1067,26 @@ volatile avme9440* pc;
    return( 0 );
 }
 
+
+
+/* Epics iocsh bindings */
+
+static const iocshArg AVME9440Arg0 = {"num_card",  iocshArgInt};
+static const iocshArg AVME9440Arg1 = {"addrs",     iocshArgInt};
+static const iocshArg AVME9440Arg2 = {"vector",    iocshArgInt};
+
+static const iocshArg* const AVME9440Args[3] = {&AVME9440Arg0, &AVME9440Arg1, &AVME9440Arg2};
+
+static const iocshFuncDef AVME9440FuncDef = {"devAvme9440Config", 3, AVME9440Args};
+
+static void AVME9440CallFunc(const iocshArgBuf* args)
+{
+	AVME9440Setup(args[0].ival, (void*) args[1].ival, (unsigned) args[2].ival);
+}
+
+void AVME9440Registrar(void)
+{
+	iocshRegister(&AVME9440FuncDef, &AVME9440CallFunc);
+}
+
+epicsExportRegistrar(AVME9440Registrar);
