@@ -1081,7 +1081,7 @@ static const iocshFuncDef AVME9440FuncDef = {"devAvme9440Config", 3, AVME9440Arg
 
 static void AVME9440CallFunc(const iocshArgBuf* args)
 {
-	AVME9440Setup(args[0].ival, (void*) args[1].ival, (unsigned) args[2].ival);
+	devAvme9440Config(args[0].ival, (void*) args[1].ival, (unsigned) args[2].ival);
 }
 
 void AVME9440Registrar(void)
