@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/epics-modules/vme.svg?branch=master)](https://travis-ci.org/epics-modules/vme)
+
 # vme
 APS BCDA synApps module: vme
 
