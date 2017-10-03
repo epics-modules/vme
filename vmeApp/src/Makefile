@@ -35,6 +35,7 @@ vme_SRCS_vxWorks += devAoVMI4116.c
 vme_SRCS_vxWorks += devAvme9440.c
 vme_SRCS_vxWorks += devAoAvme9210.c
 vme_SRCS_vxWorks += drvAvme9210.c
+vme_SRCS_vxWorks += drvCAEN_v895.cpp
 
 # For generic VME A32/D32 access
 vme_SRCS_vxWorks += devA32Vme.c
