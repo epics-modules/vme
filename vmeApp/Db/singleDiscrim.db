@@ -1,0 +1,22 @@
+record(ao,"$(P)DISCRIM$(D)_$(N)") {
+    field(PINI, "YES")
+    field(DTYP,"asynInt32")
+    field(OUT,"@asyn($(PORT),$(S))")
+    field(DRVL,"0")
+    field(DRVH,"255")
+}
+
+record(ao,"$(P)DISCRIM$(D)_$(N)_tweakVal") {
+	field(DOL, "1")
+    field(PREC,"0")
+}
+
+record(transform,"$(P)DISCRIM$(D)_$(N)_tweak") {
+    field(CLCE,"a?d-c:b?d+c:d")
+    field(INPC,"$(P)DISCRIM$(D)_$(N)_tweakVal.VAL  NPP MS")
+    field(INPD,"$(P)DISCRIM$(D)_$(N).VAL  NPP MS")
+    field(OUTE,"$(P)DISCRIM$(D)_$(N).VAL  PP MS")
+    field(OUTF,"$(P)DISCRIM$(D)_$(N)_tweak.A  NPP MS")
+    field(OUTG,"$(P)DISCRIM$(D)_$(N)_tweak.B  NPP MS")
+    field(PREC,"3")
+}
