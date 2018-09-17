@@ -1,3 +1,69 @@
+#!/bin/bash
+shopt -s expand_aliases
+set -x
+
+# This file is intended to gather everything in or used in synApps.
+# The version numbers in this file are not guaranteed to be up to date,
+# and the modules are not guaranteed to work or even build together.
+
+shallow_repo()
+{
+	PROJECT=$1
+	MODULE_NAME=$2
+	RELEASE_NAME=$3
+	TAG=$4
+	
+	FOLDER_NAME=$MODULE_NAME-${TAG//./-}
+	
+	echo
+	echo "Grabbing $MODULE_NAME at tag: $TAG"
+	echo
+	
+	if [ ! -d "$FOLDER_NAME" ] 
+	then
+		git clone --branch $TAG --depth 1 git://github.com/$PROJECT/$MODULE_NAME.git $FOLDER_NAME
+	fi
+	
+	echo "$RELEASE_NAME=\$(SUPPORT)/$FOLDER_NAME" >> ./configure/RELEASE
+	
+	echo
+}
+
+shallow_support()
+{
+	if [ ! -d "$1" ]
+	then
+		git clone --branch $2 --depth 1 git://github.com/EPICS-synApps/$1.git
+	fi
+}
+
+cd $HOME/.cache
+
+EPICS_BASE=$HOME/.cache/base-$BASE
+
+if [ ! -d "$EPICS_BASE" ] 
+then
+	git clone --branch $BASE --depth 1 git://github.com/epics-base/epics-base.git base-$BASE
+
+	EPICS_HOST_ARCH=`sh $EPICS_BASE/startup/EpicsHostArch`
+	
+	case "$STATIC" in
+	static)
+		cat << EOF >> "$EPICS_BASE/configure/CONFIG_SITE"
+SHARED_LIBRARIES=NO
+STATIC_BUILD=YES
+EOF
+		;;
+	*) ;;
+	esac
+	
+	case "$CMPLR" in
+	clang)
+		echo "Host compiler is clang"
+		
+		cat << EOF >> "$EPICS_BASE/configure/os/CONFIG_SITE.Common.$EPICS_HOST_ARCH"
+GNU         = NO
+CMPLR_CLASS = clang
 CC          = clang
 CCC         = clang++
 EOF
