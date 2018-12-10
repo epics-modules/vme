@@ -12,6 +12,11 @@
 #- CARD           - Optional: Card Number
 #-                  Default: 0
 #-
+#- ID1            - Optional: ID1
+#-                  Default: $(INSTANCE)
+#- 
+#- ID2            - Optional: ID2
+#-                  Default: $(INSTANCE)us
 #- ###################################################
 
 # Machine Status Link (MSL) board (MRD 100)
@@ -25,4 +30,4 @@
 #####################################################
 #  Configure the MSL MRD 100 module.....
 devAvmeMRDConfig($(ADDRESS), $(INT_VEC), $(INT_LVL=5))
-dbLoadRecords("$(VME)/vmeApp/Db/msl_mrd100.db","C=$(CARD=0),S=$(INSTANCE),ID1=$(INSTANCE),ID2=$(INSTANCE)us")
+dbLoadRecords("$(VME)/vmeApp/Db/msl_mrd100.db","C=$(CARD=0),S=$(INSTANCE),$(ID1=$(INSTANCE)),$(ID2=$(INSTANCE)us)")
