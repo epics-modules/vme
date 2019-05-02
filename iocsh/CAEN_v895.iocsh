@@ -1,0 +1,27 @@
+# ### CAEN_v895.iocsh ###
+
+#- ###################################################
+#- PREFIX         - IOC Prefix
+#- INSTANCE       - Instance Prefix
+#- ADDRESS        - Base card address 
+#- VME            - Location of vme module
+#- ###################################################
+
+initCAEN_v895("$(PORT)", $(ADDRESS))
+
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=1, S=0")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=2, S=1")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=3, S=2")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=4, S=3")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=5, S=4")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=6, S=5")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=7, S=6")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=8, S=7")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=9, S=8")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=10, S=9")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=11, S=10")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=12, S=11")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=13, S=12")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=14, S=13")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=15, S=14")
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX), D=$(INSTANCE), N=16, S=15")
