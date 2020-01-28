@@ -7,11 +7,11 @@
   </auto_scale_widgets>
   <auto_zoom_to_fit_all>false</auto_zoom_to_fit_all>
   <background_color>
-    <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+    <color red="235" green="241" blue="181" />
   </background_color>
-  <boy_version>5.1.0.201802081749</boy_version>
+  <boy_version>5.1.0</boy_version>
   <foreground_color>
-    <color name="Gray_0" red="255" green="255" blue="255" />
+    <color red="255" green="255" blue="255" />
   </foreground_color>
   <grid_space>5</grid_space>
   <height>590</height>
@@ -54,11 +54,11 @@
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_16" red="30" green="187" blue="0" />
+      <color red="30" green="187" blue="0" />
     </foreground_color>
     <gradient>false</gradient>
     <height>8</height>
@@ -111,11 +111,11 @@ $(pv_value)</tooltip>
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </foreground_color>
     <gradient>false</gradient>
     <height>35</height>
@@ -178,11 +178,11 @@ $(pv_value)</tooltip>
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_16" red="30" green="187" blue="0" />
+      <color red="30" green="187" blue="0" />
     </foreground_color>
     <gradient>false</gradient>
     <height>8</height>
@@ -224,10 +224,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="13" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="13" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>22</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -264,10 +264,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="alarm" red="253" green="0" blue="0" />
+      <color red="253" green="0" blue="0" />
     </foreground_color>
     <height>25</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -325,11 +325,11 @@ $(pv_value)</tooltip>
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_62" red="60" green="180" blue="32" />
+      <color red="60" green="180" blue="32" />
     </foreground_color>
     <gradient>false</gradient>
     <height>15</height>
@@ -371,10 +371,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="MEDM_COLOR_15" red="0" green="216" blue="0" />
+      <color red="0" green="216" blue="0" />
     </foreground_color>
     <height>25</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -429,11 +429,11 @@ $(pv_value)</tooltip>
     <fill_arrow>true</fill_arrow>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>48</height>
     <horizontal_fill>true</horizontal_fill>
@@ -484,11 +484,11 @@ $(pv_value)</tooltip>
     <fill_arrow>true</fill_arrow>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>51</height>
     <horizontal_fill>true</horizontal_fill>
@@ -539,11 +539,11 @@ $(pv_value)</tooltip>
     <fill_arrow>true</fill_arrow>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>51</height>
     <horizontal_fill>true</horizontal_fill>
@@ -594,11 +594,11 @@ $(pv_value)</tooltip>
     <fill_arrow>true</fill_arrow>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>51</height>
     <horizontal_fill>true</horizontal_fill>
@@ -649,11 +649,11 @@ $(pv_value)</tooltip>
     <fill_arrow>true</fill_arrow>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>48</height>
     <horizontal_fill>true</horizontal_fill>
@@ -704,11 +704,11 @@ $(pv_value)</tooltip>
     <fill_arrow>true</fill_arrow>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>51</height>
     <horizontal_fill>true</horizontal_fill>
@@ -759,11 +759,11 @@ $(pv_value)</tooltip>
     <fill_arrow>true</fill_arrow>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_10" red="105" green="105" blue="105" />
+      <color red="105" green="105" blue="105" />
     </foreground_color>
     <height>33</height>
     <horizontal_fill>true</horizontal_fill>
@@ -814,11 +814,11 @@ $(pv_value)</tooltip>
     <fill_arrow>true</fill_arrow>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_10" red="105" green="105" blue="105" />
+      <color red="105" green="105" blue="105" />
     </foreground_color>
     <height>33</height>
     <horizontal_fill>true</horizontal_fill>
@@ -854,7 +854,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -864,7 +864,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -905,7 +905,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -915,7 +915,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -956,7 +956,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -966,7 +966,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1007,7 +1007,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1017,7 +1017,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1058,7 +1058,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1068,7 +1068,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1109,7 +1109,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1119,7 +1119,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1160,7 +1160,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1170,7 +1170,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1211,7 +1211,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1221,7 +1221,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1269,10 +1269,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1309,10 +1309,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1349,10 +1349,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1389,10 +1389,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1429,10 +1429,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1469,10 +1469,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1509,10 +1509,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1549,10 +1549,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1589,10 +1589,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="softGlue_output" red="205" green="97" blue="0" />
+      <color red="205" green="97" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -1629,10 +1629,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="softGlue_output" red="205" green="97" blue="0" />
+      <color red="205" green="97" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -1669,10 +1669,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="MEDM_COLOR_25" red="88" green="147" blue="255" />
+      <color red="88" green="147" blue="255" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -1702,7 +1702,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1712,7 +1712,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1753,7 +1753,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1763,7 +1763,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1804,7 +1804,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1814,7 +1814,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1855,7 +1855,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1865,7 +1865,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1906,7 +1906,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1916,7 +1916,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -1957,7 +1957,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -1967,7 +1967,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -2015,10 +2015,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="MEDM_COLOR_38" red="139" green="26" blue="150" />
+      <color red="139" green="26" blue="150" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2055,10 +2055,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2095,10 +2095,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2135,10 +2135,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2175,10 +2175,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2215,10 +2215,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2255,10 +2255,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2295,10 +2295,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2335,10 +2335,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2375,10 +2375,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="alarm" red="253" green="0" blue="0" />
+      <color red="253" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2415,10 +2415,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="alarm" red="253" green="0" blue="0" />
+      <color red="253" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2455,10 +2455,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2495,10 +2495,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2535,10 +2535,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2575,10 +2575,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2615,10 +2615,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2655,10 +2655,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2695,10 +2695,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2735,10 +2735,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2775,10 +2775,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2815,10 +2815,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2855,10 +2855,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2895,10 +2895,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -2935,10 +2935,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="MEDM_COLOR_29" red="39" green="84" blue="141" />
+      <color red="39" green="84" blue="141" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -2975,10 +2975,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="MEDM_COLOR_29" red="39" green="84" blue="141" />
+      <color red="39" green="84" blue="141" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3015,10 +3015,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="MEDM_COLOR_29" red="39" green="84" blue="141" />
+      <color red="39" green="84" blue="141" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3055,10 +3055,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="MEDM_COLOR_39" red="97" green="10" blue="117" />
+      <color red="97" green="10" blue="117" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -3088,7 +3088,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -3098,7 +3098,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -3146,10 +3146,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3186,10 +3186,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -3219,7 +3219,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -3229,7 +3229,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -3277,10 +3277,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3317,10 +3317,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -3357,10 +3357,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="MEDM_COLOR_25" red="88" green="147" blue="255" />
+      <color red="88" green="147" blue="255" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3390,7 +3390,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -3400,7 +3400,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -3448,10 +3448,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3488,10 +3488,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -3521,7 +3521,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -3531,7 +3531,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -3579,10 +3579,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3619,10 +3619,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -3652,7 +3652,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -3662,7 +3662,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -3710,10 +3710,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3750,10 +3750,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -3783,7 +3783,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -3793,7 +3793,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -3841,10 +3841,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="9" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="9" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>15</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -3881,10 +3881,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>13</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -3921,10 +3921,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -3961,10 +3961,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -4001,10 +4001,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -4041,10 +4041,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -4081,10 +4081,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -4121,10 +4121,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -4161,10 +4161,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -4201,10 +4201,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="6" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="6" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>10</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -4234,7 +4234,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_56" red="212" green="219" blue="157" />
+      <color red="212" green="219" blue="157" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -4244,7 +4244,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="18" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="18" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -4292,10 +4292,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="13" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="13" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>22</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -4325,7 +4325,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <border_color>
@@ -4335,11 +4335,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <format_type>1</format_type>
     <height>20</height>
@@ -4383,10 +4383,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="13" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="13" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>22</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -4434,11 +4434,11 @@ $(pv_value)</tooltip>
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_62" red="60" green="180" blue="32" />
+      <color red="60" green="180" blue="32" />
     </foreground_color>
     <gradient>false</gradient>
     <height>15</height>
@@ -4480,10 +4480,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -4520,10 +4520,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -4571,11 +4571,11 @@ $(pv_value)</tooltip>
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_62" red="60" green="180" blue="32" />
+      <color red="60" green="180" blue="32" />
     </foreground_color>
     <gradient>false</gradient>
     <height>15</height>
@@ -4617,10 +4617,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -4657,10 +4657,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -4708,11 +4708,11 @@ $(pv_value)</tooltip>
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_62" red="60" green="180" blue="32" />
+      <color red="60" green="180" blue="32" />
     </foreground_color>
     <gradient>false</gradient>
     <height>15</height>
@@ -4754,10 +4754,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -4805,11 +4805,11 @@ $(pv_value)</tooltip>
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_62" red="60" green="180" blue="32" />
+      <color red="60" green="180" blue="32" />
     </foreground_color>
     <gradient>false</gradient>
     <height>15</height>
@@ -4862,11 +4862,11 @@ $(pv_value)</tooltip>
     </fg_gradient_color>
     <fill_level>100.0</fill_level>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="MEDM_COLOR_62" red="60" green="180" blue="32" />
+      <color red="60" green="180" blue="32" />
     </foreground_color>
     <gradient>false</gradient>
     <height>15</height>
@@ -4908,10 +4908,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -4948,10 +4948,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>12</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -4988,10 +4988,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="alarm" red="253" green="0" blue="0" />
+      <color red="253" green="0" blue="0" />
     </foreground_color>
     <height>25</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -5031,7 +5031,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_56" red="212" green="219" blue="157" />
+      <color red="212" green="219" blue="157" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -5041,7 +5041,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -5082,7 +5082,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_56" red="212" green="219" blue="157" />
+      <color red="212" green="219" blue="157" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -5092,7 +5092,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -5140,10 +5140,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>12</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -5180,10 +5180,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>12</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -5220,10 +5220,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="18" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="18" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="alarm" red="253" green="0" blue="0" />
+      <color red="253" green="0" blue="0" />
     </foreground_color>
     <height>30</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -5253,7 +5253,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <border_color>
@@ -5263,11 +5263,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <format_type>1</format_type>
     <height>25</height>
@@ -5304,7 +5304,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_56" red="212" green="219" blue="157" />
+      <color red="212" green="219" blue="157" />
     </background_color>
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <border_color>
@@ -5314,11 +5314,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <format_type>1</format_type>
     <height>25</height>
@@ -5355,7 +5355,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_56" red="212" green="219" blue="157" />
+      <color red="212" green="219" blue="157" />
     </background_color>
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <border_color>
@@ -5365,11 +5365,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <format_type>1</format_type>
     <height>25</height>
@@ -5406,7 +5406,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <border_color>
@@ -5416,11 +5416,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <format_type>1</format_type>
     <height>20</height>
@@ -5457,7 +5457,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <border_color>
@@ -5467,11 +5467,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <format_type>1</format_type>
     <height>20</height>
@@ -5515,10 +5515,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -5555,10 +5555,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -5588,7 +5588,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <border_color>
@@ -5598,11 +5598,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="ioc_read_fg" red="10" green="0" blue="184" />
+      <color red="10" green="0" blue="184" />
     </foreground_color>
     <format_type>1</format_type>
     <height>20</height>
@@ -5646,10 +5646,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>20</height>
     <horizontal_alignment>0</horizontal_alignment>
@@ -5686,10 +5686,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="alarm" red="253" green="0" blue="0" />
+      <color red="253" green="0" blue="0" />
     </foreground_color>
     <height>24</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -5729,7 +5729,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -5739,7 +5739,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="18" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="18" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <foreground_color>
@@ -5780,7 +5780,7 @@ $(pv_value)</tooltip>
     <auto_size>false</auto_size>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_55" red="235" green="241" blue="181" />
+      <color red="235" green="241" blue="181" />
     </background_color>
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <border_color>
@@ -5790,11 +5790,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="11" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <format_type>1</format_type>
     <height>20</height>
@@ -5838,10 +5838,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="15" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="15" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="alarm" red="253" green="0" blue="0" />
+      <color red="253" green="0" blue="0" />
     </foreground_color>
     <height>24</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -5888,10 +5888,10 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Cantarell" height="8" style="0" pixels="false" />
+      <fontdata fontName="Sans" height="8" style="0" pixels="false" />
     </font>
     <foreground_color>
-      <color name="Gray_14" red="0" green="0" blue="0" />
+      <color red="0" green="0" blue="0" />
     </foreground_color>
     <height>12</height>
     <horizontal_alignment>1</horizontal_alignment>
@@ -5928,7 +5928,7 @@ $(pv_value)</tooltip>
     <alarm_pulsing>false</alarm_pulsing>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <background_color>
-      <color name="MEDM_COLOR_45" red="199" green="187" blue="109" />
+      <color red="199" green="187" blue="109" />
     </background_color>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <border_color>
@@ -5938,11 +5938,11 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <opifont.name fontName="Cantarell" height="11" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
-      <color name="alarm" red="253" green="0" blue="0" />
+      <color red="253" green="0" blue="0" />
     </foreground_color>
     <height>15</height>
     <image></image>
