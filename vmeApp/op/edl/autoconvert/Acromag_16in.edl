@@ -1,0 +1,1662 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 55
+y 425
+w 700
+h 125
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor rgb 0 0 0
+bgColor rgb 34048 34048 34048
+textColor rgb 0 0 0
+ctlFgColor1 rgb 64256 62208 18944
+ctlFgColor2 rgb 60928 46592 11008
+ctlBgColor1 rgb 52480 24832 0
+ctlBgColor2 rgb 65280 45056 65280
+topShadowColor rgb 44544 19968 48128
+botShadowColor rgb 13312 13056 34304
+showGrid
+snapToGrid
+gridSize 4
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 204
+y 5
+w 266
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 29440 65280 27392
+bgColor index 3
+useDisplayBg
+value {
+  "Acromag Digital Inputs"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 555
+y 5
+w 135
+h 14
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb 29440 65280 27392
+bgColor index 3
+useDisplayBg
+value {
+  "Acromag board #$(A)"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 67
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "0"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 65
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_0.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 107
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "1"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 105
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_1.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 147
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "2"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 145
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_2.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 187
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "3"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 185
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_3.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 227
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "4"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 225
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_4.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 267
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "5"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 265
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_5.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 307
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "6"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 305
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_6.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 347
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "7"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 345
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_7.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 387
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "8"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 385
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_8.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 427
+y 103
+w 26
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "9"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 425
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_9.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 465
+y 103
+w 30
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "10"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 465
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_10.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 505
+y 103
+w 30
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "11"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 505
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_11.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 545
+y 103
+w 30
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "12"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 545
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_12.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 585
+y 103
+w 30
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "13"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 585
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_13.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 625
+y 103
+w 30
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "14"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 625
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_14.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 665
+y 103
+w 30
+h 20
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 39168 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "15"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 665
+y 70
+w 30
+h 25
+controlPv "$(P)9440:$(A):bi_15.VAL"
+format "decimal"
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor rgb 0 0 0
+bgColor rgb 60416 60416 60416
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x -4
+y 41
+w 73
+h 18
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 63744 55808 15360
+bgColor index 3
+useDisplayBg
+value {
+  "DB Scan:"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 1
+y 74
+w 59
+h 18
+font "helvetica-medium-r-14.0"
+fontAlign "right"
+fgColor rgb 63744 55808 15360
+bgColor index 3
+useDisplayBg
+value {
+  "Value:"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x -4
+y 102
+w 70
+h 18
+font "helvetica-medium-r-14.0"
+fontAlign "right"
+fgColor rgb 63744 55808 15360
+bgColor index 3
+useDisplayBg
+value {
+  "Channel:"
+}
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 77
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_0.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 117
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_1.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 157
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_2.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 197
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_3.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 237
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_4.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 277
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_5.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 317
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_6.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 357
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_7.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 397
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_8.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 437
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_9.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 477
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_10.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 517
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_11.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 557
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_12.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 597
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_13.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 637
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_14.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 677
+y 60
+w 6
+h 6
+lineColor rgb 0 55296 0
+fill
+fillColor rgb 0 55296 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)9440:$(A):bi_15.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 70
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=0"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 110
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=1"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 150
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=2"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 190
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=3"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 230
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=4"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 270
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=5"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 310
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=6"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 350
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=7"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 390
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=8"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 430
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=9"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 470
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=10"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 510
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=11"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 550
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=12"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 590
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=13"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 630
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=14"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 670
+y 38
+w 20
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 47872 47872 47872
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "Acro_bi_scan.edl"
+}
+menuLabel {
+  0 "Scan Options"
+}
+symbols {
+  0 "P=$(P),A=$(A),ch=15"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+

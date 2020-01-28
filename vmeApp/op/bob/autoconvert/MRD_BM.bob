@@ -1,0 +1,1507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>MRD_BM</name>
+  <x>114</x>
+  <y>414</y>
+  <width>750</width>
+  <height>450</height>
+  <background_color>
+    <color red="235" green="241" blue="181">
+    </color>
+  </background_color>
+  <grid_visible>false</grid_visible>
+  <grid_step_x>5</grid_step_x>
+  <widget type="label" version="2.0.0">
+    <name>text #6</name>
+    <text>SR Status for Beamline $(xx)-BM</text>
+    <x>17</x>
+    <y>6</y>
+    <width>650</width>
+    <height>30</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="30.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #9</name>
+    <text>* NORMALIZED x-BPM SIGNALS *</text>
+    <x>417</x>
+    <y>266</y>
+    <width>280</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="88" green="147" blue="255">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #12</name>
+    <pv_name>BL$(xx):BM:1XBPM:VPOS</pv_name>
+    <x>448</x>
+    <y>359</y>
+    <width>90</width>
+    <height>15</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #15</name>
+    <pv_name>BL$(xx):BM:2XBPM:VPOS</pv_name>
+    <x>587</x>
+    <y>359</y>
+    <width>90</width>
+    <height>15</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #18</name>
+    <pv_name>BL$(xx):BM:XBPM:VAngle</pv_name>
+    <x>590</x>
+    <y>416</y>
+    <width>90</width>
+    <height>15</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #21</name>
+    <text>1XBPM:VPOSITION</text>
+    <x>453</x>
+    <y>344</y>
+    <width>80</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #24</name>
+    <text>2XBPM:VPOSITION</text>
+    <x>592</x>
+    <y>344</y>
+    <width>80</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #27</name>
+    <text>VANGLE</text>
+    <x>616</x>
+    <y>401</y>
+    <width>50</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #30</name>
+    <text>mm</text>
+    <x>517</x>
+    <y>374</y>
+    <width>20</width>
+    <height>13</height>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #33</name>
+    <text>mm</text>
+    <x>659</x>
+    <y>374</y>
+    <width>20</width>
+    <height>13</height>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #36</name>
+    <text>microradians</text>
+    <x>592</x>
+    <y>432</y>
+    <width>90</width>
+    <height>13</height>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #39</name>
+    <text>Vertical Positions and Angles</text>
+    <x>89</x>
+    <y>346</y>
+    <width>180</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="97" green="10" blue="117">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #42</name>
+    <text>Beam Line Front End X-RAY BPM</text>
+    <x>416</x>
+    <y>46</y>
+    <width>300</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="97" green="10" blue="117">
+      </color>
+    </foreground_color>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>polyline #45</name>
+    <x>539</x>
+    <y>102</y>
+    <width>0</width>
+    <height>47</height>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="0.0" y="47.0">
+      </point>
+    </points>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>polyline #49</name>
+    <x>539</x>
+    <y>177</y>
+    <width>0</width>
+    <height>50</height>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="0.0" y="50.0">
+      </point>
+    </points>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #53</name>
+    <pv_name>BL$(xx):BM:1XBPM:A</pv_name>
+    <x>455</x>
+    <y>126</y>
+    <width>75</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #56</name>
+    <pv_name>BL$(xx):BM:1XBPM:B</pv_name>
+    <x>456</x>
+    <y>205</y>
+    <width>75</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #59</name>
+    <text>A</text>
+    <x>536</x>
+    <y>84</y>
+    <width>10</width>
+    <height>15</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #62</name>
+    <text>B</text>
+    <x>536</x>
+    <y>233</y>
+    <width>10</width>
+    <height>15</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #65</name>
+    <text>First</text>
+    <x>451</x>
+    <y>70</y>
+    <width>75</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="205" green="97" blue="0">
+      </color>
+    </foreground_color>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #68</name>
+    <text>Second</text>
+    <x>588</x>
+    <y>67</y>
+    <width>75</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="205" green="97" blue="0">
+      </color>
+    </foreground_color>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #71</name>
+    <text>1XBPM:A</text>
+    <x>464</x>
+    <y>103</y>
+    <width>60</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #74</name>
+    <text>1XBPM:B</text>
+    <x>465</x>
+    <y>186</y>
+    <width>60</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>polyline #77</name>
+    <x>673</x>
+    <y>105</y>
+    <width>0</width>
+    <height>47</height>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="0.0" y="47.0">
+      </point>
+    </points>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>polyline #81</name>
+    <x>673</x>
+    <y>180</y>
+    <width>0</width>
+    <height>50</height>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="0.0" y="50.0">
+      </point>
+    </points>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #85</name>
+    <pv_name>BL$(xx):BM:2XBPM:A</pv_name>
+    <x>588</x>
+    <y>127</y>
+    <width>75</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #88</name>
+    <pv_name>BL$(xx):BM:2XBPM:B</pv_name>
+    <x>583</x>
+    <y>208</y>
+    <width>75</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #91</name>
+    <text>A</text>
+    <x>670</x>
+    <y>87</y>
+    <width>10</width>
+    <height>15</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #94</name>
+    <text>B</text>
+    <x>670</x>
+    <y>234</y>
+    <width>10</width>
+    <height>15</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #97</name>
+    <text>2XBPM:A</text>
+    <x>595</x>
+    <y>104</y>
+    <width>60</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #100</name>
+    <text>2XBPM:B</text>
+    <x>597</x>
+    <y>185</y>
+    <width>60</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #103</name>
+    <pv_name>BL$(xx):BM:XBPM:VPosition</pv_name>
+    <x>452</x>
+    <y>416</y>
+    <width>90</width>
+    <height>15</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #106</name>
+    <text>VPOSITION</text>
+    <x>463</x>
+    <y>401</y>
+    <width>80</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #109</name>
+    <text>mm</text>
+    <x>521</x>
+    <y>432</y>
+    <width>20</width>
+    <height>13</height>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #112</name>
+    <pv_name>BL$(xx):SRBM:VAngle</pv_name>
+    <x>197</x>
+    <y>388</y>
+    <width>120</width>
+    <height>25</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #115</name>
+    <text>VANGLE</text>
+    <x>236</x>
+    <y>373</y>
+    <width>50</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #118</name>
+    <text>microradians</text>
+    <x>229</x>
+    <y>416</y>
+    <width>90</width>
+    <height>13</height>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #121</name>
+    <pv_name>BL$(xx):SRBM:VPosition</pv_name>
+    <x>18</x>
+    <y>388</y>
+    <width>120</width>
+    <height>25</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #124</name>
+    <text>VPOSITION</text>
+    <x>39</x>
+    <y>373</y>
+    <width>80</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #127</name>
+    <text>mm</text>
+    <x>118</x>
+    <y>413</y>
+    <width>20</width>
+    <height>13</height>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #130</name>
+    <text>* SR RF BPM Signals *</text>
+    <x>34</x>
+    <y>304</y>
+    <width>280</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #133</name>
+    <text>microAmps</text>
+    <x>465</x>
+    <y>225</y>
+    <width>60</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #136</name>
+    <text>microAmps</text>
+    <x>466</x>
+    <y>146</y>
+    <width>60</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #139</name>
+    <text>microAmps</text>
+    <x>601</x>
+    <y>148</y>
+    <width>60</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #142</name>
+    <text>microAmps</text>
+    <x>596</x>
+    <y>228</y>
+    <width>60</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #145</name>
+    <text>* Normalized to the Source *</text>
+    <x>35</x>
+    <y>324</y>
+    <width>280</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #148</name>
+    <text>Vertical Positions and Angles</text>
+    <x>474</x>
+    <y>282</y>
+    <width>180</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="39" green="84" blue="141">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #151</name>
+    <text>NOTE:  The Normalized XBPM signals</text>
+    <x>381</x>
+    <y>300</y>
+    <width>350</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #154</name>
+    <text>are correctly only when calibrated.</text>
+    <x>388</x>
+    <y>318</y>
+    <width>350</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #157</name>
+    <pv_name>BL$(xx):srCurrent</pv_name>
+    <x>176</x>
+    <y>53</y>
+    <width>90</width>
+    <height>34</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="30.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="30" green="187" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="212" green="219" blue="157">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #160</name>
+    <text>CM Status</text>
+    <x>354</x>
+    <y>378</y>
+    <width>50</width>
+    <height>12</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="12.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #163</name>
+    <text>SR Current :</text>
+    <x>15</x>
+    <y>60</y>
+    <width>150</width>
+    <height>22</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #166</name>
+    <pv_name>BL$(xx):srCurrent.EGU</pv_name>
+    <x>277</x>
+    <y>65</y>
+    <width>50</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #169</name>
+    <text>SR Status :</text>
+    <x>22</x>
+    <y>92</y>
+    <width>150</width>
+    <height>22</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #172</name>
+    <pv_name>BL$(xx):ActualMode</pv_name>
+    <x>169</x>
+    <y>94</y>
+    <width>227</width>
+    <height>25</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>oval #175</name>
+    <x>159</x>
+    <y>162</y>
+    <width>15</width>
+    <height>15</height>
+    <line_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </background_color>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil
+from org.csstudio.display.builder.model.persist import WidgetColorService
+sevr = PVUtil.getSeverity(pvs[0])
+if sevr==1:
+    name = 'MINOR'
+elif sevr==2:
+    name = 'MAJOR'
+elif sevr==3:
+    name = 'INVALID'
+elif sevr==4:
+    name = 'DISCONNECTED'
+else:
+    name = 'OK'
+color = WidgetColorService.getColor(name)
+widget.setPropertyValue('background_color', color)
+]]></text>
+        <pv_name>BL$(xx):BeamPresent</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #179</name>
+    <text>MPS/RF OK</text>
+    <x>36</x>
+    <y>193</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #182</name>
+    <text>Top Up</text>
+    <x>36</x>
+    <y>223</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>oval #185</name>
+    <x>159</x>
+    <y>223</y>
+    <width>15</width>
+    <height>15</height>
+    <line_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </background_color>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil
+from org.csstudio.display.builder.model.persist import WidgetColorService
+sevr = PVUtil.getSeverity(pvs[0])
+if sevr==1:
+    name = 'MINOR'
+elif sevr==2:
+    name = 'MAJOR'
+elif sevr==3:
+    name = 'INVALID'
+elif sevr==4:
+    name = 'DISCONNECTED'
+else:
+    name = 'OK'
+color = WidgetColorService.getColor(name)
+widget.setPropertyValue('background_color', color)
+]]></text>
+        <pv_name>BL$(xx):TopUpStatus</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>oval #189</name>
+    <x>159</x>
+    <y>193</y>
+    <width>15</width>
+    <height>15</height>
+    <line_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </background_color>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil
+from org.csstudio.display.builder.model.persist import WidgetColorService
+sevr = PVUtil.getSeverity(pvs[0])
+if sevr==1:
+    name = 'MINOR'
+elif sevr==2:
+    name = 'MAJOR'
+elif sevr==3:
+    name = 'INVALID'
+elif sevr==4:
+    name = 'DISCONNECTED'
+else:
+    name = 'OK'
+color = WidgetColorService.getColor(name)
+widget.setPropertyValue('background_color', color)
+]]></text>
+        <pv_name>BL$(xx):RfMpsStatus</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #193</name>
+    <text>Beam Present</text>
+    <x>14</x>
+    <y>161</y>
+    <width>120</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #196</name>
+    <text>ACIS Permit</text>
+    <x>230</x>
+    <y>158</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>oval #199</name>
+    <x>353</x>
+    <y>160</y>
+    <width>15</width>
+    <height>15</height>
+    <line_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </background_color>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil
+from org.csstudio.display.builder.model.persist import WidgetColorService
+sevr = PVUtil.getSeverity(pvs[0])
+if sevr==1:
+    name = 'MINOR'
+elif sevr==2:
+    name = 'MAJOR'
+elif sevr==3:
+    name = 'INVALID'
+elif sevr==4:
+    name = 'DISCONNECTED'
+else:
+    name = 'OK'
+color = WidgetColorService.getColor(name)
+widget.setPropertyValue('background_color', color)
+]]></text>
+        <pv_name>BL$(xx):ACISShutterPermit</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #203</name>
+    <text>Gbl Fdbk</text>
+    <x>228</x>
+    <y>221</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>oval #206</name>
+    <x>353</x>
+    <y>191</y>
+    <width>15</width>
+    <height>15</height>
+    <line_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </background_color>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil
+from org.csstudio.display.builder.model.persist import WidgetColorService
+sevr = PVUtil.getSeverity(pvs[0])
+if sevr==1:
+    name = 'MINOR'
+elif sevr==2:
+    name = 'MAJOR'
+elif sevr==3:
+    name = 'INVALID'
+elif sevr==4:
+    name = 'DISCONNECTED'
+else:
+    name = 'OK'
+color = WidgetColorService.getColor(name)
+widget.setPropertyValue('background_color', color)
+]]></text>
+        <pv_name>BL$(xx):OrbitCorrection</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>oval #210</name>
+    <x>353</x>
+    <y>222</y>
+    <width>15</width>
+    <height>15</height>
+    <line_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="60" green="180" blue="32">
+      </color>
+    </background_color>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil
+from org.csstudio.display.builder.model.persist import WidgetColorService
+sevr = PVUtil.getSeverity(pvs[0])
+if sevr==1:
+    name = 'MINOR'
+elif sevr==2:
+    name = 'MAJOR'
+elif sevr==3:
+    name = 'INVALID'
+elif sevr==4:
+    name = 'DISCONNECTED'
+else:
+    name = 'OK'
+color = WidgetColorService.getColor(name)
+widget.setPropertyValue('background_color', color)
+]]></text>
+        <pv_name>BL$(xx):GblFeedback</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #214</name>
+    <text>Orbit Corr</text>
+    <x>229</x>
+    <y>189</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #217</name>
+    <text>Front End Shutters Open</text>
+    <x>72</x>
+    <y>251</y>
+    <width>265</width>
+    <height>25</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="216" blue="0">
+      </color>
+    </foreground_color>
+    <auto_size>true</auto_size>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>BL$(xx):BMFEShutter</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #221</name>
+    <text>Front End Shutters Closed</text>
+    <x>59</x>
+    <y>251</y>
+    <width>265</width>
+    <height>25</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <auto_size>true</auto_size>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>BL$(xx):BMFEShutter</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #225</name>
+    <x>357</x>
+    <y>391</y>
+    <width>50</width>
+    <height>8</height>
+    <line_color>
+      <color red="30" green="187" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="30" green="187" blue="0">
+      </color>
+    </background_color>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil
+from org.csstudio.display.builder.model.persist import WidgetColorService
+sevr = PVUtil.getSeverity(pvs[0])
+if sevr==1:
+    name = 'MINOR'
+elif sevr==2:
+    name = 'MAJOR'
+elif sevr==3:
+    name = 'INVALID'
+elif sevr==4:
+    name = 'DISCONNECTED'
+else:
+    name = 'OK'
+color = WidgetColorService.getColor(name)
+widget.setPropertyValue('background_color', color)
+]]></text>
+        <pv_name>BL$(xx):CMStatus</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #229</name>
+    <text>Aux Clock OFF</text>
+    <x>354</x>
+    <y>411</y>
+    <width>50</width>
+    <height>12</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="12.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #232</name>
+    <x>357</x>
+    <y>424</y>
+    <width>50</width>
+    <height>8</height>
+    <line_color>
+      <color red="30" green="187" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="30" green="187" blue="0">
+      </color>
+    </background_color>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil
+from org.csstudio.display.builder.model.persist import WidgetColorService
+sevr = PVUtil.getSeverity(pvs[0])
+if sevr==1:
+    name = 'MINOR'
+elif sevr==2:
+    name = 'MAJOR'
+elif sevr==3:
+    name = 'INVALID'
+elif sevr==4:
+    name = 'DISCONNECTED'
+else:
+    name = 'OK'
+color = WidgetColorService.getColor(name)
+widget.setPropertyValue('background_color', color)
+]]></text>
+        <pv_name>BL$(xx):AuxClock</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #236</name>
+    <text>SR Lifetime :</text>
+    <x>13</x>
+    <y>128</y>
+    <width>150</width>
+    <height>22</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #239</name>
+    <pv_name>BL$(xx):srLifetime</pv_name>
+    <x>176</x>
+    <y>120</y>
+    <width>90</width>
+    <height>34</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="30.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="30" green="187" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #242</name>
+    <pv_name>BL$(xx):srLifetime.EGU</pv_name>
+    <x>273</x>
+    <y>133</y>
+    <width>50</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #245</name>
+    <x>7</x>
+    <y>120</y>
+    <width>330</width>
+    <height>35</height>
+    <line_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="235" green="241" blue="181">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>BL$(xx):Injecting</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #249</name>
+    <text>Injection in Progress</text>
+    <x>37</x>
+    <y>127</y>
+    <width>280</width>
+    <height>24</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>BL$(xx):Injecting</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #253</name>
+    <pv_name>BL$(xx):ParityError</pv_name>
+    <x>195</x>
+    <y>290</y>
+    <width>50</width>
+    <height>12</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="12.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="212" green="219" blue="157">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #256</name>
+    <pv_name>BL$(xx):LostLink</pv_name>
+    <x>90</x>
+    <y>288</y>
+    <width>45</width>
+    <height>12</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="12.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="212" green="219" blue="157">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #259</name>
+    <text>Link Status</text>
+    <x>95</x>
+    <y>275</y>
+    <width>36</width>
+    <height>12</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="12.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #262</name>
+    <text>Parity Error</text>
+    <x>217</x>
+    <y>277</y>
+    <width>80</width>
+    <height>12</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="12.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>message button #265</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>BL$(xx):ParityErrorClr</pv_name>
+        <value>1</value>
+        <description>Write</description>
+      </action>
+    </actions>
+    <pv_name>BL$(xx):ParityErrorClr</pv_name>
+    <text>Clear</text>
+    <x>258</x>
+    <y>288</y>
+    <width>50</width>
+    <height>15</height>
+    <foreground_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="199" green="187" blue="109">
+      </color>
+    </background_color>
+  </widget>
+</display>

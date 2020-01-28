@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Acro_bi_scan</name>
+  <x>220</x>
+  <y>448</y>
+  <width>124</width>
+  <height>246</height>
+  <background_color>
+    <color red="145" green="145" blue="145">
+    </color>
+  </background_color>
+  <grid_visible>false</grid_visible>
+  <grid_step_x>5</grid_step_x>
+  <widget type="choice" version="2.0.0">
+    <name>choice button #6</name>
+    <pv_name>$(P)9440:$(A):bi_$(ch).SCAN</pv_name>
+    <x>3</x>
+    <y>18</y>
+    <width>117</width>
+    <height>223</height>
+    <background_color>
+      <color red="187" green="187" blue="187">
+      </color>
+    </background_color>
+    <horizontal>false</horizontal>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <items>
+      <item>Item 1</item>
+      <item>Item 2</item>
+    </items>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #9</name>
+    <text>Scan Ch $(ch)</text>
+    <x>5</x>
+    <y>1</y>
+    <width>110</width>
+    <height>16</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+</display>

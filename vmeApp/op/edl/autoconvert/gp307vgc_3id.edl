@@ -1,0 +1,921 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 10
+y 10
+w 190
+h 250
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+textColor rgb -1 -1 -1
+ctlFgColor1 rgb -1 -1 -1
+ctlFgColor2 rgb -1 -1 -1
+ctlBgColor1 rgb -1 -1 -1
+ctlBgColor2 rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+showGrid
+snapToGrid
+gridSize 4
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 147
+y 5
+w 39
+h 89
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 6
+w 137
+h 142
+lineColor rgb -1 -1 -1
+fillColor rgb -1 -1 -1
+lineWidth 3
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 11
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 25
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 38
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 52
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 66
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 80
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Arc)
+object activeArcClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 166
+w 10
+h 10
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+startAngle  0
+totalAngle  360
+fillMode "pie"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 10
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)gp307:sp1)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 24
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)gp307:sp2)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 52
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+fillAlarm
+lineAlarm
+alarmPv $(P)gp307:sp4
+visPv "CALC\\\{(A)\}($(P)gp307:sp4)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 38
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+fillAlarm
+lineAlarm
+alarmPv $(P)gp307:sp3
+visPv "CALC\\\{(A)\}($(P)gp307:sp3)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 66
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+fillAlarm
+lineAlarm
+alarmPv $(P)gp307:sp5
+visPv "CALC\\\{(A)\}($(P)gp307:sp5)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 173
+y 80
+w 9
+h 9
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+fillAlarm
+lineAlarm
+alarmPv $(P)gp307:sp6
+visPv "CALC\\\{(A)\}($(P)gp307:sp6)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Arc)
+object activeArcClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 166
+w 10
+h 10
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)gp307:calc1.VAL)"
+visInvert
+visMin 0
+visMax 1
+startAngle  0
+totalAngle  360
+fillMode "pie"
+endObjectProperties
+
+# (Arc)
+object activeArcClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 79
+y 165
+w 10
+h 10
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+startAngle  0
+totalAngle  360
+fillMode "pie"
+endObjectProperties
+
+# (Arc)
+object activeArcClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 78
+y 165
+w 10
+h 10
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)gp307:calc2.VAL)"
+visInvert
+visMin 0
+visMax 1
+startAngle  0
+totalAngle  360
+fillMode "pie"
+endObjectProperties
+
+# (Arc)
+object activeArcClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 129
+y 166
+w 10
+h 10
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+startAngle  0
+totalAngle  360
+fillMode "pie"
+endObjectProperties
+
+# (Arc)
+object activeArcClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 166
+w 10
+h 10
+lineColor rgb -1 -1 -1
+fill
+fillColor rgb -1 -1 -1
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)gp307:dgStatus)"
+visInvert
+visMin 0
+visMax 1
+startAngle  0
+totalAngle  360
+fillMode "pie"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 9
+y 42
+w 130
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Ion Gauge (Torr)"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 9
+y 86
+w 130
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Convectron A (Torr)"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 9
+y 131
+w 130
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Convectron B (Torr)"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 9
+y 10
+w 130
+h 30
+controlPv "$(P)gp307:igPres"
+format "exponential"
+font "utopia-medium-r-24.0"
+fontAlign "center"
+fgColor rgb 0 65535 0
+fgAlarm
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 9
+y 54
+w 130
+h 30
+controlPv "$(P)gp307:cg1Pres"
+format "exponential"
+font "utopia-medium-r-24.0"
+fontAlign "center"
+fgColor rgb 0 65535 0
+fgAlarm
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 9
+y 98
+w 130
+h 30
+controlPv "$(P)gp307:cg2Pres"
+format "exponential"
+font "utopia-medium-r-24.0"
+fontAlign "center"
+fgColor rgb 0 65535 0
+fgAlarm
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 148
+y 9
+w 25
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "SP1"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 148
+y 23
+w 25
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "SP2"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 148
+y 37
+w 25
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "SP3"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 148
+y 51
+w 25
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "SP4"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 148
+y 65
+w 25
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "SP5"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 148
+y 79
+w 25
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "SP6"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 15
+y 180
+w 35
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "IG1"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 65
+y 180
+w 35
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "IG2"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 113
+y 180
+w 38
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "DEGAS"
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 159
+w 52
+h 87
+lineColor rgb -1 -1 -1
+fillColor rgb -1 -1 -1
+lineWidth 2
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 57
+y 159
+w 52
+h 87
+lineColor rgb -1 -1 -1
+fillColor rgb -1 -1 -1
+lineWidth 2
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 110
+y 159
+w 52
+h 87
+lineColor rgb -1 -1 -1
+fillColor rgb -1 -1 -1
+lineWidth 2
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 112
+y 214
+w 45
+h 20
+fgColor rgb -1 -1 -1
+onColor rgb -1 -1 -1
+offColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(P)gp307:dgsON"
+pressValue "1"
+releaseValue ""
+onLabel "ON"
+offLabel "ON"
+3d
+useEnumNumeric
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 61
+y 214
+w 45
+h 20
+fgColor rgb -1 -1 -1
+onColor rgb -1 -1 -1
+offColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(P)gp307:ig2ON"
+pressValue "1"
+releaseValue ""
+onLabel "ON"
+offLabel "ON"
+3d
+useEnumNumeric
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 214
+w 45
+h 20
+fgColor rgb -1 -1 -1
+onColor rgb -1 -1 -1
+offColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(P)gp307:ig1ON"
+pressValue "1"
+releaseValue ""
+onLabel "ON"
+offLabel "ON"
+3d
+useEnumNumeric
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 193
+w 45
+h 20
+fgColor rgb -1 -1 -1
+onColor rgb -1 -1 -1
+offColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(P)gp307:ig1OFF"
+pressValue "1"
+releaseValue ""
+onLabel "OFF"
+offLabel "OFF"
+3d
+useEnumNumeric
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 61
+y 193
+w 45
+h 20
+fgColor rgb -1 -1 -1
+onColor rgb -1 -1 -1
+offColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(P)gp307:ig2OFF"
+pressValue "1"
+releaseValue ""
+onLabel "OFF"
+offLabel "OFF"
+3d
+useEnumNumeric
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 112
+y 193
+w 45
+h 20
+fgColor rgb -1 -1 -1
+onColor rgb -1 -1 -1
+offColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(P)gp307:dgsOFF"
+pressValue "1"
+releaseValue ""
+onLabel "OFF"
+offLabel "OFF"
+3d
+useEnumNumeric
+font "helvetica-medium-r-12.0"
+endObjectProperties
+

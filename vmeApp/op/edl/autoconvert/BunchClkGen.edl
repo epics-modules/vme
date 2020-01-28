@@ -1,0 +1,821 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 10
+y 10
+w 391
+h 203
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+textColor rgb -1 -1 -1
+ctlFgColor1 rgb -1 -1 -1
+ctlFgColor2 rgb -1 -1 -1
+ctlBgColor1 rgb -1 -1 -1
+ctlBgColor2 rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+showGrid
+snapToGrid
+gridSize 4
+endScreenProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 222
+y 112
+w 73
+h 21
+controlPv "$(UNIT)SetBucketAO.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "left"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+editable
+motifWidget
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 235
+y 99
+w 46
+h 12
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Set"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 301
+y 112
+w 73
+h 21
+controlPv "$(UNIT)ReSetBuckAO.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "left"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+editable
+motifWidget
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 314
+y 99
+w 46
+h 12
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Reset"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 260
+y 82
+w 79
+h 13
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Bunch Control"
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 214
+y 76
+w 164
+h 95
+lineColor rgb -1 -1 -1
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 335
+y 8
+w 46
+h 12
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Output"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 333
+y 49
+w 51
+h 14
+controlPv "$(UNIT)DisableBI.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 327
+y 3
+w 62
+h 65
+lineColor rgb -1 -1 -1
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 7
+y 33
+w 51
+h 14
+controlPv "$(UNIT)RunningBI.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 64
+y 33
+w 51
+h 14
+controlPv "$(UNIT)P0DetectBI.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 8
+y 19
+w 49
+h 12
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Running"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 60
+y 19
+w 58
+h 12
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "P0 Detect"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 37
+y 6
+w 46
+h 12
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Status"
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 3
+y 3
+w 118
+h 50
+lineColor rgb -1 -1 -1
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 26
+y 106
+w 73
+h 21
+controlPv "$(UNIT)P0DelayAO.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "left"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+editable
+motifWidget
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 39
+y 93
+w 46
+h 12
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Coarse"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 105
+y 106
+w 73
+h 21
+controlPv "$(UNIT)FineDelayAO.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "left"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+editable
+motifWidget
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 118
+y 93
+w 46
+h 12
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Fine"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 76
+w 104
+h 13
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Delay Relative to P0"
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 18
+y 69
+w 164
+h 102
+lineColor rgb -1 -1 -1
+fillColor rgb -1 -1 -1
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 37
+y 130
+w 51
+h 14
+controlPv "$(UNIT)P0DelayAI.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 116
+y 130
+w 51
+h 14
+controlPv "$(UNIT)FineDelayAI.VAL"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 116
+y 148
+w 51
+h 14
+controlPv "$(UNIT)FineDelayAI.EGU"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 37
+y 148
+w 51
+h 14
+controlPv "$(UNIT)P0DelayAI.EGU"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 312
+y 132
+w 51
+h 14
+controlPv "$(UNIT)ReSetBuckAO.EGU"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 233
+y 132
+w 51
+h 14
+controlPv "$(UNIT)SetBucketAO.EGU"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+limitsFromDb
+nullColor rgb -1 -1 -1
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 171
+y 7
+w 108
+h 13
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Bunch Clk Generator"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 188
+y 26
+w 74
+h 13
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "$(UNIT)"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 282
+y 185
+w 49
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Bucket List"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 68
+y 185
+w 63
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb -1 -1 -1
+bgColor index 3
+useDisplayBg
+value {
+  "Bucket Pattern"
+}
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 331
+y 21
+w 55
+h 25
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+selectColor rgb -1 -1 -1
+inconsistentColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(UNIT)DisableBO.VAL"
+font "helvetica-medium-r-10.0"
+orientation "horizontal"
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 219
+y 150
+w 60
+h 18
+fgColor rgb -1 -1 -1
+onColor rgb -1 -1 -1
+offColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(UNIT)ClearPatternBO.VAL"
+pressValue "1"
+releaseValue ""
+onLabel "Clear All"
+offLabel "Clear All"
+3d
+useEnumNumeric
+font "helvetica-medium-r-10.0"
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 289
+y 150
+w 85
+h 18
+fgColor rgb -1 -1 -1
+onColor rgb -1 -1 -1
+offColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+controlPv "$(UNIT)ClearPatternBO.VAL"
+pressValue "1"
+releaseValue ""
+onLabel "Write Pattern"
+offLabel "Write Pattern"
+3d
+useEnumNumeric
+font "helvetica-medium-r-10.0"
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 346
+y 178
+w 27
+h 21
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "BunchClkGenWF.edl"
+}
+menuLabel {
+  0 "List of Bucket Numbers"
+}
+symbols {
+  0 "UNIT=$(UNIT)"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 24
+y 178
+w 27
+h 21
+fgColor rgb -1 -1 -1
+bgColor rgb -1 -1 -1
+topShadowColor rgb -1 -1 -1
+botShadowColor rgb -1 -1 -1
+font "helvetica-medium-r-8.0"
+icon
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "BunchClkGenPatternWF.edl"
+}
+menuLabel {
+  0 "Bucket Pattern"
+}
+symbols {
+  0 "UNIT=$(UNIT)"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
