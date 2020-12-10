@@ -153,7 +153,7 @@ echo "EPICS_BASE=$EPICS_BASE" >> configure/RELEASE
 
 #get_repo   Git Project      Git Repo         RELEASE Name     Tag
 if [[ $ASYN ]]; then   get_repo              epics-modules    asyn             ASYN             $ASYN          ; fi
-if [[ $STD ]]; then   get_repo               epics-modules    std              STD              $STD           ; fi
+if [[ $SCALER ]]; then   get_repo            epics-modules    scaler           SCALER           $SCALER           ; fi
 
 if [[ $SNCSEQ ]]
 then
