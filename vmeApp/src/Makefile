@@ -25,6 +25,7 @@ vme_SRCS_vxWorks += devXxHP10895LaserAxis.c
 vme_SRCS_vxWorks += devIK320.c
 vme_SRCS_vxWorks += drvIK320.c
 vme_SRCS_vxWorks += drvIK320ErrStat.c
+vme_SRCS_vxWorks += aiCvtDouble.c
 
 #vme_SRCS_vxWorks += devScaler.c
 vme_SRCS_vxWorks += devScaler_debug.c
