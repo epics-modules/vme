@@ -4,5 +4,6 @@
 /* ---------------- DO NOT EDIT MANUALLY ------------ */
 
 #include <errMdef.h>
+#include <errSymTbl.h>
 void drvIK320RegErrStr(void);
 #endif
