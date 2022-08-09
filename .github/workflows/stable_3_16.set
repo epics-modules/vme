@@ -2,6 +2,6 @@ BASE="3.16"
 
 MODULES="sncseq asyn scaler"
 
-SCALER="R4-0"
+SCALER="4.0"
 ASYN="R4-42"
 SNCSEQ="R2-2-9"
