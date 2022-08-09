@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/epics-modules/vme.svg?branch=master)](https://travis-ci.org/epics-modules/vme)
+[![VME](https://github.com/epics-modules/vme/actions/workflows/ci-scripts-build.yml/badge.svg)](https://github.com/epics-modules/vme/actions/workflows/ci-scripts-build.yml)
 
 # vme
 APS BCDA synApps module: vme
