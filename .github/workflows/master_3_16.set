@@ -1,7 +1,0 @@
-BASE="3.16"
-
-MODULES="sncseq asyn scaler"
-
-SCALER="master"
-ASYN="master"
-SNCSEQ="R2-2-9"
