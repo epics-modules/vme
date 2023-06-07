@@ -8,6 +8,18 @@ nav_order: 3
 vme Release Notes
 -----------------
 
+Release 2-9-5 (Jun 7, 2023)
+---------------------------
+
+Include file fix to build under newer versions of base
+
+Documentation moved to github pages
+
+Release 2-9-4 (Jun 11, 2021)
+----------------------------
+
+Update to use SCALER module instead of STD
+
 Release 2-9-3 (Oct 5, 2020)
 ---------------------------
 
