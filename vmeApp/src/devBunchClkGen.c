@@ -1907,3 +1907,25 @@ struct vmeio*  pvmeio = (struct vmeio*)&(pai->inp.value);
 
 } /* specialLinconvAi() */
 
+
+
+/* Epics iocsh bindings */
+
+static const iocshArg BCGC_Arg0 = {"card",    iocshArgInt};
+static const iocshArg BCGC_Arg1 = {"address", iocshArgInt};
+
+static const iocshArg* const BCGC_Args[2] = {&BCGC_Arg0, &BCGC_Arg1};
+
+static const iocshFuncDef BCGC_FuncDef = {"BunchClkGenConfigure", 2, BCGC_Args};
+
+static void BCGCCallFunc(const iocshArgBuf* args)
+{
+	BunchClkGenConfigure(args[0].ival, args[1].ival);
+}
+
+void BCGCRegistrar(void)
+{
+	iocshRegister(&BCGC_FuncDef, &BCGCCallFunc);
+}
+
+epicsExportRegistrar(BCGCRegistrar);
