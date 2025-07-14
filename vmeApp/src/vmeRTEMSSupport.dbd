@@ -1,0 +1,24 @@
+######################################
+# DBD for RTEMS version of vme library
+######################################
+
+################
+# DEVICE SUPPORT
+################
+
+
+# Heidenhain IK320 VME counter/interpolator (Till Straumann/BESSY)
+device(mbbo,VME_IO,devIK320Funct,"Heidenhain IK320 Command")
+device(mbbo,VME_IO,devIK320Dir,"Heidenhain IK320 Sign")
+device(mbbo,VME_IO,devIK320ModeX3,"Heidenhain IK320 X3 Mode")
+device(stringout,VME_IO,devIK320Parm,"Heidenhain IK320 Parameter")
+device(ai,VME_IO,devIK320Ai,"Heidenhain IK320")
+device(ai,VME_IO,devIK320GroupAi,"Heidenhain IK320 Group")
+
+
+################
+# DRIVER SUPPORT
+################
+# Heidenhain IK320 (Till Straumann/BESSY)
+driver(drvIK320)
+

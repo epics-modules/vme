@@ -73,16 +73,28 @@
  *
  *
  */
-
+#ifdef vxWorks
 #include <vxWorks.h>
 #include <tyLib.h>
 #include <stdioLib.h>
 #include <setjmp.h>
 #include <taskLib.h>
+#include <sysLib.h>
+#include <semLib.h>
+#endif
+
+#ifdef __rtems__
+#define OK 0
+#define ERROR -1
+#endif
+
+#include	<epicsStdlib.h>
+#include	<epicsEvent.h>	
+#include	<epicsMutex.h>	
+
 #include <signal.h>
 #include <time.h>
 #include <assert.h>
-#include <sysLib.h>
 
 #include <string.h>
 
@@ -91,7 +103,6 @@
 #include <devSup.h>
 #include <devLib.h>
 #include <epicsPrint.h>
-#include <semLib.h>
 #include <dbAccess.h>
 #include <dbEvent.h>
 #include <callback.h>
@@ -280,7 +291,7 @@ typedef struct DevIK320GroupAiRec_
     short  valid;
     long   status;
     double value,lvalue;
-    SEM_ID mutex;
+    epicsMutexId mutex;
 } DevIK320GroupAiRec, *DevIK320GroupAi;
 
 STATIC long ik320InitGroupAi();
@@ -411,7 +422,7 @@ STATIC void ik320GroupChanged(int unregister, int groupNr)
         return;
     grp = (DevIK320GroupAi)(prec->dpvt);
 
-    semTake(grp->mutex,WAIT_FOREVER);
+    epicsMutexLock(grp->mutex);
     grp->value *= grp->nAxes;
     if (unregister)
         grp->nAxes--;
@@ -429,7 +440,7 @@ STATIC void ik320GroupChanged(int unregister, int groupNr)
         grp->value=0;
         grp->valid=0;
     }
-    semGive(grp->mutex);
+    epicsMutexUnlock(grp->mutex);
     DM(2,"ik320GroupChanged() 1 axis %s group %i, now %i members\n",
        unregister ? "left" : "joined", groupNr, grp->nAxes);
 }
@@ -441,13 +452,13 @@ STATIC void ik320GroupAddValue(int groupNr, double value, long status)
     if (!prec)
         return;
     grp=(DevIK320GroupAi)(prec->dpvt);
-    semTake(grp->mutex,WAIT_FOREVER);
+    epicsMutexLock(grp->mutex);
     grp->value += value/grp->nAxes;
     if (status)
         grp->status = READ_ALARM;
     if (++grp->nIrqs>=grp->nAxes)
         ik320GroupPost(grp);
-    semGive(grp->mutex);
+    epicsMutexUnlock(grp->mutex);
 }
 
 STATIC long ik320InitGroupAi(int after)
@@ -497,7 +508,8 @@ STATIC long ik320InitGroupAiRec(aiRecord *prec)
     if (!(prec->dpvt=devState=(DevIK320GroupAi)malloc(sizeof(DevIK320GroupAiRec))) )
         goto cleanup;
 
-    if (!(devState->mutex=semMCreate(SEM_Q_FIFO)))
+    devState->mutex=epicsMutexMustCreate();
+    if (devState->mutex == NULL)
         goto cleanup;
 
     devState->nAxes=0;
@@ -515,7 +527,8 @@ STATIC long ik320InitGroupAiRec(aiRecord *prec)
 cleanup:
     if (devState)
     {
-        if (devState->mutex) semDelete(devState->mutex);
+        if (devState->mutex) epicsMutexDestroy(devState->mutex);
+
         free(devState);
     }
     prec->pact=TRUE;
@@ -561,7 +574,7 @@ STATIC long ik320ReadGroupAi(aiRecord *prec)
     {
         /* completion phase; this is due to a GroupPost()
          */
-        semTake(grp->mutex,WAIT_FOREVER);
+        epicsMutexLock(grp->mutex);
         prec->val = grp->lvalue;
         grp->valid = 0;
         if (grp->status)
@@ -569,7 +582,7 @@ STATIC long ik320ReadGroupAi(aiRecord *prec)
             recGblSetSevr(prec,grp->status,INVALID_ALARM);
             grp->status = NO_ALARM;
         }
-        semGive(grp->mutex);
+        epicsMutexUnlock(grp->mutex);
         DM(2,"completion phase; new (raw) value %g\n",prec->val);
         aiCvtDouble(prec);
     }
@@ -582,12 +595,12 @@ STATIC void ik320GroupPost(DevIK320GroupAi grp)
     /* save value in case more interrupts come in before the record is
      * processed.
      */
-    semTake(grp->mutex,WAIT_FOREVER);
+    epicsMutexLock(grp->mutex);
     grp->lvalue = grp->value;
     grp->valid  = TRUE;
     grp->nIrqs  = 0;
     grp->value  = 0.; /* reset the sum */
-    semGive(grp->mutex);
+    epicsMutexUnlock(grp->mutex);
     DM(2,"ik320GroupPost(): posting new value %g to group %i\n",
        grp->lvalue, grp->nr);
     callbackRequestProcessCallback(&grp->cbk,priorityHigh,ik320GroupStatic[grp->nr]);
@@ -665,7 +678,7 @@ STATIC long ik320InitMbbo(mbboRecord *prec, IK320FunctionDescRec *menu,
     long            status;
     int             i;
     DevIK320Mbbo    devState=0;
-    epicsInt32      *valptr;
+    epicsUInt32     *valptr;
     char            *nameptr;
     int             idx;
 

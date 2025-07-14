@@ -53,10 +53,10 @@
  *
  *
  */
-
+#ifdef vxWorks
 #include <vxWorks.h>
 #include <semLib.h>
-
+#endif
 /* Note: defining USE_WITHOUT_EPICS is broke and not supported anymore.
  */
 #ifndef USE_WITHOUT_EPICS
@@ -164,7 +164,7 @@ typedef struct dbCommonRec *dbCommon;
 
 /* IK320 has 48-bit registers */
 
-typedef struct IK320ValueRec_ {
+typedef volatile struct IK320ValueRec_ {
 	long	       count	__attribute__ ((packed));
 	unsigned short interpol __attribute__ ((packed));
 } IK320ValueRec, *IK320Value;
@@ -199,7 +199,7 @@ typedef struct IK320ParmRec_ {
 	IK320Type	type;
 } IK320ParmRec, *IK320Parm;
 
-typedef struct IK320DataRec_ {
+typedef volatile struct IK320DataRec_ {
 	long		count	 __attribute__ ((packed));
 	unsigned short	interpol __attribute__ ((packed));
 	unsigned char	status	 __attribute__ ((packed));
@@ -208,7 +208,7 @@ typedef struct IK320DataRec_ {
 
 /* dual port ram memory map layout */
 
-typedef struct IK320CardRec_ {
+typedef volatile struct IK320CardRec_ {
 	IK320DataRec 	X[3]		__attribute__ ((packed));
 	unsigned short	irqStatus	__attribute__ ((packed));
 	unsigned short	CRC		__attribute__ ((packed));
