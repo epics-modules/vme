@@ -98,23 +98,39 @@
  *
  */
 
+#ifdef vxWorks
 #include <tyLib.h>
 #include <stdioLib.h>
 #include <setjmp.h>
 #include <taskLib.h>
+#include <sysLib.h>
+#include <intLib.h>
+#endif
+
+#ifdef __rtems__
+#define OK 0
+#define ERROR (-1)
+#define WAIT_FOREVER (-1)
+#include <bsp.h>
+#include <epicsStdlib.h>
+#include <epicsStdioRedirect.h>
+#include <semaphore.h>
+#endif
+
+#include <epicsEvent.h>
+#include <epicsMutex.h>
+#include <epicsInterrupt.h>
+
 #include <signal.h>
 #include <time.h>
 #include <math.h>
 #include <string.h>
 #include <assert.h>
-#include <sysLib.h>
-#include <intLib.h>
 
 #include <ellLib.h>
 #include <drvSup.h>
 #include <devLib.h>
 #include <epicsPrint.h>
-#include <semLib.h>
 #include <dbAccess.h>
 #include <callback.h>
 #include <epicsExport.h>
@@ -135,6 +151,8 @@ epicsExportAddress(int, drvIK320Debug);
 #else
     #define DM(LEVEL,FMT,ARGS...) ;
 #endif
+
+#define SHORTDELAY (0.005)  /* in seconds */
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
@@ -209,10 +227,14 @@ epicsExportAddress(drvet, drvIK320);
 typedef struct IK320DriverRec_
 {
 #ifndef USE_INTLOCK
-    SEM_ID          mutex;      /* mutex for the busy flag */
+    epicsMutexId    mutex;      /* mutex for the busy flag */
 #endif
     char            busy;       /* no access to the card while busy */
-    SEM_ID          sync;       /* sync semaphore for synchronous processing */
+#ifdef vxWorks
+    SEM_ID          sync;       /* sync counting semaphore for synchronous processing */
+#else /* rtems */
+    sem_t           sync;       /* use posix semaphore here which supports counting */
+#endif
     IK320Card       card;       /* pointer to hardware registers */
     unsigned short  *port;      /* pointer to VMEA16 interrupt address */
     dbCommon        *record;        /* EPICS record that issued a request */
@@ -235,22 +257,41 @@ IK320Card drvIK320CARD(IK320Driver drv)
 
 static struct
 {
-    SEM_ID      mutex;
+    epicsMutexId  mutex;
     IK320Driver first;
 } allCards = { 0, 0};
 
-static unsigned short *groupBase = 0;
+static volatile unsigned short *groupBase = 0;
 static void (*irqHandler)() = 0;
-static int shortdelay = 0;
+static int shortdelay = 0;   /*in clock ticks */
+static struct timespec abs_shortdelay;   /* absolute time of timeout (calculated as current time + shortdelay ) */
 static int IK320brdfail = 0;
 
 #ifndef NODEBUG
-static SEM_ID
+static epicsEventId
 drvIK320LoggerSem;
 
 static char drvIK320LoggerString[256];
 
-static int drvIK320IrqLogger();
+/*static int drvIK320IrqLogger();*/
+static void drvIK320IrqLogger(void *ptr);
+#endif
+
+#ifdef __rtems__
+/* convert timeout in ticks to an absolute time by adding it to the current time */
+void tickTimeoutToAbsTime(int timeout, struct timespec *abs_timeout)
+{
+    double timeout_in_secs = ((timeout==WAIT_FOREVER) ? 999999 : timeout * epicsThreadSleepQuantum());
+    DM(3,"timeout_in_secs %lf \n",timeout_in_secs);
+    clock_gettime(CLOCK_REALTIME, abs_timeout);
+    abs_timeout->tv_sec += trunc(timeout_in_secs);
+    abs_timeout->tv_nsec += (timeout_in_secs - trunc(timeout_in_secs)) / 0.000000001;
+    if (abs_timeout->tv_nsec > 1000000000)
+    {
+        abs_timeout->tv_nsec -= 1000000000;
+        abs_timeout->tv_sec += 1;
+    }
+}
 #endif
 
 long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
@@ -278,7 +319,7 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
 
     /* is there already a driver struct for this card ? */
 
-    semTake(allCards.mutex,WAIT_FOREVER);
+    epicsMutexLock(allCards.mutex);
     for (rval = allCards.first; rval; rval=rval->next)
     {
         if (rval->sw2 == sw2)
@@ -288,7 +329,7 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
                 epicsPrintf("drvIK320: other card with same sw2 settings?\n");
                 rval = 0;
             }
-            semGive(allCards.mutex);
+            epicsMutexUnlock(allCards.mutex);
             *pDrv = rval;
             return(OK);
         }
@@ -300,7 +341,8 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
         goto cleanup;
     }
 #ifndef USE_INTLOCK
-    if (!(rval->mutex=semMCreate(SEM_Q_FIFO)))
+    rval->mutex = epicsMutexMustCreate(); 
+    if (rval->mutex == NULL)
     {
         status = S_dev_noMemory;
         goto cleanup;
@@ -309,7 +351,11 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
     /* use counting semaphore, so we are able to keep track of
      * pending interrupts.
      */
+#ifdef vxWorks
     if (!(rval->sync=semCCreate(SEM_Q_FIFO,SEM_EMPTY)))
+#else /* rtems */
+    if (sem_init(&(rval->sync),0,0) != 0)
+#endif
     {
         status = S_dev_noMemory;
         goto cleanup;
@@ -454,7 +500,7 @@ long drvIK320Connect(int sw1, int sw2, int irqLevel, IK320Driver *pDrv)
         goto cleanup;
     drvIK320Finish(rval);
 
-    semGive(allCards.mutex);
+    epicsMutexUnlock(allCards.mutex);
     *pDrv = rval;
 
     return(OK);
@@ -472,13 +518,17 @@ cleanup:
     {
 #ifndef USE_INTLOCK
         if (rval->mutex)
-            semDelete(rval->mutex);
+            epicsMutexDestroy(rval->mutex);
 #endif
+#ifdef vxWorks
         if (rval->sync)
             semDelete(rval->sync);
+#else /* rtems */
+        sem_destroy(&(rval->sync));
+#endif
         free(rval);
     }
-    semGive(allCards.mutex);
+    epicsMutexUnlock(allCards.mutex);
     *pDrv=0;
     IK320brdfail = 1;
     return(status);
@@ -493,28 +543,28 @@ drvIK320RegisterIOScan(IK320Driver drv, IOSCANPVT *pScanPvt, int axis)
      * (no need to be fine grained because this is rarely called)
      */
 #ifndef USE_INTLOCK
-    semTake(drv->mutex,WAIT_FOREVER);
+    epicsMutexLock(drv->mutex);
 #else
     {
-        int key=intLock();
+        int key=epicsInterruptLock();
 #endif
         if (!(wasBusy=drv->busy))
             drv->busy=1;
 #ifndef USE_INTLOCK
-        semGive(drv->mutex);
+        epicsMutexUnlock(drv->mutex);
 #else
-        intUnlock(key);
+        epicsInterruptUnlock(key);
     }
 #endif
 
     if (wasBusy)
         return(S_drvIK320_cardBusy);
 
-    semTake(allCards.mutex,WAIT_FOREVER);
-    key = intLock();
+    epicsMutexLock(allCards.mutex);
+    key = epicsInterruptLock();
     drv->scanPvt[axis-1] = pScanPvt;
-    intUnlock(key);
-    semGive(allCards.mutex);
+    epicsInterruptUnlock(key);
+    epicsMutexUnlock(allCards.mutex);
 
     return(OK);
 }
@@ -528,10 +578,10 @@ drvIK320Disconnect(IK320Driver drv)
         return(S_drvIK320_invalidParm);
 
 #ifndef USE_INTLOCK
-    semTake(drv->mutex,WAIT_FOREVER);
+    epicsMutexLock(drv->mutex);
 #else
     {
-        int key=intLock();
+        int key = epicsInterruptLock();
 #endif
         if (!(busy=drv->busy))
         {
@@ -539,9 +589,9 @@ drvIK320Disconnect(IK320Driver drv)
             devDisableInterruptLevel(intVME,drv->irqLevel);
         }
 #ifndef USE_INTLOCK
-        semGive(drv->mutex);
+        epicsMutexUnlock(drv->mutex);
 #else
-        intUnlock(key);
+        epicsInterruptUnlock(key);
     }
 #endif
 
@@ -549,10 +599,15 @@ drvIK320Disconnect(IK320Driver drv)
         return (S_drvIK320_cardBusy);
 
 #ifndef USE_INTLOCK
-    semTake(drv->mutex,WAIT_FOREVER);
-    semDelete(drv->mutex);
+    epicsMutexLock(drv->mutex);
+    epicsMutexDestroy(drv->mutex);
+
 #endif
+#ifdef vxWorks
     semDelete(drv->sync);
+#else /* rtems */
+    sem_destroy(&(drv->sync));
+#endif
     devDisconnectInterrupt(intVME,drv->sw1,IK320IrqHandler);
     devUnregisterAddress(atVMEA24,(size_t)(A24BASE(drv->sw2)),"drvIK320");
     devUnregisterAddress(atVMEA16,(size_t)(A16PORT(drv->sw1)),"drvIK320");
@@ -587,7 +642,13 @@ IK320IrqHandler(void *parm)
             if (drv->record)
                 callbackRequestProcessCallback(&drv->procCbk,priorityHigh,drv->record);
             else if (drv->waiting) /* somebody's waiting */
+            {
+#ifdef vxWorks
                 semGive(drv->sync); /* semaphore state should still remain empty */
+#else /* rtems */
+                sem_post(&(drv->sync));
+#endif
+            }
             else
             { /* UH OH, an IRQ which nobody wants; */
                 error = 1;
@@ -605,13 +666,21 @@ IK320IrqHandler(void *parm)
 #ifndef NODEBUG
     if (error)
     {
+#ifdef vxWorks
         sprintf(drvIK320LoggerString,"UNSOLICITED IRQ Status: %x",(int)drv->card->irqStatus);
         semGive(drvIK320LoggerSem);
+#else /* rtems */
+        printk("UNSOLICITED IRQ Status: %x",(int)drv->card->irqStatus);       
+#endif
     }
     else if (drvIK320Debug>=1)
     {
-        sprintf(drvIK320LoggerString,"irqStatus: %x",(int)drv->card->irqStatus);
+#ifdef vxWorks
+        sprintf(drvIK320LoggerString,"irqStatus: %x",(int)drv->card->irqStatus);*/
         semGive(drvIK320LoggerSem);
+#else /* rtems */
+        printk("irqStatus: %x",(int)drv->card->irqStatus);
+#endif
     }
 #endif
     if (error || doClear)
@@ -620,10 +689,10 @@ IK320IrqHandler(void *parm)
             card->X[sHi-1].xfer = 0;
         card->irqStatus = 0;
         {
-            int key = intLock();
+            int key = epicsInterruptLock();
             if (drv->busy > 0)
                 drv->busy--;
-            intUnlock(key);
+            epicsInterruptUnlock(key);
         }
     }
 }
@@ -632,13 +701,17 @@ static void
 IK320IrqCatcher(void *parm)
 {
     IK320Driver drv = (IK320Driver)parm;
-    int key = intLock();
+    int key = epicsInterruptLock();
     drv->card->X[0].xfer = 0;
     drv->card->X[1].xfer = 0;
     drv->card->X[2].xfer = 0;
     drv->card->irqStatus = 0;
-    intUnlock(key);
+    epicsInterruptUnlock(key);
+#ifdef vxWorks
     semGive(drv->sync);
+#else /* rtems */
+    sem_post(&(drv->sync));
+#endif
 }
 
 static void IK320IrqMaster(void *parm)
@@ -691,7 +764,13 @@ static long cardQuery(IK320Driver drv)
         drv->card->X[0].xfer=0;
     }
     INTERRUPT(drv);
+#ifdef vxWorks
     rval = semTake(drv->sync, shortdelay);
+#else /* rtems */
+    /* shortdelay is in ticks so convert it to a timespec */
+    tickTimeoutToAbsTime(shortdelay, &abs_shortdelay);
+    rval = sem_timedwait(&(drv->sync),&abs_shortdelay);
+#endif
     drvIK320Finish(drv);
     DM(1,"drvIK320: cardQuery status %ld\n",rval);
     return(rval);
@@ -700,14 +779,15 @@ static long cardQuery(IK320Driver drv)
 #ifndef NODEBUG
 /* print irq handler messages to console */
 
-static int
+/*static int
 drvIK320IrqLogger(int a0, int a1, int a2, int a3, int a4,
-                  int a5, int a6, int a7, int a8, int a9)
+                  int a5, int a6, int a7, int a8, int a9)*/
+static void drvIK320IrqLogger(void *ptr)
 {
     printf("drvIK320 starting irq logger...\n");
     while (1)
     {
-        semTake(drvIK320LoggerSem,WAIT_FOREVER);
+        epicsEventMustWait(drvIK320LoggerSem);
         printf("drvIK320 (IRQ logger): %s\n",drvIK320LoggerString);
     }
 }
@@ -840,17 +920,17 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
 
     /* check if the card is busy */
 #ifndef USE_INTLOCK
-    semTake(drv->mutex,WAIT_FOREVER);
+    epicsMutexLock(drv->mutex);
 #else
     {
-        int key=intLock();
+        int key = epicsInterruptLock();
 #endif
         if (!(wasBusy=drv->busy))
             drv->busy = 1;
 #ifndef USE_INTLOCK
-        semGive(drv->mutex);
+        epicsMutexUnlock(drv->mutex);
 #else
-        intUnlock(key);
+        epicsInterruptUnlock(key);
     }
 #endif
 
@@ -937,12 +1017,12 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
     case FUNC_NOREF2: 
     case FUNC_NOREF12: 
         status = OK;
-        timeout = sysClkRateGet() * 1;  /* wait for 1 sec. */
+        timeout = 1/epicsThreadSleepQuantum();  /* wait for 1 sec. */
         break;
 
     case FUNC_POST: 
         status = OK;
-        timeout = sysClkRateGet() * 10; /* wait for 10 secs */
+        timeout = 10/epicsThreadSleepQuantum(); /* wait for 10 secs */
         break;
 
         /* set the direction flag;
@@ -1089,7 +1169,13 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
         DM(2,"drvIK320: reference; set irq mask...");
         card->irqStatus = 0;
         INTERRUPT(drv);
+#ifdef vxWorks
         if (semTake(drv->sync, shortdelay))
+#else /* rtems */
+        /* shortdelay is in ticks so convert it to a timespec */
+        tickTimeoutToAbsTime(shortdelay, &abs_shortdelay);
+        if (sem_timedwait(&(drv->sync), &abs_shortdelay) != 0)
+#endif
         {
             status = S_drvIK320_timeout;
             break;
@@ -1104,7 +1190,8 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
          *       
          *       At this point, we just do a taskDelay().
          */
-        taskDelay(shortdelay);
+        epicsThreadSleep(SHORTDELAY);
+
         DM(2,"ok\ndrvIK320: reference; trying to read...");
 
         last = (2==which ? 1 : which);
@@ -1116,7 +1203,13 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
             card->function = (axis ? FUNC_READ_X2 : FUNC_READ_X1);
             card->irqStatus = 0;
             INTERRUPT(drv);
+#ifdef vxWorks
             if (semTake(drv->sync, shortdelay))
+#else /* rtems */
+            /* shortdelay is in ticks so convert it to a timespec */
+            tickTimeoutToAbsTime(shortdelay, &abs_shortdelay);
+            if (sem_timedwait(&(drv->sync), &abs_shortdelay) != 0)
+#endif
                 status = S_drvIK320_timeout;
             else
             {
@@ -1137,15 +1230,21 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
         card->function = FUNC_SET_PARMS;
         card->irqStatus = 0;
         INTERRUPT(drv);
+#ifdef vxWorks
         if (semTake(drv->sync, shortdelay))
+#else /* rtmes */
+        /* shortdelay is in ticks so convert it to a timespec */
+        tickTimeoutToAbsTime(shortdelay, &abs_shortdelay);
+        if (sem_timedwait(&(drv->sync), &abs_shortdelay) != 0)
+#endif
             status = S_drvIK320_timeout;
         
         /* See the note above on why we need to do that */
-        taskDelay(shortdelay);
+        epicsThreadSleep(SHORTDELAY);
         DM(2,"done\n");
         drv->waiting--; /* NOTE: we assume -- to be ATOMIC */
         card->irqStatus = 0;
-        break;  
+        break;
     }
 
     if (OK==status)
@@ -1168,9 +1267,9 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
         /* a reference run for two axes generates two IRQs */
         if ( FUNC_REF_BOTH == func )
         {
-            int key=intLock();
+            int key=epicsInterruptLock();
             drv->busy++;
-            intUnlock(key);
+            epicsInterruptUnlock(key);
         }
         /* interrupt the IK320 */
         drv->waiting++; /* NOTE: we assume ++ to be ATOMIC; increase the counter
@@ -1183,8 +1282,15 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
          */
         if (sync)
         {
+#ifdef vxWorks
             status = semTake(drv->sync,timeout);
             if (status != OK)
+#else /* rtems */
+            /* timeout is in ticks so convert it to a timespec */
+            static struct timespec abs_timeout;
+            tickTimeoutToAbsTime(timeout, &abs_timeout);
+            if (sem_timedwait(&(drv->sync), &abs_timeout) != 0)
+#endif
             {
                 status = S_drvIK320_timeout;
                 errPrintf(-1,__FILE__,__LINE__,"Timeout!\n");
@@ -1206,14 +1312,14 @@ drvIK320Request(IK320Driver drv, dbCommon *prec, int func, void *parm)
          */
         drv->record=0;
 #ifndef USE_INTLOCK
-        semTake(drv->mutex,WAIT_FOREVER);
+        epicsMutexLock(drv->mutex);
         drv->busy=0;
-        semGive(drv->mutex);
+        epicsMutexUnlock(drv->mutex);
 #else
         {
-            int key=intLock();
+            int key=epicsInterruptLock();
             drv->busy=0;
-            intUnlock(key);
+            epicsInterruptUnlock(key);
         }
 #endif
     }
@@ -1232,17 +1338,17 @@ drvIK320Finish(IK320Driver drv)
     drv->card->irqStatus=0; /* ready for new interrupt */
 
 #ifndef USE_INTLOCK
-    semTake(drv->mutex,WAIT_FOREVER);
+    epicsMutexLock(drv->mutex);
 #else
-    { int key=intLock();
+    { int key=epicsInterruptLock();
 #endif
         wasBusy = drv->busy;
         if (drv->busy > 0)
             drv->busy--;
 #ifndef USE_INTLOCK
-        semGive(drv->mutex);
+        epicsMutexUnlock(drv->mutex);
 #else
-        intUnlock(key);
+        epicsInterruptUnlock(key);
     }
 #endif
     DM(1,"drvIK320Finish(): busy %i\n", wasBusy);
@@ -1275,19 +1381,23 @@ drvIK320init()
 {
     double quantum;
 
-    assert(allCards.mutex=semMCreate(SEM_Q_FIFO));
+    assert(allCards.mutex=epicsMutexMustCreate());
     allCards.first=0;
 #ifndef NODEBUG
-    assert(drvIK320LoggerSem = semBCreate(SEM_Q_FIFO,SEM_EMPTY));
+    assert(drvIK320LoggerSem = epicsEventMustCreate(epicsEventEmpty));
     drvIK320LoggerString[0] = 0;
-    taskSpawn("IK320Logger",130,VX_STDIO,2048,drvIK320IrqLogger,0,0,0,0,0,0,0,0,0,0);
+    epicsThreadCreate("IK320Logger",
+              epicsThreadPriorityLow,
+              epicsThreadGetStackSize(epicsThreadStackMedium),
+              (EPICSTHREADFUNC)drvIK320IrqLogger,
+              0);
 #endif
 
     drvIK320RegErrStr();    /* Initialize IK320 error status messages. */
 
     /* Initialize "shortdelay" to >= 5ms. */
     quantum = epicsThreadSleepQuantum();
-    shortdelay = (int) (0.005 / quantum);
+    shortdelay = (int) (SHORTDELAY / quantum);
     if (shortdelay < 2) /* Insure shortdelay > 2 OS system ticks. */
         shortdelay = 2;
 
@@ -1307,7 +1417,7 @@ drvIK320getNGroupListeners(int groupNr)
 {
     int rval = 0;
     IK320Driver drv;
-    semTake(allCards.mutex,WAIT_FOREVER);
+    epicsMutexLock(allCards.mutex);
     for (drv=allCards.first; drv; drv=drv->next)
     {
         int i;
@@ -1318,7 +1428,7 @@ drvIK320getNGroupListeners(int groupNr)
                     rval++;
         }
     }
-    semGive(allCards.mutex);
+    epicsMutexUnlock(allCards.mutex);
     return(rval);
 }
 
@@ -1346,17 +1456,17 @@ markGroupBusy(IK320Driver drv, int groupNr)
     {
         /* mark this member of our group busy */
 #ifndef USE_INTLOCK
-        semTake(drv->mutex,WAIT_FOREVER);
+        epicsMutexLock(drv->mutex);
 #else
         {
-            int key=intLock();
+            int key=epicsInterruptLock();
 #endif
             if (!(wasBusy = drv->busy))
                 drv->busy = 2;
 #ifndef USE_INTLOCK
-            semGive(drv->mutex);
+            epicsMutexUnlock(drv->mutex);
 #else
-            intUnlock(key);
+            epicsInterruptUnlock(key);
         }
 #endif
 
@@ -1370,16 +1480,16 @@ markGroupBusy(IK320Driver drv, int groupNr)
         {
             /* failed; reset the busy flag and return */
 #ifndef USE_INTLOCK
-            semTake(drv->mutex,WAIT_FOREVER);
+            epicsMutexLock(drv->mutex);
 #else
             {
-                int key=intLock();
+                int key=epicsInterruptLock();
 #endif
                 drv->busy=0;
 #ifndef USE_INTLOCK
-                semGive(drv->mutex);
+                epicsMutexUnlock(drv->mutex);
 #else
-                intUnlock(key);
+                epicsInterruptUnlock(key);
             }
 #endif
             return(S_drvIK320_cardBusy);
@@ -1396,16 +1506,16 @@ markGroupBusy(IK320Driver drv, int groupNr)
         if (wasBusy != drv->busy)
         {
 #ifndef USE_INTLOCK
-            semTake(drv->mutex,WAIT_FOREVER);
+            epicsMutexLock(drv->mutex);
 #else
             {
-                int key=intLock();
+                int key=epicsInterruptLock();
 #endif
                 drv->busy=wasBusy;
 #ifndef USE_INTLOCK
-                semGive(drv->mutex);
+                epicsMutexUnlock(drv->mutex);
 #else
-                intUnlock(key);
+                epicsInterruptUnlock(key);
             }
 #endif
         }
@@ -1425,23 +1535,23 @@ unmarkGroupBusy(int groupNr)
 {
     int         wasBusy;
     IK320Driver drv;
-    semTake(allCards.mutex,WAIT_FOREVER);
+    epicsMutexLock(allCards.mutex);
     for (drv=allCards.first; drv; drv=drv->next)
     {
         /* member ? */
         if (GROUP_NR(drv->sw1)==groupNr)
         {
 #ifndef USE_INTLOCK
-            semTake(drv->mutex,WAIT_FOREVER);
+            epicsMutexLock(drv->mutex);
 #else
             {
-                int key=intLock();
+                int key=epicsInterruptLock();
 #endif
                 wasBusy=drv->busy; drv->busy=0;
 #ifndef USE_INTLOCK
-                semGive(drv->mutex);
+                epicsMutexUnlock(drv->mutex);
 #else
-                intUnlock(key);
+                epicsInterruptUnlock(key);
             }
 #endif
             /*
@@ -1452,7 +1562,7 @@ unmarkGroupBusy(int groupNr)
              */
         }
     }
-    semGive(allCards.mutex);
+    epicsMutexUnlock(allCards.mutex);
 }
 #endif
 
@@ -1469,9 +1579,9 @@ drvIK320GroupTrigger(int groupNr)
     if (0>groupNr || MAX_IK320_GROUPS <= groupNr)
         return(S_drvIK320_invalidParm);
 
-    semTake(allCards.mutex,WAIT_FOREVER);
+    epicsMutexLock(allCards.mutex);
     rval = markGroupBusy(allCards.first,groupNr);
-    semGive(allCards.mutex);
+    epicsMutexUnlock(allCards.mutex);
 
     if ( OK == rval )
     { /* nobody is busy */

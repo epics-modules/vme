@@ -1,8 +1,13 @@
 /* $Id: aiCvtDouble.c,v 1.2 2003-05-28 20:09:18 bcda Exp $ */
+#ifdef vxWorks
 #include <vxWorks.h>
 #include <types.h>
 #include <stdioLib.h>
 #include <lstLib.h>
+#else /* rtems */
+#include <epicsStdlib.h>
+#include <ellLib.h>
+#endif
 #include <string.h>
 
 #include "dbDefs.h"
