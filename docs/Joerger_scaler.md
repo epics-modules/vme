@@ -25,21 +25,6 @@ Both families interface with the EPICS scaler record from the **SCALER** module
 
 vxWorks only (with OSI portability via S. Kate Feng, 2003).
 
-## Source Files
-
-### VSC Series (VSC8, VSC16)
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/devScaler_debug.c` | Device support (debug-enhanced version, actively used) |
-| `vmeApp/src/devScaler.c` | Original device support (currently not compiled) |
-
-### VS Series (VS64, VS32, VS16)
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/devScaler_VS.c` | Device support |
-
 ## Configuration
 
 ### VSC Series

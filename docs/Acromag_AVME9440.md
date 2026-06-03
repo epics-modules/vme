@@ -18,12 +18,6 @@ available for binary input signals 0-7 only, and only for the bi record type.
 
 OS independent (uses EPICS devLib).
 
-## Source Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/devAvme9440.c` | Combined device support for bi, bo, mbbi, and mbbo records |
-
 ## Configuration
 
 Call `devAvme9440Config` in the IOC startup script before `iocInit`:
@@ -42,6 +36,7 @@ devAvme9440Config(ncards, base, vector)
 
 ```
 devAvme9440Config(1, 0x400, 0x78)
+dbLoadRecords("$(VME)/vmeApp/Db/Acromag_16IO.db", "P=$(PREFIX),A=$(INSTANCE),C=0")
 ```
 
 ## Supported Record Types
@@ -71,21 +66,6 @@ I/O Intr scanning is available for bi records on input signals 0-7 only. If
 interrupts are needed for mbbi-type values, use bi records with `SCAN="I/O Intr"`
 linked to calc records.
 
-## Database Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/Db/Acromag_16IO.db` | 16 binary input + 16 binary output records |
-| `vmeApp/Db/Acromag_16IO_settings.req` | Autosave request file |
-
-### Database Macros
-
-| Macro | Description |
-|-------|-------------|
-| `$(P)` | PV prefix |
-| `$(A)` | Instance prefix |
-| `$(C)` | Card number |
-
 ## iocsh Script
 
 The provided iocsh script handles configuration and database loading:
@@ -105,15 +85,6 @@ The provided iocsh script handles configuration and database loading:
 | `INT_VEC` | First call | -- | Interrupt vector |
 | `MAX_CARDS` | No | 1 | Total number of cards |
 | `CARD` | No | 0 | Card number |
-
-## Operator Displays
-
-| File | Format |
-|------|--------|
-| `vmeApp/op/adl/Acro_bi_scan.adl` | MEDM |
-
-Autoconverted displays are available in the `bob/`, `edl/`, `opi/`, and `ui/`
-subdirectories.
 
 ## Debug Variable
 

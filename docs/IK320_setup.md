@@ -19,24 +19,6 @@ of PTB at BESSY.
 The IK320 is the only device in the vme module that builds on both **vxWorks**
 and **RTEMS**.
 
-## Source Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/devIK320.c` | Device support for mbbo, stringout, and ai records |
-| `vmeApp/src/drvIK320.c` | Low-level driver (card init, interrupts, encoder reading, reference search) |
-| `vmeApp/src/drvIK320.h` | Driver header (data structures, constants, API) |
-| `vmeApp/src/drvIK320ErrStat.c` | Error string registration |
-| `vmeApp/src/aiCvtDouble.c` | AI record conversion routine for double values |
-
-## Database Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/Db/IK320card.db` | Per-card/per-axis records (function command, direction, precision, raw value, calibrated value, parameters) |
-| `vmeApp/Db/IK320group.db` | Group trigger record (single ai record to trigger group readings) |
-| `vmeApp/Db/IK320card_settings.req` | Autosave request file |
-
 ## Supported Record Types
 
 | Record Type | DTYP | Purpose |
@@ -147,12 +129,4 @@ record that must be processed in order for readings to be taken. The `$(group)`
 macro is derived by taking the decimal value of bits 8, 7, and 6 on S1. For
 example, if these bits were set to `1 0 1`, then `group=5`.
 
-## Operator Displays
 
-| File | Format |
-|------|--------|
-| `vmeApp/op/adl/HeidIK320.adl` | MEDM |
-| `vmeApp/op/adl/HeidIK320group.adl` | MEDM |
-
-Autoconverted displays are available in the `bob/`, `edl/`, `opi/`, and `ui/`
-subdirectories.

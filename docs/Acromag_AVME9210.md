@@ -17,13 +17,6 @@ low-level driver for controlling the AVME-9210.
 
 vxWorks only.
 
-## Source Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/devAoAvme9210.c` | Device support for ao records |
-| `vmeApp/src/drvAvme9210.c` | Low-level driver (card init, read/write, reboot cleanup) |
-
 ## Configuration
 
 Call `avme9210Config` in the IOC startup script before `iocInit`:
@@ -42,7 +35,12 @@ avme9210Config(maxCards, maxChan, address)
 
 ```
 avme9210Config(1, 8, 0x3000)
+dbLoadRecords("$(VME)/vmeApp/Db/VME_DAC.db", "P=$(PREFIX),D=1,N=chan1,DTYP=AVME-9210,C=0,S=0,H=10,L=-10")
 ```
+
+The `VME_DAC.db` template provides a rate-of-change-limited DAC output with
+tweaking and can be used with this device support by setting
+`DTYP="AVME-9210"`.
 
 ## Supported Record Types
 
@@ -62,14 +60,6 @@ Link type: VME_IO (`#C<card> S<signal> @`)
 - The card cannot be meaningfully read back (reads return `0xFFFF`).
 - Card identity is verified at initialization via the module ID PROM string
   `"VMEIDACR9210"`.
-
-## Database Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/Db/VME_DAC.db` | Generic DAC template with rate-of-change limiting and tweaking. Set `DTYP="AVME-9210"`. |
-| `vmeApp/Db/VME_DAC_settings.req` | Autosave request file for DAC configuration |
-| `vmeApp/Db/VME_DAC_positions.req` | Autosave request file for DAC setpoint values |
 
 ## Hardware Reference
 

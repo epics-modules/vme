@@ -17,12 +17,6 @@ per-channel threshold values (0-255) through standard asyn interfaces.
 
 vxWorks only.
 
-## Source Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/drvCAEN_v895.cpp` | asynPortDriver subclass |
-
 ## Configuration
 
 Call `initCAEN_v895` in the IOC startup script before `iocInit`:
@@ -40,7 +34,10 @@ initCAEN_v895(portName, baseAddress)
 
 ```
 initCAEN_v895("v895", 0x04000000)
+dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX),D=$(INSTANCE),N=1,S=0")
 ```
+
+Load one instance of `singleDiscrim.db` per channel (N=1-16, S=0-15).
 
 ## asyn Parameters
 
@@ -54,22 +51,6 @@ The driver is configured as `ASYN_MULTIDEVICE` with 16 channels (addresses
 
 **Note:** The CAEN V895 hardware is write-only. Read operations return 0; the
 last written value is tracked via the asyn parameter library.
-
-## Database Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/Db/singleDiscrim.db` | Single discriminator channel with threshold and tweak controls |
-| `vmeApp/Db/singleDiscrim_settings.req` | Autosave request file |
-
-### Database Macros (singleDiscrim.db)
-
-| Macro | Description |
-|-------|-------------|
-| `$(P)` | PV prefix |
-| `$(D)` | Discriminator instance prefix |
-| `$(N)` | Channel number (1-16, for PV naming) |
-| `$(S)` | asyn address (0-15, maps to hardware channel) |
 
 ## iocsh Script
 
@@ -88,15 +69,6 @@ The provided iocsh script initializes the driver and loads all 16 channels:
 | `ADDRESS` | Yes | VME base address |
 | `PORT` | Yes | asyn port name |
 | `VME` | Yes | Location of vme module |
-
-## Operator Displays
-
-| File | Format |
-|------|--------|
-| `vmeApp/op/adl/CAEN_v895.adl` | MEDM |
-
-Autoconverted displays are available in the `bob/`, `edl/`, `opi/`, and `ui/`
-subdirectories.
 
 ## Dependencies
 

@@ -22,13 +22,6 @@ generator hardware.
 
 vxWorks only.
 
-## Source Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/devBunchClkGen.c` | Combined driver and device support |
-| `vmeApp/src/getFilledBuckets.st` | SNL sequence program for fill pattern loading |
-
 ## Configuration
 
 Call `BunchClkGenConfigure` in the IOC startup script before `iocInit`:
@@ -46,6 +39,7 @@ BunchClkGenConfigure(card, base)
 
 ```
 BunchClkGenConfigure(0, 0x7000)
+dbLoadRecords("$(VME)/vmeApp/Db/BunchClkGen.db", "UNIT=$(PREFIX)$(INSTANCE),C=0")
 ```
 
 After `iocInit`, start the fill pattern sequence program:
@@ -66,21 +60,6 @@ All use VME_IO link type (`#C<card> S<signal> @`).
 | bo | `"Bunch Clk Gen"` |
 | waveform | `"Bunch Clk Gen"` |
 
-## Database Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/Db/BunchClkGen.db` | Bunch clock generator records (delays, bucket control, enable/disable, waveforms) |
-| `vmeApp/Db/BunchClkGenA.db` | Alternate database with all fields explicitly set |
-| `vmeApp/Db/BunchClkGenA.req` | Autosave request file for delay values |
-
-### Database Macros
-
-| Macro | Description |
-|-------|-------------|
-| `$(UNIT)` | PV prefix (typically `$(PREFIX)$(INSTANCE)`) |
-| `$(C)` | Card number |
-
 ## iocsh Script
 
 The provided iocsh script handles configuration, database loading, and
@@ -99,16 +78,6 @@ sequencer startup:
 | `ADDRESS` | Yes | -- | A16 card address |
 | `VME` | Yes | -- | Location of vme module |
 | `CARD` | No | 0 | Card number |
-
-## Operator Displays
-
-| File | Format |
-|------|--------|
-| `vmeApp/op/adl/BunchClkGen.adl` | MEDM |
-| `vmeApp/op/adl/BunchClkGenA.adl` | MEDM |
-
-Autoconverted displays are available in the `bob/`, `edl/`, `opi/`, and `ui/`
-subdirectories.
 
 ## Debug Variables
 

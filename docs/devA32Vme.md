@@ -18,12 +18,6 @@ written using the PARM field to specify the starting bit and width.
 
 vxWorks only.
 
-## Source Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/devA32Vme.c` | Device support for all record types |
-
 ## Configuration
 
 Call `devA32VmeConfig` in the IOC startup script before `iocInit`:
@@ -44,7 +38,12 @@ devA32VmeConfig(card, a32base, nreg, iVector, iLevel)
 
 ```
 devA32VmeConfig(0, 0x80000000, 44, 0x3e, 5)
+dbLoadRecords("$(VME)/vmeApp/Db/VME_DAC.db", "P=$(PREFIX),D=1,N=chan1,DTYP=Generic A32 VME,C=0,S=0,H=10,L=-10")
 ```
+
+The `VME_DAC.db` template provides a rate-of-change-limited DAC output with
+tweaking and can be used with this device support by setting
+`DTYP="Generic A32 VME"`.
 
 ## Supported Record Types
 
@@ -86,12 +85,6 @@ record(bo, "$(P)control") {
     field(OUT,  "#C0 S10 @3")
 }
 ```
-
-## Database Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/Db/VME_DAC.db` | Generic DAC template (works with any DTYP including `"Generic A32 VME"`) |
 
 ## Debug Variable
 

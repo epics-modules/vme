@@ -18,13 +18,6 @@ driver for reading absolute encoder positions via EPICS ai records.
 
 vxWorks only.
 
-## Source Files
-
-| File | Description |
-|------|-------------|
-| `vmeApp/src/devAiVaroc.c` | Device support for ai records |
-| `vmeApp/src/drvVarocB.c` | Low-level driver (card init, command writes, data reads) |
-
 ## Configuration
 
 There is no user-callable configuration function. The driver uses compile-time
