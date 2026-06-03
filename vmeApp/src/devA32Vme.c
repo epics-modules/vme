@@ -126,6 +126,7 @@
 #include	<link.h>
 
 #include	<epicsPrint.h>
+#include	<iocsh.h>
 #include	<epicsExport.h>
 
 #include	<aoRecord.h>
@@ -1290,4 +1291,32 @@ short   card;
   else
     return(OK);
 }
+
+/* iocsh registration */
+
+static const iocshArg devA32VmeConfigArg0 = {"card",    iocshArgInt};
+static const iocshArg devA32VmeConfigArg1 = {"a32base", iocshArgInt};
+static const iocshArg devA32VmeConfigArg2 = {"nregs",   iocshArgInt};
+static const iocshArg devA32VmeConfigArg3 = {"iVector", iocshArgInt};
+static const iocshArg devA32VmeConfigArg4 = {"iLevel",  iocshArgInt};
+
+static const iocshArg * const devA32VmeConfigArgs[5] = {
+    &devA32VmeConfigArg0, &devA32VmeConfigArg1, &devA32VmeConfigArg2,
+    &devA32VmeConfigArg3, &devA32VmeConfigArg4
+};
+
+static const iocshFuncDef devA32VmeConfigFuncDef = {"devA32VmeConfig", 5, devA32VmeConfigArgs};
+
+static void devA32VmeConfigCallFunc(const iocshArgBuf *args)
+{
+    devA32VmeConfig(args[0].ival, (unsigned long)args[1].ival,
+                    args[2].ival, args[3].ival, args[4].ival);
+}
+
+void devA32VmeRegistrar(void)
+{
+    iocshRegister(&devA32VmeConfigFuncDef, devA32VmeConfigCallFunc);
+}
+
+epicsExportRegistrar(devA32VmeRegistrar);
 

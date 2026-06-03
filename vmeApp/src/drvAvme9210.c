@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <iocsh.h>
 #include <epicsExport.h>
 
 #include "dbDefs.h"
@@ -231,4 +232,28 @@ LOCAL long avme9210_testCard(avme9210_t *pcard)
   pcard->csr = saveLED;
   return 1;
 }
+
+/* iocsh registration */
+
+static const iocshArg avme9210ConfigArg0 = {"maxCards", iocshArgInt};
+static const iocshArg avme9210ConfigArg1 = {"maxChan",  iocshArgInt};
+static const iocshArg avme9210ConfigArg2 = {"address",  iocshArgInt};
+
+static const iocshArg * const avme9210ConfigArgs[3] = {
+    &avme9210ConfigArg0, &avme9210ConfigArg1, &avme9210ConfigArg2
+};
+
+static const iocshFuncDef avme9210ConfigFuncDef = {"avme9210Config", 3, avme9210ConfigArgs};
+
+static void avme9210ConfigCallFunc(const iocshArgBuf *args)
+{
+    avme9210Config(args[0].ival, args[1].ival, args[2].ival);
+}
+
+void avme9210Registrar(void)
+{
+    iocshRegister(&avme9210ConfigFuncDef, avme9210ConfigCallFunc);
+}
+
+epicsExportRegistrar(avme9210Registrar);
 

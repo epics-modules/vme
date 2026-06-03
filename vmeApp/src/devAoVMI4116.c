@@ -49,6 +49,7 @@
 #include	<devSup.h>
 #include	<special.h>
 #include	<aoRecord.h>
+#include	<iocsh.h>
 #include	<epicsExport.h>
 
 static long vmi4116_num_cards = 1;
@@ -209,6 +210,25 @@ static long special_linconv(aoRecord *pao, int after)
     return(0);
 }
 
-/* user callable functions
-void VMI4116_setup(int num_cards,void *addrs)
-*/
+/* iocsh registration */
+
+static const iocshArg VMI4116SetupArg0 = {"num_cards", iocshArgInt};
+static const iocshArg VMI4116SetupArg1 = {"addrs",     iocshArgInt};
+
+static const iocshArg * const VMI4116SetupArgs[2] = {
+    &VMI4116SetupArg0, &VMI4116SetupArg1
+};
+
+static const iocshFuncDef VMI4116SetupFuncDef = {"VMI4116_setup", 2, VMI4116SetupArgs};
+
+static void VMI4116SetupCallFunc(const iocshArgBuf *args)
+{
+    VMI4116_setup(args[0].ival, (void *)args[1].ival);
+}
+
+void VMI4116Registrar(void)
+{
+    iocshRegister(&VMI4116SetupFuncDef, VMI4116SetupCallFunc);
+}
+
+epicsExportRegistrar(VMI4116Registrar);

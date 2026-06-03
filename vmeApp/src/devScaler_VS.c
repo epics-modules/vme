@@ -65,6 +65,7 @@ extern int logMsg(char *fmt, ...);
 
 #include	<epicsTimer.h>
 #include	<epicsThread.h>
+#include	<iocsh.h>
 #include	<epicsExport.h>
 #include	<errlog.h>
 #include	<devLib.h>
@@ -954,3 +955,29 @@ void scalerVS_regShow(int card, int level)
 	devScaler_VSDebug = saveDebug;
 
 }
+
+/* iocsh registration */
+
+static const iocshArg scalerVSSetupArg0 = {"num_cards", iocshArgInt};
+static const iocshArg scalerVSSetupArg1 = {"addrs",     iocshArgInt};
+static const iocshArg scalerVSSetupArg2 = {"vector",    iocshArgInt};
+static const iocshArg scalerVSSetupArg3 = {"intlevel",  iocshArgInt};
+
+static const iocshArg * const scalerVSSetupArgs[4] = {
+    &scalerVSSetupArg0, &scalerVSSetupArg1, &scalerVSSetupArg2,
+    &scalerVSSetupArg3
+};
+
+static const iocshFuncDef scalerVSSetupFuncDef = {"scalerVS_Setup", 4, scalerVSSetupArgs};
+
+static void scalerVSSetupCallFunc(const iocshArgBuf *args)
+{
+    scalerVS_Setup(args[0].ival, args[1].ival, args[2].ival, args[3].ival);
+}
+
+void scalerVSRegistrar(void)
+{
+    iocshRegister(&scalerVSSetupFuncDef, scalerVSSetupCallFunc);
+}
+
+epicsExportRegistrar(scalerVSRegistrar);
