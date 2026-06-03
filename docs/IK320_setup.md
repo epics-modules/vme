@@ -15,10 +15,7 @@ encoders. This page describes how to configure the IK320 for use with EPICS
 (synApps). The IK320 device support and driver were written by Till Straumann
 of PTB at BESSY.
 
-## Platform Support
-
-The IK320 is the only device in the vme module that builds on both **vxWorks**
-and **RTEMS**.
+**Note:** The IK320 builds on both **vxWorks** and **RTEMS**.
 
 ## Supported Record Types
 

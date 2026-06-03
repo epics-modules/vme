@@ -15,10 +15,6 @@ A32/D32 address space. It supports ai, ao, bi, bo, longin, longout, mbbi, and
 mbbo record types. Arbitrary bit fields within 32-bit registers can be read and
 written using the PARM field to specify the starting bit and width.
 
-## Platform Support
-
-vxWorks only.
-
 ## Configuration
 
 Call `devA32VmeConfig` in the IOC startup script before `iocInit`:

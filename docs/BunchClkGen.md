@@ -19,33 +19,31 @@ A State Notation Language (SNL) sequence program (`getFilledBuckets.st`) is
 included that loads the APS storage ring fill pattern into the bunch clock
 generator hardware.
 
-## Platform Support
-
-vxWorks only.
-
 ## Configuration
 
-Call `BunchClkGenConfigure` in the IOC startup script before `iocInit`:
+An iocsh script is provided that handles configuration, database loading, and
+sequencer startup:
 
 ```
-BunchClkGenConfigure(card, base)
+iocshLoad("$(VME)/iocsh/BunchClkGen.iocsh", "PREFIX=xxx:, INSTANCE=bcg:, VME=$(VME), ADDRESS=0x7000")
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `card` | Card number |
-| `base` | VME A16 base address |
+| Macro | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `PREFIX` | Yes | -- | IOC prefix |
+| `INSTANCE` | Yes | -- | Instance prefix |
+| `ADDRESS` | Yes | -- | A16 card address |
+| `VME` | Yes | -- | Location of vme module |
+| `CARD` | No | 0 | Card number |
 
-**Example:**
+The script calls `BunchClkGenConfigure(card, base)`, loads `BunchClkGen.db`,
+and starts the `getFillPat` sequencer after `iocInit`. When configuring
+manually:
 
 ```
 BunchClkGenConfigure(0, 0x7000)
 dbLoadRecords("$(VME)/vmeApp/Db/BunchClkGen.db", "UNIT=$(PREFIX)$(INSTANCE),C=0")
-```
-
-After `iocInit`, start the fill pattern sequence program:
-
-```
+# After iocInit:
 seq &getFillPat, "unit=$(PREFIX)$(INSTANCE)"
 ```
 
@@ -60,25 +58,6 @@ All use VME_IO link type (`#C<card> S<signal> @`).
 | bi | `"Bunch Clk Gen"` |
 | bo | `"Bunch Clk Gen"` |
 | waveform | `"Bunch Clk Gen"` |
-
-## iocsh Script
-
-The provided iocsh script handles configuration, database loading, and
-sequencer startup:
-
-```
-< $(VME)/iocsh/BunchClkGen.iocsh
-```
-
-### Script Macros
-
-| Macro | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `PREFIX` | Yes | -- | IOC prefix |
-| `INSTANCE` | Yes | -- | Instance prefix |
-| `ADDRESS` | Yes | -- | A16 card address |
-| `VME` | Yes | -- | Location of vme module |
-| `CARD` | No | 0 | Card number |
 
 ## Debug Variables
 

@@ -15,25 +15,28 @@ device support provides EPICS access to all 16 input and 16 output channels
 via bi, bo, mbbi, and mbbo records. Change-of-state I/O interrupts are
 available for binary input signals 0-7 only, and only for the bi record type.
 
-## Platform Support
-
-OS independent (uses EPICS devLib).
+**Note:** This device support is OS independent (uses EPICS devLib).
 
 ## Configuration
 
-Call `devAvme9440Config` in the IOC startup script before `iocInit`:
+An iocsh script is provided that handles configuration and database loading:
 
 ```
-devAvme9440Config(ncards, base, vector)
+iocshLoad("$(VME)/iocsh/Acromag_AVME9440.iocsh", "PREFIX=xxx:, INSTANCE=avme:, VME=$(VME), ADDRESS=0x400, INT_VEC=0x78")
 ```
 
-| Argument | Description |
-|----------|-------------|
-| `ncards` | Number of cards |
-| `base` | VME A16 base address |
-| `vector` | Interrupt vector |
+| Macro | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `PREFIX` | Yes | -- | IOC prefix |
+| `INSTANCE` | Yes | -- | Instance prefix |
+| `VME` | Yes | -- | Location of vme module |
+| `ADDRESS` | First call | -- | A16 base address |
+| `INT_VEC` | First call | -- | Interrupt vector |
+| `MAX_CARDS` | No | 1 | Total number of cards |
+| `CARD` | No | 0 | Card number |
 
-**Example:**
+The script calls `devAvme9440Config(ncards, base, vector)` and loads
+`Acromag_16IO.db`. When configuring manually:
 
 ```
 devAvme9440Config(1, 0x400, 0x78)
@@ -66,26 +69,6 @@ All use VME_IO link type (`#C<card> S<signal> @`).
 I/O Intr scanning is available for bi records on input signals 0-7 only. If
 interrupts are needed for mbbi-type values, use bi records with `SCAN="I/O Intr"`
 linked to calc records.
-
-## iocsh Script
-
-The provided iocsh script handles configuration and database loading:
-
-```
-< $(VME)/iocsh/Acromag_AVME9440.iocsh
-```
-
-### Script Macros
-
-| Macro | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `PREFIX` | Yes | -- | IOC prefix |
-| `INSTANCE` | Yes | -- | Instance prefix |
-| `VME` | Yes | -- | Location of vme module |
-| `ADDRESS` | First call | -- | A16 base address |
-| `INT_VEC` | First call | -- | Interrupt vector |
-| `MAX_CARDS` | No | 1 | Total number of cards |
-| `CARD` | No | 0 | Card number |
 
 ## Debug Variable
 

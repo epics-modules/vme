@@ -14,7 +14,6 @@ Author: Mark Rivers
 - [Overview](#overview)
 - [Field Descriptions](#field-descriptions)
 - [Files](#files)
-- [Release Notes](#release-notes)
 - [Example](#example)
 
 ## Overview
@@ -101,15 +100,6 @@ medm -x -macro "REC=my_vme_record" VME_IO.adl
 ```
 
 where `my_vme_record` is the name of a VME record in an IOC.
-
----
-
-## Release Notes
-
-- Version 1.0, March 1996. Initial release for R3.12 by Mark Rivers.
-- Version 1.1, December 1997. Conversion to EPICS R3.13 by Tim Mooney.
-
-See the [vme module release notes](vmeReleaseNotes.md) for subsequent changes.
 
 ---
 

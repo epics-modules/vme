@@ -14,10 +14,6 @@ The Acromag AVME-9210 is an 8-channel, 12-bit DAC analog output VME module in
 A16 short I/O address space. This module provides device support and a
 low-level driver for controlling the AVME-9210.
 
-## Platform Support
-
-vxWorks only.
-
 ## Configuration
 
 Call `avme9210Config` in the IOC startup script before `iocInit`:

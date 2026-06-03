@@ -22,10 +22,6 @@ modules:
 Both families interface with the EPICS scaler record from the **SCALER** module
 (formerly part of STD).
 
-## Platform Support
-
-vxWorks only (with OSI portability via S. Kate Feng, 2003).
-
 ## Configuration
 
 ### VSC Series

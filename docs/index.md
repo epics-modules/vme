@@ -28,14 +28,8 @@ Most device support in this module is **vxWorks only**. Exceptions:
 
 | Module | Purpose |
 |--------|---------|
-| EPICS Base | Required (7.0.4 or compatible) |
+| [EPICS Base](https://github.com/epics-base/epics-base) | Required (7.0.4 or compatible) |
 | [asyn](https://github.com/epics-modules/asyn) | Required for CAEN V895 driver (asynPortDriver) |
-| [SNCSEQ](https://github.com/epics-modules/sequencer-2-2) | Required for bunch clock fill pattern sequencer |
-| [SCALER](https://github.com/epics-modules/scaler) | Required for Joerger scaler record type |
+| [seq](https://github.com/epics-modules/sequencer-2-2) | Required for bunch clock fill pattern sequencer |
+| [scaler](https://github.com/epics-modules/scaler) | Required for Joerger scaler record type |
 
-## Hardware Datasheets (included)
-
-- [Acromag AVME-9210](AVME9210.pdf)
-- [Acromag AVME-9440](AVME9440.pdf)
-- [Joerger VS64](JOERGER_Vs64Mc.PDF)
-- [VMIC VMI4116](VMICVMI4116.pdf)

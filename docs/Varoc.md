@@ -15,10 +15,6 @@ encoder interface card originally developed at ESRF. It supports up to 16
 encoder channels per card. This module provides device support and a low-level
 driver for reading absolute encoder positions via EPICS ai records.
 
-## Platform Support
-
-vxWorks only.
-
 ## Configuration
 
 There is no user-callable configuration function. The driver uses compile-time
