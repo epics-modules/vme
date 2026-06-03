@@ -1,0 +1,134 @@
+---
+layout: default
+title: Acromag AVME-9440
+nav_order: 6
+---
+
+
+# Acromag AVME-9440 Digital I/O
+
+Author: Greg Nawrocki (1993), David M. Kline (2005)
+
+The Acromag AVME-9440 is a 16-bit binary input and output VME board. This
+device support provides EPICS access to all 16 input and 16 output channels
+via bi, bo, mbbi, and mbbo records. Change-of-state I/O interrupts are
+available for binary input signals 0-7 only, and only for the bi record type.
+
+## Platform Support
+
+OS independent (uses EPICS devLib).
+
+## Source Files
+
+| File | Description |
+|------|-------------|
+| `vmeApp/src/devAvme9440.c` | Combined device support for bi, bo, mbbi, and mbbo records |
+
+## Configuration
+
+Call `devAvme9440Config` in the IOC startup script before `iocInit`:
+
+```
+devAvme9440Config(ncards, base, vector)
+```
+
+| Argument | Description |
+|----------|-------------|
+| `ncards` | Number of cards |
+| `base` | VME A16 base address |
+| `vector` | Interrupt vector |
+
+**Example:**
+
+```
+devAvme9440Config(1, 0x400, 0x78)
+```
+
+## Supported Record Types
+
+### Signal Assignments
+
+| Signal Range | DTYP | Direction | Description |
+|--------------|------|-----------|-------------|
+| 0-15 | `"AVME9440 O"` | Output | Binary outputs |
+| 0-15 | `"AVME9440 I"` | Input | Binary inputs |
+| 16-31 | `"AVME9440 I"` | Input (readback) | Binary output readback |
+
+All use VME_IO link type (`#C<card> S<signal> @`).
+
+### Record Types
+
+| Record Type | DTYP Strings |
+|-------------|-------------|
+| bi | `"AVME9440 I"` |
+| bo | `"AVME9440 O"` |
+| mbbi | `"AVME9440 I"` |
+| mbbo | `"AVME9440 O"` |
+
+### I/O Interrupt Scanning
+
+I/O Intr scanning is available for bi records on input signals 0-7 only. If
+interrupts are needed for mbbi-type values, use bi records with `SCAN="I/O Intr"`
+linked to calc records.
+
+## Database Files
+
+| File | Description |
+|------|-------------|
+| `vmeApp/Db/Acromag_16IO.db` | 16 binary input + 16 binary output records |
+| `vmeApp/Db/Acromag_16IO_settings.req` | Autosave request file |
+
+### Database Macros
+
+| Macro | Description |
+|-------|-------------|
+| `$(P)` | PV prefix |
+| `$(A)` | Instance prefix |
+| `$(C)` | Card number |
+
+## iocsh Script
+
+The provided iocsh script handles configuration and database loading:
+
+```
+< $(VME)/iocsh/Acromag_AVME9440.iocsh
+```
+
+### Script Macros
+
+| Macro | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `PREFIX` | Yes | -- | IOC prefix |
+| `INSTANCE` | Yes | -- | Instance prefix |
+| `VME` | Yes | -- | Location of vme module |
+| `ADDRESS` | First call | -- | A16 base address |
+| `INT_VEC` | First call | -- | Interrupt vector |
+| `MAX_CARDS` | No | 1 | Total number of cards |
+| `CARD` | No | 0 | Card number |
+
+## Operator Displays
+
+| File | Format |
+|------|--------|
+| `vmeApp/op/adl/Acro_bi_scan.adl` | MEDM |
+
+Autoconverted displays are available in the `bob/`, `edl/`, `opi/`, and `ui/`
+subdirectories.
+
+## Debug Variable
+
+```
+var devAvme9440Debug 0
+```
+
+| Level | Output |
+|-------|--------|
+| 0 | No messages |
+| >= 5 | Hardware initialization information |
+| >= 10 | Record initialization information |
+| >= 15 | Write commands |
+| >= 20 | Read commands |
+
+## Hardware Reference
+
+See [AVME9440.pdf](AVME9440.pdf) for the Acromag AVME-9440 datasheet.
