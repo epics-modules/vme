@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Generic A32 VME
-nav_order: 4
+parent: Device Support
+nav_order: 1
 ---
 
 

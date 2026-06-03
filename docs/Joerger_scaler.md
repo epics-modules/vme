@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Joerger Scalers
-nav_order: 12
+parent: Device Support
+nav_order: 9
 ---
 
 

@@ -1,7 +1,8 @@
 ---
 layout: default
 title: ESRF Varoc Encoder
-nav_order: 14
+parent: Device Support
+nav_order: 6
 ---
 
 

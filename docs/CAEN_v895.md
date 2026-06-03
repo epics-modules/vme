@@ -1,7 +1,8 @@
 ---
 layout: default
 title: CAEN V895
-nav_order: 9
+parent: Device Support
+nav_order: 5
 ---
 
 

@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Heidenhain IK320
-nav_order: 5
+parent: Device Support
+nav_order: 7
 ---
 
 

@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Bunch Clock Generator
-nav_order: 8
+parent: Device Support
+nav_order: 4
 ---
 
 

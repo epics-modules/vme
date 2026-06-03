@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Acromag AVME-9440
-nav_order: 6
+parent: Device Support
+nav_order: 3
 ---
 
 

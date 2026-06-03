@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Acromag AVME-9210
-nav_order: 7
+parent: Device Support
+nav_order: 2
 ---
 
 
