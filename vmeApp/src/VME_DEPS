@@ -1,0 +1,9 @@
+ifeq ($(OS_CLASS),vxWorks)
+VME_IOC_DBDS = vmeVXSupport.dbd
+VME_IOC_LIBS = vme
+endif
+
+ifeq ($(OS_CLASS),RTEMS)
+VME_IOC_DBDS = vmeRTEMSSupport.dbd
+VME_IOC_LIBS = vme
+endif

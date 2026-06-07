@@ -5,6 +5,8 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
+CFG += VME_DEPS
+
 USR_CFLAGS += -DUSE_TYPED_RSET
 USR_CFLAGS += -mstrict-align
 USR_CFLAGS += -fno-builtin
