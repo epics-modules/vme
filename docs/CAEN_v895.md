@@ -7,8 +7,15 @@ nav_order: 5
 
 
 # CAEN V895 16-Channel Discriminator
+{: .no_toc}
 
 Author: Tim Mooney
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 The CAEN V895 is a 16-channel leading edge discriminator in a VME module. This
 driver is implemented as an asynPortDriver subclass, providing access to the
@@ -50,8 +57,9 @@ dbLoadRecords("$(VME)/vmeApp/Db/singleDiscrim.db", "P=$(PREFIX),D=$(INSTANCE),N=
 The driver is configured as `ASYN_MULTIDEVICE` with 16 channels (addresses
 0-15).
 
-**Note:** The CAEN V895 hardware is write-only. Read operations return 0; the
-last written value is tracked via the asyn parameter library.
+{: .note }
+> The CAEN V895 hardware is write-only. Read operations return 0; the last
+> written value is tracked via the asyn parameter library.
 
 ## Dependencies
 

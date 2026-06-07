@@ -7,8 +7,15 @@ nav_order: 4
 
 
 # APS BCG-100 Bunch Clock Generator
+{: .no_toc}
 
 Author: Frank Lenkszus (1995), David M. Kline (2005)
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 The BCG-100 is a VMEbus bunch clock generator module used at the Advanced
 Photon Source. This module provides combined driver and device support for
@@ -73,4 +80,4 @@ var devBunchClkGenDebug 0
 
 ## Dependencies
 
-The fill pattern sequence program requires the **SNCSEQ** (sequencer) module.
+The fill pattern sequence program requires the **seq** (sequencer) module.

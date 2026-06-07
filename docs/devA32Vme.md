@@ -7,8 +7,15 @@ nav_order: 1
 
 
 # Generic A32/D32 VME Device Support
+{: .no_toc}
 
 Author: Ned D. Arnold (1997)
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 This device support module provides generic access to any VME register in the
 A32/D32 address space. It supports ai, ao, bi, bo, longin, longout, mbbi, and

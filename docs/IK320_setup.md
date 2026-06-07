@@ -7,15 +7,23 @@ nav_order: 7
 
 
 # Heidenhain IK320 Encoder Setup
+{: .no_toc}
 
 Author: Kurt Goetze (goetze@aps.anl.gov)
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 The Heidenhain IK320 is a VME counter/interpolator for linear and angular
 encoders. This page describes how to configure the IK320 for use with EPICS
 (synApps). The IK320 device support and driver were written by Till Straumann
 of PTB at BESSY.
 
-**Note:** The IK320 builds on both **vxWorks** and **RTEMS**.
+{: .note }
+> The IK320 builds on both **vxWorks** and **RTEMS**.
 
 ## Supported Record Types
 

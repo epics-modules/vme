@@ -7,15 +7,23 @@ nav_order: 3
 
 
 # Acromag AVME-9440 Digital I/O
+{: .no_toc}
 
 Author: Greg Nawrocki (1993), David M. Kline (2005)
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 The Acromag AVME-9440 is a 16-bit binary input and output VME board. This
 device support provides EPICS access to all 16 input and 16 output channels
 via bi, bo, mbbi, and mbbo records. Change-of-state I/O interrupts are
 available for binary input signals 0-7 only, and only for the bi record type.
 
-**Note:** This device support is OS independent (uses EPICS devLib).
+{: .note }
+> This device support is OS independent (uses EPICS devLib).
 
 ## Configuration
 

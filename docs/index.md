@@ -6,6 +6,13 @@ nav_order: 1
 
 
 # vme -- EPICS VME Device Support Module
+{: .no_toc}
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 The **vme** module is part of the
 [APS BCDA synApps](https://github.com/epics-modules) suite. It provides EPICS

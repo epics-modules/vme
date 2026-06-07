@@ -7,6 +7,7 @@ has_children: true
 
 
 # Device Support
+{: .no_toc}
 
 The vme module provides device support and drivers for the following VME
 hardware:

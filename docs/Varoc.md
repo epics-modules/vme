@@ -7,8 +7,15 @@ nav_order: 6
 
 
 # ESRF Varoc SSI Absolute Encoder Interface
+{: .no_toc}
 
 Authors: Karen J. Coulter (1993), Robert A. Popper (1994)
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 The Varoc (ZIO085) is a VMEbus SSI (Synchronous Serial Interface) absolute
 encoder interface card originally developed at ESRF. It supports up to 16

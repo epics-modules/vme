@@ -7,8 +7,15 @@ nav_order: 9
 
 
 # Joerger Scalers
+{: .no_toc}
 
 Author: Tim Mooney (1995, 2003)
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 The vme module provides device support for two families of Joerger VME scaler
 modules:

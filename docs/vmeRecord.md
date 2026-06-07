@@ -1,20 +1,20 @@
 ---
 layout: default
 title: VME Record
-nav_order: 2
+nav_order: 3
 ---
 
 
 # vme - Generic VME Record
+{: .no_toc}
 
 Author: Mark Rivers
 
-## Contents
+## Table of contents
+{: .no_toc .text-delta }
 
-- [Overview](#overview)
-- [Field Descriptions](#field-descriptions)
-- [Files](#files)
-- [Example](#example)
+- TOC
+{:toc}
 
 ## Overview
 
@@ -35,10 +35,11 @@ contains the data to be written or the data read. The SARR (Status Array) field
 contains the status of each VME I/O operation, i.e. whether the operation
 succeeded or generated a VME bus error.
 
-**Warning:** The VME record should be used with care, since it is possible to
-write to any location in the VME address space. It is definitely possible to
-affect VME modules in unintended ways. Even read-only operations can have
-significant side-effects.
+{: .warning }
+> The VME record should be used with care, since it is possible to write to
+> any location in the VME address space. It is definitely possible to affect
+> VME modules in unintended ways. Even read-only operations can have
+> significant side-effects.
 
 ---
 

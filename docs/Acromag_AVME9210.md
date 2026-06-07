@@ -7,8 +7,15 @@ nav_order: 2
 
 
 # Acromag AVME-9210 Analog Output
+{: .no_toc}
 
 Author: Joe White (SLAC, 1995)
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 The Acromag AVME-9210 is an 8-channel, 12-bit DAC analog output VME module in
 A16 short I/O address space. This module provides device support and a

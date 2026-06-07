@@ -1,11 +1,18 @@
 ---
 layout: default
 title: Release Notes
-nav_order: 3
+nav_order: 2
 ---
 
 
 # vme Release Notes
+{: .no_toc}
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 ## Release 2-9-5 (Jun 7, 2023)
 
