@@ -88,6 +88,7 @@
 #include <biRecord.h>
 #include <boRecord.h>
 #include <waveformRecord.h>
+#include <iocsh.h>
 
 
 /* Define general symbolic constants */
@@ -108,7 +109,7 @@ int drvBunchClkGenDebug = 0;
 static int* drvDebug = &drvBunchClkGenDebug;
 epicsExportAddress(int, drvBunchClkGenDebug);
 
-static long drvInitCard();
+static long drvInitCard(void);
 static long drvIoReport(int);
 static long check_card(USHORT, USHORT);
 static long drvReadCard(short, short, short, ULONG*);
@@ -118,7 +119,7 @@ static long drvCopyRam(short);
 static long drvClearRam(short);
 
 /* Epics driver entry point table */
-drvet drvBunchClkGen = { 2, drvIoReport, drvInitCard };
+drvet drvBunchClkGen = { 2, (DRVSUPFUN)drvIoReport, (DRVSUPFUN)drvInitCard };
 epicsExportAddress(drvet, drvBunchClkGen);
 
 static char* drvName = "drvBunchClkGen";
@@ -1000,8 +1001,8 @@ typedef struct DSET
    DEVSUPFUN   read_write;
 } DSET;
 
-DSET devBiBunchClkGen = { 5, NULL, NULL, initBiRecord, NULL, readBi  };
-DSET devBoBunchClkGen = { 5, NULL, NULL, initBoRecord, NULL, writeBo };
+DSET devBiBunchClkGen = { 5, NULL, NULL, (DEVSUPFUN)initBiRecord, NULL, (DEVSUPFUN)readBi  };
+DSET devBoBunchClkGen = { 5, NULL, NULL, (DEVSUPFUN)initBoRecord, NULL, (DEVSUPFUN)writeBo };
 
 epicsExportAddress(dset, devBiBunchClkGen);
 epicsExportAddress(dset, devBoBunchClkGen);
@@ -1017,9 +1018,9 @@ typedef struct DSETA
    DEVSUPFUN   special_linconv;
 } DSETA;
 
-DSETA devAoBunchClkGen = { 6, NULL, NULL, initAoRecord, NULL, writeAo, specialLinconvAo };
-DSETA devAiBunchClkGen = { 6, NULL, NULL, initAiRecord, NULL, readAi,  specialLinconvAi };
-DSETA devWfBunchClkGen = { 6, NULL, NULL, initWfRecord, NULL, readWf,  NULL             };
+DSETA devAoBunchClkGen = { 6, NULL, NULL, (DEVSUPFUN)initAoRecord, NULL, (DEVSUPFUN)writeAo, (DEVSUPFUN)specialLinconvAo };
+DSETA devAiBunchClkGen = { 6, NULL, NULL, (DEVSUPFUN)initAiRecord, NULL, (DEVSUPFUN)readAi,  (DEVSUPFUN)specialLinconvAi };
+DSETA devWfBunchClkGen = { 6, NULL, NULL, (DEVSUPFUN)initWfRecord, NULL, (DEVSUPFUN)readWf,  NULL             };
 
 epicsExportAddress(dset, devAoBunchClkGen);
 epicsExportAddress(dset, devAiBunchClkGen);

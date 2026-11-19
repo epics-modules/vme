@@ -185,13 +185,14 @@ IK320FunctionDescRec devFunctMenu[][5]= {
     },
 };
 
-STATIC long ik320InitFunct();
-STATIC long ik320WriteFunct();
-STATIC long ik320InitDir();
-STATIC long ik320InitModeX3();
-STATIC long ik320WriteMbboSync();
-STATIC long ik320InitMbbo();
-STATIC long get_ioint_info();
+STATIC long ik320InitFunct(mbboRecord *prec);
+STATIC long ik320WriteFunct(mbboRecord *prec);
+STATIC long ik320InitDir(mbboRecord *prec);
+STATIC long ik320InitModeX3(mbboRecord *prec);
+STATIC long ik320WriteMbboSync(mbboRecord *prec);
+STATIC long ik320InitMbbo(mbboRecord *prec, IK320FunctionDescRec *menu,
+                          int nels, int multiDim);
+STATIC long get_ioint_info(int cmd, dbCommon *prec, IOSCANPVT *ppvt);
 
 typedef struct
 {
@@ -206,9 +207,9 @@ devIK320Funct_dset devIK320Funct = {
     5,
     NULL,
     NULL,
-    ik320InitFunct,
+    (DEVSUPFUN)ik320InitFunct,
     NULL,
-    ik320WriteFunct
+    (DEVSUPFUN)ik320WriteFunct
 };
 epicsExportAddress(dset, devIK320Funct);
 
@@ -225,9 +226,9 @@ devIK320Dir_dset devIK320Dir = {
     5,
     NULL,
     NULL,
-    ik320InitDir,
+    (DEVSUPFUN)ik320InitDir,
     NULL,
-    ik320WriteMbboSync,
+    (DEVSUPFUN)ik320WriteMbboSync,
 };
 epicsExportAddress(dset, devIK320Dir);
 
@@ -244,9 +245,9 @@ devIK320ModeX3_dset devIK320ModeX3 = {
     5,
     NULL,
     NULL,
-    ik320InitModeX3,
+    (DEVSUPFUN)ik320InitModeX3,
     NULL,
-    ik320WriteMbboSync,
+    (DEVSUPFUN)ik320WriteMbboSync,
 };
 epicsExportAddress(dset, devIK320ModeX3);
 
@@ -258,8 +259,8 @@ typedef struct DevIK320AiRec_
     IOSCANPVT   scanPvt;
 } DevIK320AiRec, *DevIK320Ai;
 
-STATIC long ik320InitAiRec();
-STATIC long ik320ReadAi();
+STATIC long ik320InitAiRec(aiRecord *prec);
+STATIC long ik320ReadAi(aiRecord *prec);
 
 typedef struct
 {
@@ -275,9 +276,9 @@ devIK320Ai_dset devIK320Ai = {
     6,
     NULL,
     NULL,
-    ik320InitAiRec,
-    get_ioint_info,
-    ik320ReadAi,
+    (DEVSUPFUN)ik320InitAiRec,
+    (DEVSUPFUN)get_ioint_info,
+    (DEVSUPFUN)ik320ReadAi,
     NULL
 };
 epicsExportAddress(dset, devIK320Ai);
@@ -294,9 +295,9 @@ typedef struct DevIK320GroupAiRec_
     epicsMutexId mutex;
 } DevIK320GroupAiRec, *DevIK320GroupAi;
 
-STATIC long ik320InitGroupAi();
-STATIC long ik320InitGroupAiRec();
-STATIC long ik320ReadGroupAi();
+STATIC long ik320InitGroupAi(int after);
+STATIC long ik320InitGroupAiRec(aiRecord *prec);
+STATIC long ik320ReadGroupAi(aiRecord *prec);
 
 STATIC void ik320GroupPost(DevIK320GroupAi grp);
 
@@ -313,10 +314,10 @@ typedef struct
 devIK320GroupAi_dset devIK320GroupAi = {
     6,
     NULL,
-    ik320InitGroupAi,
-    ik320InitGroupAiRec,
+    (DEVSUPFUN)ik320InitGroupAi,
+    (DEVSUPFUN)ik320InitGroupAiRec,
     NULL,
-    ik320ReadGroupAi,
+    (DEVSUPFUN)ik320ReadGroupAi,
     NULL
 };
 epicsExportAddress(dset, devIK320GroupAi);
@@ -386,8 +387,8 @@ STATIC IK320ParmRec parmTable[]={
 };
 #undef PE
 
-STATIC long ik320InitParm();
-STATIC long ik320WriteParm();
+STATIC long ik320InitParm(stringoutRecord *prec);
+STATIC long ik320WriteParm(stringoutRecord *prec);
 
 typedef struct
 {
@@ -402,9 +403,9 @@ devIK320Parm_dset devIK320Parm = {
     5,
     NULL,
     NULL,
-    ik320InitParm,
+    (DEVSUPFUN)ik320InitParm,
     NULL,
-    ik320WriteParm,
+    (DEVSUPFUN)ik320WriteParm,
 };
 epicsExportAddress(dset, devIK320Parm);
 
@@ -636,12 +637,12 @@ STATIC long ik320Connect(struct link *link, short *axis, IK320Driver *drv)
 
 STATIC long ik320InitFunct(mbboRecord *prec)
 {
-    return(ik320InitMbbo(prec, devFunctMenu, NUM_ELS(devFunctMenu[0]), 1));
+    return(ik320InitMbbo(prec, (IK320FunctionDescRec *)devFunctMenu, NUM_ELS(devFunctMenu[0]), 1));
 }
 
 STATIC long ik320InitDir(mbboRecord *prec)
 {
-    long rval = ik320InitMbbo(prec, devDirMenu, NUM_ELS(devDirMenu[0]), 1);
+    long rval = ik320InitMbbo(prec, (IK320FunctionDescRec *)devDirMenu, NUM_ELS(devDirMenu[0]), 1);
     if (OK == rval)
     {
         if (!prec->pini)

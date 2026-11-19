@@ -268,15 +268,15 @@ static long mbbi__read( struct mbbiRecord* );
 
 /* Define DSET structures */
 static rMRD__DSET devAiAvmeMRD   =
-   {6, NULL,        NULL, ai__init,      NULL,           ai__read,       NULL};
+   {6, NULL,        NULL, (DEVSUPFUN)ai__init,      NULL,                    (DEVSUPFUN)ai__read,       NULL};
 static rMRD__DSET devBiAvmeMRD   =
-   {5, mrd__report, NULL, bi__init,      bi__getIntInfo, bi__read,       NULL};
+   {5, (DEVSUPFUN)mrd__report, NULL, (DEVSUPFUN)bi__init,      (DEVSUPFUN)bi__getIntInfo, (DEVSUPFUN)bi__read,       NULL};
 static rMRD__DSET devBoAvmeMRD   =
-   {5, NULL,        NULL, bo__init,      NULL,           bo__write,      NULL};
+   {5, NULL,        NULL, (DEVSUPFUN)bo__init,      NULL,                    (DEVSUPFUN)bo__write,      NULL};
 static rMRD__DSET devLiAvmeMRD   =
-   {5, NULL,        NULL, longin__init,  NULL,           longin__read,   NULL};
+   {5, NULL,        NULL, (DEVSUPFUN)longin__init,  NULL,                    (DEVSUPFUN)longin__read,   NULL};
 static rMRD__DSET devMbbiAvmeMRD =
-   {5, NULL,        NULL, mbbi__init,    NULL,           mbbi__read,     NULL};
+   {5, NULL,        NULL, (DEVSUPFUN)mbbi__init,    NULL,                    (DEVSUPFUN)mbbi__read,     NULL};
 
 
 /* Publish DSET structure references to EPICS */

@@ -152,7 +152,7 @@ void devHPLaserAxis_Register(void)
 epicsExportRegistrar(devHPLaserAxis_Register);
 
 
-STATIC int devHPLaserAxisReport();
+STATIC int devHPLaserAxisReport(void);
 STATIC long init(int flag);
 STATIC long init_bi_record(struct biRecord *p);
 STATIC long init_bo_record(struct boRecord *p);
@@ -184,9 +184,9 @@ devBiHP10895LaserAxis_dset devBiHP10895LaserAxis = {
 	5,
 	NULL,
 	NULL,
-	init_bi_record,
+	(DEVSUPFUN)init_bi_record,
 	NULL,
-	read_bi
+	(DEVSUPFUN)read_bi
 };
 
 epicsExportAddress(dset, devBiHP10895LaserAxis);
@@ -204,10 +204,10 @@ typedef struct {
 devBoHP10895LaserAxis_dset devBoHP10895LaserAxis = {
 	5,
 	(DEVSUPFUN) devHPLaserAxisReport,
-	init,
-	init_bo_record,
+	(DEVSUPFUN)init,
+	(DEVSUPFUN)init_bo_record,
 	NULL,
-	write_bo
+	(DEVSUPFUN)write_bo
 };
 
 epicsExportAddress(dset, devBoHP10895LaserAxis);
@@ -226,9 +226,9 @@ devMbbiHP10895LaserAxis_dset devMbbiHP10895LaserAxis = {
 	5,
 	NULL,
 	NULL,
-	init_mbbi_record,
+	(DEVSUPFUN)init_mbbi_record,
 	NULL,
-	read_mbbi
+	(DEVSUPFUN)read_mbbi
 };
 
 epicsExportAddress(dset, devMbbiHP10895LaserAxis);
@@ -246,10 +246,10 @@ typedef struct {
 devMbboHP10895LaserAxis_dset devMbboHP10895LaserAxis = {
 	5,
 	(DEVSUPFUN) devHPLaserAxisReport,
-	init,
-	init_mbbo_record,
+	(DEVSUPFUN)init,
+	(DEVSUPFUN)init_mbbo_record,
 	NULL,
-	write_mbbo
+	(DEVSUPFUN)write_mbbo
 };
 
 epicsExportAddress(dset, devMbboHP10895LaserAxis);
@@ -268,9 +268,9 @@ devLiHP10895LaserAxis_dset devLiHP10895LaserAxis = {
 	5,
 	NULL,
 	NULL,
-	init_li_record,
+	(DEVSUPFUN)init_li_record,
 	NULL,
-	read_li
+	(DEVSUPFUN)read_li
 };
 
 epicsExportAddress(dset, devLiHP10895LaserAxis);
@@ -289,9 +289,9 @@ devLoHP10895LaserAxis_dset devLoHP10895LaserAxis = {
 	5,
 	NULL,
 	NULL,
-	init_lo_record,
+	(DEVSUPFUN)init_lo_record,
 	NULL,
-	write_lo
+	(DEVSUPFUN)write_lo
 };
 
 epicsExportAddress(dset, devLoHP10895LaserAxis);

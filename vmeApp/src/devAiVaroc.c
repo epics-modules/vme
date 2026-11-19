@@ -61,9 +61,9 @@
 extern int varoc_driver(unsigned short card, unsigned short chan, int numbits,
 	int gray, long *prbval);
 
-static long init_record();
-static long read_ai();
-static long special_linconv();
+static long init_record(struct aiRecord *pai);
+static long read_ai(struct aiRecord *pai);
+static long special_linconv(struct aiRecord *pai, int after);
 
 typedef struct {
 	long		number;
@@ -79,10 +79,10 @@ devAiVaroc_dset devAiVaroc = {
 	6,
 	NULL,
 	NULL,
-	init_record,
+	(DEVSUPFUN)init_record,
 	NULL,
-	read_ai,
-	special_linconv
+	(DEVSUPFUN)read_ai,
+	(DEVSUPFUN)special_linconv
 };
 
 epicsExportAddress(dset, devAiVaroc);
@@ -94,8 +94,7 @@ struct dprivate {
 
 
 
-static long init_record(pai)
-    struct aiRecord	*pai;
+static long init_record(struct aiRecord *pai)
 {
     int num_bits;
     char sorg[1];
@@ -170,8 +169,7 @@ static long init_record(pai)
 }
 
 
-static long read_ai(pai)
-    struct aiRecord	*pai;
+static long read_ai(struct aiRecord *pai)
 {
   long value;
   long status;
@@ -199,9 +197,7 @@ static long read_ai(pai)
 
 
 
-static long special_linconv(pai,after)
-    struct aiRecord	*pai;
-    int after;
+static long special_linconv(struct aiRecord *pai, int after)
 {
 
     if (!after) return(0);

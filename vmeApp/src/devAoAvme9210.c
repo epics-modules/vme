@@ -57,11 +57,11 @@ struct {
 } devAoAvme9210 = {
   6,
   NULL,
-  aoAvme9210_init,
-  aoAvme9210_init_record,
+  (DEVSUPFUN)aoAvme9210_init,
+  (DEVSUPFUN)aoAvme9210_init_record,
   NULL,
-  aoAvme9210_write,
-  aoAvme9210_special_linconv
+  (DEVSUPFUN)aoAvme9210_write,
+  (DEVSUPFUN)aoAvme9210_special_linconv
 };
 epicsExportAddress(dset, devAoAvme9210);
 

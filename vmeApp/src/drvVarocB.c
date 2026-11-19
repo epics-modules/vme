@@ -57,8 +57,8 @@
 #include <epicsExport.h>
 
 
-static long varoc_io_report();
-long varoc_drv_init();
+static long varoc_io_report(short int level);
+long varoc_drv_init(void);
 
 typedef struct {
 	long		number;
@@ -68,8 +68,8 @@ typedef struct {
 
 drvVaroc_drvet drvVaroc = {
         2,
-        varoc_io_report,
-        varoc_drv_init
+        (DRVSUPFUN)varoc_io_report,
+        (DRVSUPFUN)varoc_drv_init
 };
 
 epicsExportAddress(drvet, drvVaroc);
@@ -143,9 +143,8 @@ long varoc_drv_init()
 
 
 
-long varoc_io_report(level)
-  short int level;
- { 
+long varoc_io_report(short int level)
+{
    int i;
 
    for (i=0; i < MAX_VAROC_CARDS; i++) {
@@ -162,12 +161,7 @@ long varoc_io_report(level)
  *
  * interface to the Varoc Absolute Encoder board (16 channels)
  */
-int varoc_driver(card, chan, numbits, gray, prbval)
-register unsigned short card;
-register unsigned short chan;
-int                     numbits;
-int			gray;
-register long           *prbval;
+int varoc_driver(register unsigned short card, register unsigned short chan, int numbits, int gray, register long *prbval)
 {
   long                   msb=0;
   unsigned short int     type;

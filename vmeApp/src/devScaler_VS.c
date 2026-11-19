@@ -200,16 +200,16 @@ void scalerVS_show(int card, int level);
 void scalerVS_regShow(int card, int level);
 
 SCALERDSET devScaler_VS = {
-	7, 
-	scalerVS_report,
-	scalerVS_init,
-	scalerVS_init_record,
+	7,
+	(DEVSUPFUN)scalerVS_report,
+	(DEVSUPFUN)scalerVS_init,
+	(DEVSUPFUN)scalerVS_init_record,
 	scalerVS_get_ioint_info,
-	scalerVS_reset,
-	scalerVS_read,
-	scalerVS_write_preset,
-	scalerVS_arm,
-	scalerVS_done
+	(DEVSUPFUN)scalerVS_reset,
+	(DEVSUPFUN)scalerVS_read,
+	(DEVSUPFUN)scalerVS_write_preset,
+	(DEVSUPFUN)scalerVS_arm,
+	(DEVSUPFUN)scalerVS_done
 };
 epicsExportAddress(dset, devScaler_VS);
 

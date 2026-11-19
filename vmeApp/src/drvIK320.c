@@ -203,8 +203,8 @@ static void IK320IrqMaster(void*);
 static long cardInit(IK320Card crd);
 static long cardQuery(IK320Driver drv);
 
-static long drvIK320report();
-static long drvIK320init();
+static long drvIK320report(void);
+static long drvIK320init(void);
 
 typedef struct
 {
@@ -214,8 +214,8 @@ typedef struct
 } drvIK320_drvet;
 drvIK320_drvet drvIK320 = {
     2,
-    drvIK320report,
-    drvIK320init
+    (DRVSUPFUN)drvIK320report,
+    (DRVSUPFUN)drvIK320init
 };
 epicsExportAddress(drvet, drvIK320);
 
@@ -262,7 +262,7 @@ static struct
 } allCards = { 0, 0};
 
 static volatile unsigned short *groupBase = 0;
-static void (*irqHandler)() = 0;
+static void (*irqHandler)(void *) = 0;
 static int shortdelay = 0;   /*in clock ticks */
 static struct timespec abs_shortdelay;   /* absolute time of timeout (calculated as current time + shortdelay ) */
 static int IK320brdfail = 0;
@@ -676,7 +676,7 @@ IK320IrqHandler(void *parm)
     else if (drvIK320Debug>=1)
     {
 #ifdef vxWorks
-        sprintf(drvIK320LoggerString,"irqStatus: %x",(int)drv->card->irqStatus);*/
+        sprintf(drvIK320LoggerString,"irqStatus: %x",(int)drv->card->irqStatus);
         semGive(drvIK320LoggerSem);
 #else /* rtems */
         printk("irqStatus: %x",(int)drv->card->irqStatus);
@@ -1354,7 +1354,7 @@ drvIK320Finish(IK320Driver drv)
     DM(1,"drvIK320Finish(): busy %i\n", wasBusy);
 }
 
-static long drvIK320report()
+static long drvIK320report(void)
 {
     IK320Driver drv;
     int itera;
@@ -1377,7 +1377,7 @@ static long drvIK320report()
 }
 
 static long
-drvIK320init()
+drvIK320init(void)
 {
     double quantum;
 

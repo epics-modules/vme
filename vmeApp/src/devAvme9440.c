@@ -182,7 +182,7 @@ static ioCard cards[NOCARDS];
 /* Forward references */
 static long init(int);
 static long checkLink(short);
-static long devAvme9440Report();
+static long devAvme9440Report(void);
 static void avme9440_isr(void*);
 static long write_card(short,ULONG,ULONG);
 static long read_card(short,ULONG,USHORT*,int);
@@ -212,7 +212,7 @@ static struct
    DEVSUPFUN get_ioint_info;  /* used for COS processing (not used for outputs)*/
    DEVSUPFUN write_bo;        /* output command goes here */
 }
-devBoAvme9440 = {5, devAvme9440Report, init, init_bo_record, NULL, write_bo};
+devBoAvme9440 = {5, (DEVSUPFUN)devAvme9440Report, (DEVSUPFUN)init, (DEVSUPFUN)init_bo_record, NULL, (DEVSUPFUN)write_bo};
 epicsExportAddress( dset, devBoAvme9440 );
 
 
@@ -226,7 +226,7 @@ static struct
    DEVSUPFUN get_ioint_info; /* used for COS processing */
    DEVSUPFUN read_bi;        /* input command goes here */
 }
-devBiAvme9440 = {5, NULL, NULL, init_bi_record, get_bi_int_info, read_bi};
+devBiAvme9440 = {5, NULL, NULL, (DEVSUPFUN)init_bi_record, (DEVSUPFUN)get_bi_int_info, (DEVSUPFUN)read_bi};
 epicsExportAddress( dset, devBiAvme9440 );
 
 
@@ -240,7 +240,7 @@ static struct
    DEVSUPFUN get_ioint_info;
    DEVSUPFUN write_mbbo;
 }
-devMbboAvme9440 = {5, NULL, NULL, init_mbbo_record, NULL, write_mbbo};
+devMbboAvme9440 = {5, NULL, NULL, (DEVSUPFUN)init_mbbo_record, NULL, (DEVSUPFUN)write_mbbo};
 epicsExportAddress( dset, devMbboAvme9440 );
 
 
@@ -254,7 +254,7 @@ static struct
    DEVSUPFUN get_ioint_info;
    DEVSUPFUN read_mbbi;
 }
-devMbbiAvme9440 = {5, NULL, NULL, init_mbbi_record, NULL, read_mbbi};
+devMbbiAvme9440 = {5, NULL, NULL, (DEVSUPFUN)init_mbbi_record, NULL, (DEVSUPFUN)read_mbbi};
 epicsExportAddress( dset, devMbbiAvme9440 );
 
 

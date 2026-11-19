@@ -63,7 +63,7 @@ static long init_record(aoRecord *pao);
 static long write_ao(aoRecord *pao);
 static long special_linconv(aoRecord *pao, int after);
 static long vmi4116_io_report(int level);
-static long	vmi4116_init();
+static long	vmi4116_init(void);
 
 typedef struct {
 	long		number;
@@ -77,12 +77,12 @@ typedef struct {
 
 DSET devAoVMI4116 = {
 	6,
-	vmi4116_io_report,
-	vmi4116_init,
-	init_record,
+	(DEVSUPFUN)vmi4116_io_report,
+	(DEVSUPFUN)vmi4116_init,
+	(DEVSUPFUN)init_record,
 	NULL,
-	write_ao,
-	special_linconv
+	(DEVSUPFUN)write_ao,
+	(DEVSUPFUN)special_linconv
 };
 epicsExportAddress(dset, devAoVMI4116);
 

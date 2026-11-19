@@ -16,91 +16,92 @@
 
 #define FEXIT   1
 
-static void  ttylinemode();
-static void  ttycharmode();
-static void  ttyinflush();
-static int   fmenu();
+struct fmenu;
+static void  ttylinemode(void);
+static void  ttycharmode(void);
+static void  ttyinflush(void);
+static int   fmenu(struct fmenu *pmenu);
 
-static void  srandom();
-static long  random();
-static char* initstate();
+static void  srandom(u_int x);
+static long  random(void);
+static char* initstate(u_int seed, char *arg_state, int n);
 
-static int setbase();
-static int setla();
-static int setoffset();
-static int listsettings();
-static int fwritereg();
-static int freadreg();
-static int fwrreg();
-static int loopread();
-static int loopwrite();
-static int looprw();
-static int rammenu();
-static int bitpatmenu();
-static int twopatternwrite();
-static int a32menu();
-static int exitx();
+static int setbase(void);
+static int setla(void);
+static int setoffset(void);
+static int listsettings(void);
+static int fwritereg(void);
+static int freadreg(void);
+static int fwrreg(void);
+static int loopread(void);
+static int loopwrite(void);
+static int looprw(void);
+static int rammenu(void);
+static int bitpatmenu(void);
+static int twopatternwrite(void);
+static int a32menu(void);
+static int exitx(void);
 
-static int setramaoff();
-static int setramdoff();
-static int setramsz();
-static int setramwsz();
-static int setramdadd();
-static int setramdwords();
-static int fillram();
-static int dumpram();
-static int listrsettings();
-static int wraddtest();
-static int raddtest();
-static int wrrottest();
-static int wrrandtest();
-static int rrandtest();
-static int randchk();
-static int wronestest();
+static int setramaoff(void);
+static int setramdoff(void);
+static int setramsz(void);
+static int setramwsz(void);
+static int setramdadd(void);
+static int setramdwords(void);
+static int fillram(void);
+static int dumpram(void);
+static int listrsettings(void);
+static int wraddtest(void);
+static int raddtest(void);
+static int wrrottest(void);
+static int wrrandtest(void);
+static int rrandtest(void);
+static int randchk(void);
+static int wronestest(void);
 
-static int setintvector();
-static void inthandler();
+static int setintvector(void);
+static void inthandler(int param);
 
 
-static int bpramsel();
-static int bpbanksel();
-static int bpfillram();
-static int bpdumpram();
-static int listbpsettings();
-static int bpwraddtest();
-static int bpwrrottest();
-static int bpwronestest();
-static int bprandchk();
+static int bpramsel(void);
+static int bpbanksel(void);
+static int bpfillram(void);
+static int bpdumpram(void);
+static int listbpsettings(void);
+static int bpwraddtest(void);
+static int bpwrrottest(void);
+static int bpwronestest(void);
+static int bprandchk(void);
 
-static int seta32base();
-static int seta32offset();
-static int lista32settings();
-static int freada32reg();
-static int fwritea32reg();
-static int fwra32reg();
-static int loopa32read();
-static int loopa32write();
-static int loopa32rw();
-static int a32rammenu();
-static int seta32ramaoff();
-static int seta32ramsz();
-static int seta32ramdwords();
-static int seta32fast();
-static int filla32ram();
-static int dumpa32ram();
-static int lista32rsettings();
-static int a32wraddtest();
-static int a32wrrottest();
-static int a32wronestest();
-static int a32randchk();
-static int a32wrrandtest();
-static int a32rrandtest();
-static int a32raddtest();
-static int seta32ramdadd();
-static int seta32intvector();
-static void a32inthandler();
+static int seta32base(void);
+static int seta32offset(void);
+static int lista32settings(void);
+static int freada32reg(void);
+static int fwritea32reg(void);
+static int fwra32reg(void);
+static int loopa32read(void);
+static int loopa32write(void);
+static int loopa32rw(void);
+static int a32rammenu(void);
+static int seta32ramaoff(void);
+static int seta32ramsz(void);
+static int seta32ramdwords(void);
+static int seta32fast(void);
+static int filla32ram(void);
+static int dumpa32ram(void);
+static int lista32rsettings(void);
+static int a32wraddtest(void);
+static int a32wrrottest(void);
+static int a32wronestest(void);
+static int a32randchk(void);
+static int a32wrrandtest(void);
+static int a32rrandtest(void);
+static int a32raddtest(void);
+static int seta32ramdadd(void);
+static int seta32intvector(void);
+static void a32inthandler(int param);
 
-static void vmeTest_Register();
+static void vmeTest_Register(void);
 epicsExportRegistrar(vmeTest_Register);
 
 static unsigned short   *modbase;   /* module base address */
@@ -139,7 +140,7 @@ static unsigned long a32ipatmask;   /* interrupt pattern and mask */
 struct  menu_prompt {    /* defines a prompt for a menu */
    char  id;             /* char to input for this choice */
    int   val;            /* value to return for this prompt */
-   int   (*proc)();      /* proc to execute for this prompt */
+   int   (*proc)(void);  /* proc to execute for this prompt */
    int   key;            /* key code for this prompt */
    char  *pmt;           /* prompt text */
 };
@@ -1272,9 +1273,7 @@ static int listbpsettings()
    return(0);
 }
 
-static int bpinit(num, bank)
-unsigned short num;
-unsigned short bank;
+static int bpinit(unsigned short num, unsigned short bank)
 {
 #define  BPSELECT 0x20
 #define   BPBANK     0x2a
@@ -2028,8 +2027,7 @@ initstate(seed, arg_state, n)
  */
 static
 char *
-setstate(arg_state)
-   char *arg_state;
+setstate(char *arg_state)
 {
    register long *new_state = (long *)arg_state;
    register int type = new_state[0] % MAX_TYPES;

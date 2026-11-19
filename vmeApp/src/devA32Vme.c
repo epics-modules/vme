@@ -142,20 +142,30 @@
 
 #define ERROR (-1)
 
-static long init_ai(), read_ai();
-static long init_ao(), write_ao();
-static long init_bi(), read_bi();
-static long init_bo(), write_bo();
-static long init_li(), read_li();
-static long init_lo(), write_lo();
-static long init_mbbi(), read_mbbi();
-static long init_mbbo(), write_mbbo();
-static long checkCard(), write_card(), read_card();
-static long get_bi_int_info();
-static void devA32_isr();
-static void devA32RebootFunc();
+static long init_ai(struct aiRecord *pai);
+static long read_ai(struct aiRecord *pai);
+static long init_ao(struct aoRecord *pao);
+static long write_ao(struct aoRecord *pao);
+static long init_bi(struct biRecord *pbi);
+static long read_bi(struct biRecord *pbi);
+static long init_bo(struct boRecord *pbo);
+static long write_bo(struct boRecord *pbo);
+static long init_li(struct longinRecord *pli);
+static long read_li(struct longinRecord *pli);
+static long init_lo(struct longoutRecord *plo);
+static long write_lo(struct longoutRecord *plo);
+static long init_mbbi(struct mbbiRecord *pmbbi);
+static long read_mbbi(struct mbbiRecord *pmbbi);
+static long init_mbbo(struct mbboRecord *pmbbo);
+static long write_mbbo(struct mbboRecord *pmbbo);
+static long checkCard(short card);
+static long write_card(short card, unsigned short reg, unsigned long mask, unsigned long value);
+static long read_card(short card, unsigned short reg, unsigned long mask, unsigned long *value);
+static long get_bi_int_info(int cmd, struct biRecord *pbi, IOSCANPVT *ppvt);
+static void devA32_isr(int card);
+static void devA32RebootFunc(void);
 
-static long devA32VmeReport();
+static long devA32VmeReport(void);
 
 int  devA32VmeDebug = 0; 
 
@@ -213,15 +223,15 @@ typedef struct {
         DEVSUPFUN       special_linconv;
 } A32VME_DSET;
 
-A32VME_DSET devAiA32Vme =   {6, NULL, NULL, init_ai, NULL, read_ai,  NULL};
-A32VME_DSET devAoA32Vme =   {6, NULL, NULL, init_ao, NULL, write_ao, NULL};
-A32VME_DSET devBiA32Vme =   {5, devA32VmeReport,NULL,init_bi, get_bi_int_info, 
-                             read_bi,  NULL};
-A32VME_DSET devBoA32Vme =   {5, NULL, NULL, init_bo, NULL, write_bo, NULL};
-A32VME_DSET devLiA32Vme =   {5, NULL, NULL, init_li, NULL, read_li,  NULL};
-A32VME_DSET devLoA32Vme =   {5, NULL, NULL, init_lo, NULL, write_lo, NULL};
-A32VME_DSET devMbbiA32Vme = {5, NULL, NULL, init_mbbi, NULL, read_mbbi,  NULL};
-A32VME_DSET devMbboA32Vme = {5, NULL, NULL, init_mbbo, NULL, write_mbbo, NULL};
+A32VME_DSET devAiA32Vme =   {6, NULL, NULL, (DEVSUPFUN)init_ai, NULL, (DEVSUPFUN)read_ai,  NULL};
+A32VME_DSET devAoA32Vme =   {6, NULL, NULL, (DEVSUPFUN)init_ao, NULL, (DEVSUPFUN)write_ao, NULL};
+A32VME_DSET devBiA32Vme =   {5, (DEVSUPFUN)devA32VmeReport,NULL,(DEVSUPFUN)init_bi, (DEVSUPFUN)get_bi_int_info,
+                             (DEVSUPFUN)read_bi,  NULL};
+A32VME_DSET devBoA32Vme =   {5, NULL, NULL, (DEVSUPFUN)init_bo, NULL, (DEVSUPFUN)write_bo, NULL};
+A32VME_DSET devLiA32Vme =   {5, NULL, NULL, (DEVSUPFUN)init_li, NULL, (DEVSUPFUN)read_li,  NULL};
+A32VME_DSET devLoA32Vme =   {5, NULL, NULL, (DEVSUPFUN)init_lo, NULL, (DEVSUPFUN)write_lo, NULL};
+A32VME_DSET devMbbiA32Vme = {5, NULL, NULL, (DEVSUPFUN)init_mbbi, NULL, (DEVSUPFUN)read_mbbi,  NULL};
+A32VME_DSET devMbboA32Vme = {5, NULL, NULL, (DEVSUPFUN)init_mbbo, NULL, (DEVSUPFUN)write_mbbo, NULL};
 
 epicsExportAddress(dset, devAiA32Vme);
 epicsExportAddress(dset, devAoA32Vme);
@@ -258,12 +268,7 @@ return(0);
 * Initialization of A32/D32 Card
 *
 ***************************************************************************/
-int devA32VmeConfig(card,a32base,nregs,iVector,iLevel)
-int	      card;
-unsigned long a32base;
-int	      nregs;
-int	      iVector;
-int	      iLevel;
+int devA32VmeConfig(int card, unsigned long a32base, int nregs, int iVector, int iLevel)
 {
 
   unsigned long probeVal;
@@ -381,8 +386,7 @@ static void devA32RebootFunc(void)
  * BO Initialization (Called one time for each BO MSLT card record)
  *
  **************************************************************************/
-static long init_bo(pbo)
-struct boRecord *pbo;
+static long init_bo(struct boRecord *pbo)
 {
     long                status = 0;
     int                 card, args, bit;
@@ -456,8 +460,7 @@ struct boRecord *pbo;
  * BI Initialization (Called one time for each BI record)
  *
  **************************************************************************/
-static long init_bi(pbi)
-struct biRecord *pbi;
+static long init_bi(struct biRecord *pbi)
 {
     long                status = 0;
     int                 card, args, bit;
@@ -533,8 +536,7 @@ struct biRecord *pbi;
  * MBBO Initialization (Called one time for each MBBO record)
  *
  **************************************************************************/
-static long init_mbbo(pmbbo)
-struct mbboRecord   *pmbbo;
+static long init_mbbo(struct mbboRecord *pmbbo)
 {
     long                status = 0;
     int                 card, args, bit;
@@ -612,8 +614,7 @@ struct mbboRecord   *pmbbo;
  * MBBI Initialization (Called one time for each MBBO record)
  *
  **************************************************************************/
-static long init_mbbi(pmbbi)
-struct mbbiRecord   *pmbbi;
+static long init_mbbi(struct mbbiRecord *pmbbi)
 {
     long                status = 0;
     int                 card, args, bit;
@@ -691,8 +692,7 @@ struct mbbiRecord   *pmbbi;
  * AI Initialization (Called one time for each AI record)
  *
  **************************************************************************/
-static long init_ai(pai)
-struct aiRecord   *pai;
+static long init_ai(struct aiRecord *pai)
 {
     long                status = 0;
     int                 card, args, bit, numBits, twotype;
@@ -770,8 +770,7 @@ struct aiRecord   *pai;
  * AO Initialization (Called one time for each AO record)
  *
  **************************************************************************/
-static long init_ao(pao)
-struct aoRecord   *pao;
+static long init_ao(struct aoRecord *pao)
 {
     long                status = 0;
     unsigned long       rawVal;
@@ -862,8 +861,7 @@ struct aoRecord   *pao;
  * LI Initialization (Called one time for each LI record)
  *
  **************************************************************************/
-static long init_li(pli)
-struct longinRecord   *pli;
+static long init_li(struct longinRecord *pli)
 {
     long                status = 0;
     int                 card, args, bit, numBits;
@@ -931,8 +929,7 @@ struct longinRecord   *pli;
  * Long Out Initialization (Called one time for each LO record)
  *
  **************************************************************************/
-static long init_lo(plo)
-struct longoutRecord   *plo;
+static long init_lo(struct longoutRecord *plo)
 {
     long                status = 0;
     unsigned long       rawVal;
@@ -1009,8 +1006,7 @@ struct longoutRecord   *plo;
  * Perform a write operation from a BO record
  *
  **************************************************************************/
-static long write_bo(pbo)
-struct boRecord *pbo;
+static long write_bo(struct boRecord *pbo)
 {
 
   unsigned long 	rawVal;
@@ -1037,8 +1033,7 @@ struct boRecord *pbo;
  * Perform a read operation from a BI record
  *
  **************************************************************************/
-static long read_bi(pbi)
-struct biRecord *pbi;
+static long read_bi(struct biRecord *pbi)
 {
 
   unsigned long       rawVal;
@@ -1061,8 +1056,7 @@ struct biRecord *pbi;
  * Perform a read operation from a MBBI record
  *
  **************************************************************************/
-static long read_mbbi(pmbbi)
-struct mbbiRecord *pmbbi;
+static long read_mbbi(struct mbbiRecord *pmbbi)
 {
 
   unsigned long       rawVal;
@@ -1087,8 +1081,7 @@ struct mbbiRecord *pmbbi;
  * Perform a write operation from a MBBO record
  *
  **************************************************************************/
-static long write_mbbo(pmbbo)
-struct mbboRecord *pmbbo;
+static long write_mbbo(struct mbboRecord *pmbbo)
 {
 
   unsigned long         rawVal;
@@ -1116,8 +1109,7 @@ struct mbboRecord *pmbbo;
  * Perform a read operation from a AI record
  *
  **************************************************************************/
-static long read_ai(pai)
-struct aiRecord *pai;
+static long read_ai(struct aiRecord *pai)
 {
   unsigned long         rawVal;
   a32VmeDpvt           *pPvt = (a32VmeDpvt *)pai->dpvt;
@@ -1147,8 +1139,7 @@ struct aiRecord *pai;
  * Perform a write operation from a AO record
  *
  **************************************************************************/
-static long write_ao(pao)
-struct aoRecord *pao;
+static long write_ao(struct aoRecord *pao)
 {
 
   unsigned long      rawVal;
@@ -1183,8 +1174,7 @@ struct aoRecord *pao;
  * Perform a read operation from a LI record
  *
  **************************************************************************/
-static long read_li(pli)
-struct longinRecord *pli;
+static long read_li(struct longinRecord *pli)
 {
 
   unsigned long         rawVal;
@@ -1208,8 +1198,7 @@ struct longinRecord *pli;
  * Perform a write operation from a LO record
  *
  **************************************************************************/
-static long write_lo(plo)
-struct longoutRecord *plo;
+static long write_lo(struct longoutRecord *plo)
 {
 
   a32VmeDpvt           *pPvt = (a32VmeDpvt *)plo->dpvt;
@@ -1256,11 +1245,7 @@ unsigned long  *value; /* the value to return from the card */
  * Write a bitfield to the card retaining the states of the other bits
  *
  **************************************************************************/
-static long write_card(card, reg, mask, value)
-short           card;
-unsigned short  reg;
-unsigned long   mask;
-unsigned long   value;
+static long write_card(short card, unsigned short reg, unsigned long mask, unsigned long value)
 {
   if (checkCard(card) == ERROR)
     return(ERROR);
@@ -1283,8 +1268,7 @@ unsigned long   value;
  * Make sure card number is valid
  *
  **************************************************************************/
-static long checkCard(card)
-short   card;
+static long checkCard(short card)
 {
   if ((card >= MAX_NUM_CARDS) || (cards[card].base == NULL))
     return(ERROR);

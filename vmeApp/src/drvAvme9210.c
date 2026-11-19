@@ -43,8 +43,8 @@ long avme9210_read( unsigned short, unsigned short, unsigned short*);
 
 /* global routines called implicitly through driver entry table */
 long avme9210_report(long);
-long avme9210_init();
-long avme9210_reboot();
+long avme9210_init(void);
+long avme9210_reboot(void);
 
 struct {
    long number;
@@ -53,9 +53,9 @@ struct {
    DRVSUPFUN reboot;
 } drvAvme9210 ={
   3,
-  avme9210_report,
-  avme9210_init,
-  avme9210_reboot
+  (DRVSUPFUN)avme9210_report,
+  (DRVSUPFUN)avme9210_init,
+  (DRVSUPFUN)avme9210_reboot
 };
 epicsExportAddress(drvet, drvAvme9210);
 
