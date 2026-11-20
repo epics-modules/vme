@@ -72,6 +72,7 @@
 
 /* EPICS system related include files */
 #include <alarm.h>
+#include <iocsh.h>
 #include <devLib.h>
 #include <devSup.h>
 #include <drvSup.h>
