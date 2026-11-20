@@ -676,7 +676,7 @@ IK320IrqHandler(void *parm)
     else if (drvIK320Debug>=1)
     {
 #ifdef vxWorks
-        sprintf(drvIK320LoggerString,"irqStatus: %x",(int)drv->card->irqStatus);*/
+        sprintf(drvIK320LoggerString,"irqStatus: %x",(int)drv->card->irqStatus);
         semGive(drvIK320LoggerSem);
 #else /* rtems */
         printk("irqStatus: %x",(int)drv->card->irqStatus);
