@@ -18,6 +18,7 @@ USR_CFLAGS += -mlongcall
 DBD_vxWorks += vmeRecord.dbd
 
 # <name>.dbd will be created from <name>Include.dbd
+DBD_vxWorks += vmeRecord.dbd
 DBD_vxWorks += vmeSupport.dbd
 DBD_vxWorks += vmeVXSupport.dbd
 
