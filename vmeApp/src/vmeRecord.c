@@ -75,13 +75,13 @@ volatile int vmeRecordDebug = 0;
 /* Create RSET - Record Support Entry Table*/
 #define report NULL
 #define initialize NULL
-static long init_record();
-static long process();
+static long init_record(struct dbCommon *pcommon, int pass);
+static long process(struct dbCommon *pcommon);
 #define special NULL
 #define get_value NULL
-static long cvt_dbaddr();
-static long get_array_info();
-static long put_array_info();
+static long cvt_dbaddr(struct dbAddr *paddr);
+static long get_array_info(struct dbAddr *paddr, long *no_elements, long *offset);
+static long put_array_info(struct dbAddr *paddr, long nNew);
 #define get_units NULL
 #define get_precision NULL
 #define get_enum_str NULL
@@ -91,7 +91,7 @@ static long put_array_info();
 #define get_control_double NULL
 #define get_alarm_double NULL
 
-struct rset vmeRSET={
+rset vmeRSET={
    RSETNUMBER,
    report,
    initialize,
@@ -112,14 +112,14 @@ struct rset vmeRSET={
    get_alarm_double };
 epicsExportAddress(rset, vmeRSET);
 
-static void monitor();
-static long doVmeIo();
+static void monitor(vmeRecord *pvme);
+static long doVmeIo(vmeRecord *pvme);
 
-
-static long init_record(pvme, pass)
-   vmeRecord  *pvme;
-   int pass;
+
+static long init_record(struct dbCommon *pcommon, int pass)
 {
+   vmeRecord *pvme = (vmeRecord *)pcommon;
+
    if (pass==0) {
       if (pvme->nmax <= 0) pvme->nmax=1;
       pvme->bptr = (char *)calloc(pvme->nmax, sizeof(long));
@@ -129,9 +129,9 @@ static long init_record(pvme, pass)
    return(0);
 }
 
-static long process(pvme)
-   vmeRecord *pvme;
+static long process(struct dbCommon *pcommon)
 {
+   vmeRecord *pvme = (vmeRecord *)pcommon;
    long status;
 
    status=doVmeIo(pvme); /* Do VME I/O operation */
@@ -146,8 +146,7 @@ static long process(pvme)
    return(status);
 }
 
-static long cvt_dbaddr(paddr)
-struct dbAddr *paddr;
+static long cvt_dbaddr(struct dbAddr *paddr)
 {
    vmeRecord *pvme=(vmeRecord *)paddr->precord;
 
@@ -167,10 +166,7 @@ struct dbAddr *paddr;
    return(0);
 }
 
-static long get_array_info(paddr,no_elements,offset)
-struct dbAddr *paddr;
-long *no_elements;
-long *offset;
+static long get_array_info(struct dbAddr *paddr, long *no_elements, long *offset)
 {
    vmeRecord *pvme=(vmeRecord *)paddr->precord;
 
@@ -179,9 +175,7 @@ long *offset;
    return(0);
 }
 
-static long put_array_info(paddr,nNew)
-struct dbAddr *paddr;
-long nNew;
+static long put_array_info(struct dbAddr *paddr, long nNew)
 {
 vmeRecord *pvme=(vmeRecord *)paddr->precord;
 
@@ -191,8 +185,7 @@ vmeRecord *pvme=(vmeRecord *)paddr->precord;
 }
 
 
-static void monitor(pvme)
-    vmeRecord   *pvme;
+static void monitor(vmeRecord *pvme)
 {
    unsigned short monitor_mask;
 
@@ -208,8 +201,7 @@ static void monitor(pvme)
    return;
 }
 
-static long doVmeIo(pvme)
-   vmeRecord   *pvme;
+static long doVmeIo(vmeRecord *pvme)
 {
    int amod, length, mode, status=ERROR, value, i;
    int *data_array = (int *) pvme->bptr;
