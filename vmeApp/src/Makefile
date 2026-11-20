@@ -15,7 +15,7 @@ USR_CFLAGS += -mlongcall
 #=============================
 # xxxRecord.h will be created from xxxRecord.dbd
 
-DBDINC_vxWorks += vmeRecord
+DBD_vxWorks += vmeRecord.dbd
 
 # <name>.dbd will be created from <name>Include.dbd
 DBD_vxWorks += vmeSupport.dbd
